@@ -35,22 +35,17 @@ export function rich(src: string): string {
 }
 
 /**
- * A meta line ("role · org · dates"): split at " · ", each short segment kept on one line, so the line breaks only
- * between items. `extra` = already-rendered HTML segments appended (e.g. <time> ranges).
+ * A meta line ("role · org · dates"): split at " · " (never inside a `code` span or a link), each short segment kept on
+ * one line, so the line breaks only between items. `extra` = already-rendered HTML segments appended (e.g. <time>
+ * ranges).
  */
 export function segs(src: string, extra: string[] = []): string {
-  const parts: string[] = [];
-  let cur = '';
-  for (let i = 0; i < src.length; i++) {
-    if (src.startsWith(' · ', i)) {
-      parts.push(cur);
-      cur = '';
-      i += 2;
-      continue;
-    }
-    cur += src[i];
+  const parts = [''];
+  for (const piece of src.split(/(`[^`]+`|\[[^\]]+\]\([^)\s]+\)| · )/)) {
+    if (piece === ' · ') parts.push('');
+    else parts[parts.length - 1] += piece;
   }
-  if (cur) parts.push(cur);
+  if (parts.at(-1) === '') parts.pop();
   // every item is a .seg (a phone layout may stack them one per line); a short one is also kept whole (.nw), and one of
   // 41–44 characters from 720 px up only (.nw-w: "FORWARD Data Lab, UIUC (Prof. Kevin Chang)" would otherwise break
   // inside on desktop; kept whole on a 320 px phone it would overflow the column)
