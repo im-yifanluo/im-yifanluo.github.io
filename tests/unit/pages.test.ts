@@ -6,6 +6,7 @@ import { parse } from 'yaml';
 import astroConfig from '../../astro.config.mjs';
 import Home from '@/pages/index.astro';
 import * as ProjectPage from '@/pages/[slug].astro';
+import * as Robots from '@/pages/robots.txt';
 import { escapeHtml } from '@/lib/rich-text';
 import { list } from '@/lib/list-loader';
 import { load, ROOT, schemaOf, type Entry } from './load';
@@ -20,6 +21,15 @@ beforeEach(() => entries.clear());
 async function render(page: Parameters<AstroContainer['renderToString']>[0], path = '/') {
   const container = await AstroContainer.create({ astroConfig });
   return container.renderToString(page, { request: new Request(new URL(path, astroConfig.site)) });
+}
+
+/** What an endpoint (a .ts file in src/pages) answers at its path. */
+async function fetchEndpoint(endpoint: object, path: string) {
+  const container = await AstroContainer.create({ astroConfig });
+  return container.renderToResponse(endpoint as Parameters<AstroContainer['renderToResponse']>[0], {
+    routeType: 'endpoint',
+    request: new Request(new URL(path, astroConfig.site)),
+  });
 }
 
 describe('homepage', () => {
@@ -48,5 +58,14 @@ describe('project pages', () => {
   it.each(redirects)('a project named "%s" stops the build', async (slug) => {
     entries.set('projects', [{ id: slug, data: { order: 1 } }]);
     await expect(ProjectPage.getStaticPaths()).rejects.toThrow(`the slug "${slug}" shadows`);
+  });
+});
+
+describe('robots.txt', () => {
+  it('lets crawlers read every page and names the sitemap index at the root of the site', async () => {
+    const response = await fetchEndpoint(Robots, '/robots.txt');
+    expect(response.status).toBe(200);
+    const sitemap = `${new URL(astroConfig.site!).origin}/sitemap-index.xml`;
+    expect((await response.text()).split('\n')).toEqual(['User-agent: *', 'Allow: /', `Sitemap: ${sitemap}`, '']);
   });
 });

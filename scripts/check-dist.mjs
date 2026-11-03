@@ -7,7 +7,8 @@
  *                 files. The font itself is inlined into each page's CSS, so no font file ships.
  *   2. origin     no local-machine URL in any text file; every canonical link, og:url and og:image is an absolute
  *                 URL on the configured site (SITE_URL, or the same default as astro.config.mjs), and names a file
- *                 that dist/ serves.
+ *                 that dist/ serves; so does every URL in the sitemaps and in robots.txt, which names the sitemap
+ *                 index. The sitemap lists exactly the pages that search engines may index.
  *   3. budgets    the "dist" limits in scripts/budgets.json.
  *   4. privacy    scripts/privacy-scan.mjs over dist/.
  *
@@ -39,13 +40,17 @@ Checks a built site (default: dist/ at the repository root) and exits 1 on any f
              media/** as .avif .webp .jpg .png .svg .mp4 .webm, fonts/OFL.txt (no font file:
              the font is inlined into the CSS),
              _astro/*.js, _astro/*.css, og.jpg, favicon.svg, apple-touch-icon.png,
-             yifan-luo-resume.pdf, sitemap-*.xml, robots.txt. Never a .json file. index.html and
-             404.html must exist.
+             yifan-luo-resume.pdf, sitemap-*.xml, robots.txt. Never a .json file. index.html,
+             404.html, sitemap-index.xml and robots.txt must exist.
   origin     no localhost, 127.0.0.1, [::1] or file:/ URL in any text file. Every page has one
              canonical link (404.html may have none); it and every og:url, og:image, twitter:url
              and twitter:image start with the site URL. Canonical links and og:image must name a
              file in dist (query and fragment ignored); 404.html's canonical is not resolved, as
-             that page is served for every missing URL.
+             that page is served for every missing URL. robots.txt has a Sitemap line for
+             <site>sitemap-index.xml; every Sitemap URL in it and every <loc> in sitemap-*.xml
+             starts with the site URL and names a file in dist. The sitemaps list every page
+             without <meta name="robots" content="noindex"> (so not 404.html or a redirect
+             page), and no other URL.
   budgets    every "scope": "dist" entry in scripts/budgets.json.
   privacy    node scripts/privacy-scan.mjs <dist-dir>; its findings fail the build.
 
@@ -149,6 +154,9 @@ const pagePath = (rel) => `/${rel.replace(/(^|\/)index\.html$/, '$1')}`;
 // ---------------------------------------------------------------------------------------------------------------
 // 1. allowlist
 
+const SITEMAP = /^sitemap-[^/]+\.xml$/; // the sitemap index and the sitemaps it lists (@astrojs/sitemap)
+const SITEMAP_INDEX = 'sitemap-index.xml';
+
 const DENIED = [[/\.json$/i, 'JSON file; reports and data files do not ship']];
 const ALLOWED = [
   /^(?:[^/]+\/)*index\.html$/, // pages, including redirect pages (build.format "directory")
@@ -157,9 +165,9 @@ const ALLOWED = [
   /^fonts\/OFL\.txt$/, // the font's license (the font itself is inlined into each page's CSS)
   /^_astro\/[^/]+\.(?:js|css)$/, // component scripts, and stylesheets should one stop being inlined
   /^(?:og\.jpg|favicon\.svg|apple-touch-icon\.png|yifan-luo-resume\.pdf|robots\.txt)$/,
-  /^sitemap-[^/]+\.xml$/,
+  SITEMAP,
 ];
-const REQUIRED = ['index.html', '404.html'];
+const REQUIRED = ['index.html', '404.html', SITEMAP_INDEX, 'robots.txt'];
 
 function checkAllowlist(files) {
   // Group by top-level entry so a whole unexpected folder is one line, not one per file.
@@ -272,6 +280,39 @@ function checkPageUrls(pages, site, dist) {
         fail('origin', `${rel}: ${key} ${value} has no file in dist`);
     }
   }
+}
+
+/** Whether a page asks search engines not to index it, as 404.html and redirect pages do. */
+const noindex = (html) =>
+  tags(html, ['meta']).some(
+    ({ attrs: a }) => (a.name ?? '').toLowerCase() === 'robots' && /\bnoindex\b/i.test(a.content ?? ''),
+  );
+
+function checkSitemaps(files, pages, site, dist) {
+  const text = (rel) => readFileSync(join(dist, rel), 'utf8');
+  /** Fails unless the URL is on the site and names a file in dist; returns whether it does. */
+  const onSite = (rel, what, url) => {
+    const problem = !url.startsWith(site) ? `is not on ${site}` : !served(url, site, dist) ? 'has no file in dist' : '';
+    if (problem) fail('origin', `${rel}: ${what} ${url || '(empty)'} ${problem}`);
+    return !problem;
+  };
+
+  if (existsSync(join(dist, 'robots.txt'))) {
+    const named = [...text('robots.txt').matchAll(/^\s*sitemap\s*:\s*(\S*)/gim)].map((m) => m[1]);
+    if (!named.includes(site + SITEMAP_INDEX)) fail('origin', `robots.txt: no "Sitemap: ${site}${SITEMAP_INDEX}" line`);
+    for (const url of named) onSite('robots.txt', 'Sitemap', url);
+  }
+
+  const listed = new Set(); // the page URLs in the sitemaps; the index lists the sitemaps themselves
+  for (const { rel } of files.filter((f) => SITEMAP.test(f.rel))) {
+    for (const [, loc] of text(rel).matchAll(/<loc>([^<]*)<\/loc>/g)) {
+      const url = decode(loc.trim());
+      if (onSite(rel, '<loc>', url) && rel !== SITEMAP_INDEX) listed.add(url);
+    }
+  }
+  const indexed = new Set(pages.filter((p) => !noindex(p.html)).map((p) => site + pagePath(p.rel).slice(1)));
+  for (const url of indexed) if (!listed.has(url)) fail('origin', `sitemap: ${url} is missing`);
+  for (const url of listed) if (!indexed.has(url)) fail('origin', `sitemap: ${url} is not a page to index`);
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -522,6 +563,7 @@ async function main() {
   checkAllowlist(files);
   checkLocalUrls(files);
   checkPageUrls(pages, site, opt.dist);
+  checkSitemaps(files, pages, site, opt.dist);
   const seen = checkBudgets(files, pages, budgets);
 
   for (const { check, message } of failures) console.log(`FAIL ${check}: ${message}`);

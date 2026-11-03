@@ -1,11 +1,14 @@
 // @ts-check
 // Static Astro, no UI framework. The derived media (tiles, heroes, loops) live in public/media.
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   output: 'static',
-  // canonical, og:url and og:image are absolute URLs on this origin, served from its root (no `base`)
+  // canonical, og:url, og:image and the sitemap are absolute URLs on this origin, served from its root (no `base`)
   site: process.env.SITE_URL ?? 'https://im-yifanluo.github.io',
+  // sitemap-index.xml and sitemap-0.xml: every page but the 404 page and redirects (src/pages/robots.txt.ts names it)
+  integrations: [sitemap()],
   build: { format: 'directory', inlineStylesheets: 'always' },
   compressHTML: true, // collapse the markup's whitespace; the HTML budget (scripts/budgets.json) is measured on it
   scopedStyleStrategy: 'class', // scoped rules: one class of specificity over the global roles, no data-* attributes

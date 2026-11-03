@@ -10,6 +10,7 @@ Personal website: projects, experience, news and awards. Its address is <https:/
 - Content in YAML, validated by Astro content collections.
 - One self-hosted font (a Source Sans 3 subset), inlined into each page's CSS, with metric-matched fallbacks.
 - Built for GitHub Pages: static files served from the domain root.
+- A sitemap of every page (`sitemap-index.xml`, written by `@astrojs/sitemap`) and a `robots.txt` that names it.
 
 ## Commands
 
@@ -57,14 +58,14 @@ src/
 ├── generated/             media.json, portrait.json, font.json: written by scripts or exported once; never edited by hand
 ├── layouts/               BaseLayout.astro
 ├── lib/                   dates, rich text, typography, the YAML list loader, the typed media manifest, diagram helpers
-├── pages/                 index.astro, [slug].astro, 404.astro
+├── pages/                 index.astro, [slug].astro, 404.astro, robots.txt.ts
 ├── styles/                tokens, global, fonts, fallbacks, diagrams
 ├── content.config.ts      the content schema
 ├── env.d.ts               HTML attributes that Astro's types do not declare
 └── site.config.ts         name, contact links, intro, last-updated date, typography settings
 tests/
 └── unit/                  unit tests (Vitest); fixtures/ holds the YAML files they load
-astro.config.mjs           site URL, static build, redirects for renamed pages
+astro.config.mjs           site URL, static build, the sitemap, redirects for renamed pages
 .prettierrc.json           Prettier settings; .prettierignore skips the generated and served-as-is files
 eslint.config.js           ESLint rules: JavaScript, TypeScript, Astro and accessibility
 vitest.config.ts           Vitest settings, on top of Astro's Vite config
@@ -199,10 +200,13 @@ if it is ever painted before the font. It runs headless and needs:
 1. `astro check`: types, and the content against `src/content.config.ts`.
 2. `astro build`: the static site into `dist/`.
 3. `node scripts/check-dist.mjs` on `dist/`:
-   - only expected files are present (pages, media, the font license, bundled scripts, the named root files; no data
-     or report files);
+   - only expected files are present (pages, media, the font license, bundled scripts, the sitemap, `robots.txt`, the
+     named root files; no data or report files);
    - no local URLs (`localhost`, `127.0.0.1`, `file:`) anywhere, and every canonical and Open Graph URL is absolute on
      `SITE_URL` (default `https://im-yifanluo.github.io`) and names a page or file in `dist/`;
+   - every URL in the sitemap and in `robots.txt` (which names the sitemap) is absolute on `SITE_URL` too and names a
+     file in `dist/`, and the sitemap lists exactly the pages without a `noindex` robots tag (all but the 404 page and
+     redirect pages);
    - the `dist` budgets in `scripts/budgets.json`;
    - the privacy scan (below).
 
@@ -252,8 +256,8 @@ git ls-files -z | xargs -0 node scripts/privacy-scan.mjs --strict
 - `typography.test.ts`, `dates.test.ts` and `rich-text.test.ts`: the text helpers in `src/lib/`.
 - `content.test.ts`: the content schemas (month fields, media and diagram ids) and the list loader, which must stop on
   a broken list file (the cases are in `tests/unit/fixtures/`).
-- `pages.test.ts`: the homepage, rendered with Astro's container API from entries the test supplies, and the project
-  pages' guard against slugs that take a redirect's address.
+- `pages.test.ts`: the homepage, rendered with Astro's container API from entries the test supplies, the project
+  pages' guard against slugs that take a redirect's address, and `robots.txt`.
 - `repo.test.ts`: the repository as a whole: the top-level entries it may track, `README.md` as its only Markdown file,
   the budgets for tracked files and for each file in `public/`, every list in `src/data` loading all of its items under
   unique ids, News newest first, and no project slug that shadows a reserved path or a redirect.
