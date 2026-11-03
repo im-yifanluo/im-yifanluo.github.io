@@ -1,0 +1,21 @@
+# Three items in display order, with ids that sort in another order.
+- id: north-college
+  graduation: 2030-05
+  dateText: (expected)
+  org: North College
+  role: B.S. Example Studies · Minor in Testing
+  lines:
+    - A line about the first school.
+- id: east-academy
+  graduation: 2026-06
+  dateText: "& <done>"
+  org: East Academy
+  role: Diploma
+  lines: []
+- id: west-school
+  graduation: 2022-06
+  dateText: ""
+  org: West School
+  role: Certificate
+  lines:
+    - A line about the third school.

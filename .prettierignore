@@ -9,3 +9,6 @@ public/
 src/generated/
 src/styles/fallbacks.css
 package-lock.json
+
+# invalid YAML on purpose, for the list loader's tests
+tests/unit/fixtures/bad-yaml.yaml

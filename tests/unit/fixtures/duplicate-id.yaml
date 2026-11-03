@@ -1,0 +1,6 @@
+- id: same
+  date: 2026-02
+  text: The first item.
+- id: same
+  date: 2026-01
+  text: The second item, with the same id.

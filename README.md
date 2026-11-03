@@ -29,6 +29,7 @@ everything from the repository root.
 | `npm run lint`                      | Lint the code with ESLint, including accessibility rules for `.astro` templates                                     |
 | `npm run format`                    | Format the code with Prettier                                                                                       |
 | `npm run format:check`              | Check the formatting without changing files                                                                         |
+| `npm test`                          | Run the unit tests (see [Tests](#tests))                                                                            |
 | `npm run media`                     | Rebuild the web media from `$MEDIA_SRC`; `npm run media -- --only <job>` for one job, `-- --help` for the job names |
 | `npm run media:portrait -- <photo>` | Rebuild the homepage portrait from a photo                                                                          |
 | `npm run fonts:fallbacks`           | Re-tune the fallback font faces in `src/styles/fallbacks.css`                                                       |
@@ -61,9 +62,12 @@ src/
 ├── content.config.ts      the content schema
 ├── env.d.ts               HTML attributes that Astro's types do not declare
 └── site.config.ts         name, contact links, intro, last-updated date, typography settings
+tests/
+└── unit/                  unit tests (Vitest); fixtures/ holds the YAML files they load
 astro.config.mjs           site URL, static build, redirects for renamed pages
 .prettierrc.json           Prettier settings; .prettierignore skips the generated and served-as-is files
 eslint.config.js           ESLint rules: JavaScript, TypeScript, Astro and accessibility
+vitest.config.ts           Vitest settings, on top of Astro's Vite config
 ```
 
 ## Editing content
@@ -161,7 +165,8 @@ and `src/assets/fonts`); only regenerating media or the font subset needs `$MEDI
 
 Size budgets are defined once, in `scripts/budgets.json`, and checked on every build: each tile loop at most 400 KiB
 (640 KiB for its high-density rendition), each hero loop at most 1 MiB, no single file over 1 MiB, and each page at
-most 128 KiB of HTML, 64 KiB of it inline CSS (the inlined font included).
+most 128 KiB of HTML, 64 KiB of it inline CSS (the inlined font included). `npm test` checks the repository's own
+budget: at most 30 MiB of tracked files.
 
 `public/favicon.svg` and `public/apple-touch-icon.png` (180 × 180) are made by hand; no script writes them.
 `public/yifan-luo-resume.pdf` is served as is.
@@ -238,6 +243,23 @@ requires it):
 ```sh
 git ls-files -z | xargs -0 node scripts/privacy-scan.mjs --strict
 ```
+
+## Tests
+
+`npm test` runs the unit tests in `tests/unit/` with [Vitest](https://vitest.dev). They run on Astro's Vite config
+(`vitest.config.ts`), so they import the site's modules the way the pages do, and they need no build:
+
+- `typography.test.ts`, `dates.test.ts` and `rich-text.test.ts`: the text helpers in `src/lib/`.
+- `content.test.ts`: the content schemas (month fields, media and diagram ids) and the list loader, which must stop on
+  a broken list file (the cases are in `tests/unit/fixtures/`).
+- `pages.test.ts`: the homepage, rendered with Astro's container API from entries the test supplies, and the project
+  pages' guard against slugs that take a redirect's address.
+- `repo.test.ts`: the repository as a whole: the top-level entries it may track, `README.md` as its only Markdown file,
+  the budgets for tracked files and for each file in `public/`, every list in `src/data` loading all of its items under
+  unique ids, News newest first, and no project slug that shadows a reserved path or a redirect.
+
+The tests read the content, the configuration and the budgets from their files rather than copying values, so a
+content edit needs no test change unless it breaks one of these rules.
 
 ## License
 

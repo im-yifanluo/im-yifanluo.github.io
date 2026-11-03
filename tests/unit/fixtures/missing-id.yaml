@@ -1,0 +1,5 @@
+- id: with-id
+  date: 2026-02
+  text: An item with an id.
+- date: 2026-01
+  text: An item without one.

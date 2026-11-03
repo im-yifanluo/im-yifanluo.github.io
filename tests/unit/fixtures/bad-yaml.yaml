@@ -1,0 +1,6 @@
+- id: first
+  date: 2026-02
+  text: Indented as it should be.
+ - id: second
+  date: 2026-01
+  text: One space too far in.
