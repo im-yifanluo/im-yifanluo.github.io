@@ -20,7 +20,7 @@ const projects = (await getCollection('projects'))
     p,
     meta: segs([p.role, p.org].filter(Boolean).join(' · '), [rangeHtml(p.start, p.end)]),
   }));
-// a list in its file's order (content.config.ts `list`)
+// a list in its file's order (`position`, from lib/list-loader.ts)
 const inOrder = <T extends { position: number }>(entries: { data: T }[]) =>
   entries.map((e) => e.data).sort((a, b) => a.position - b.position);
 const NEWS = inOrder(await getCollection('news'));

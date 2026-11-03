@@ -55,7 +55,7 @@ src/
 ├── data/                  news, awards, experience, education, more-projects (YAML); diagrams.ts
 ├── generated/             media.json, portrait.json, font.json: written by scripts or exported once; never edited by hand
 ├── layouts/               BaseLayout.astro
-├── lib/                   dates, rich text, typography, the typed media manifest and diagram helpers
+├── lib/                   dates, rich text, typography, the YAML list loader, the typed media manifest, diagram helpers
 ├── pages/                 index.astro, [slug].astro, 404.astro
 ├── styles/                tokens, global, fonts, fallbacks, diagrams
 ├── content.config.ts      the content schema
