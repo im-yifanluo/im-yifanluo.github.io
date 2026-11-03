@@ -32,7 +32,7 @@ export function rangeHtml(start: string, end: string): string {
 /** A dated list's date column (News, More projects, Awards), in the forms content.config.ts allows: "YYYY-MM" →
  *  Mon YYYY; "YYYY"; "YYYY–YY" (a span of years, each year a <time>). */
 export function dateHtml(d: string): string {
-  if (/^\d{4}-\d{2}$/.test(d)) return monthHtml(d);
+  if (/^\d{4}-(0[1-9]|1[0-2])$/.test(d)) return monthHtml(d);
   if (/^\d{4}$/.test(d)) return `<time datetime="${d}">${d}</time>`;
   const span = /^(\d{4})–(\d{2})$/.exec(d);
   if (span)
