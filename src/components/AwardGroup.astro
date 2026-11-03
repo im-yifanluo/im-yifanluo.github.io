@@ -6,17 +6,18 @@ import RichText from './RichText.astro';
 import { TYPOGRAPHY } from '@/site.config';
 import { dateHtml } from '@/lib/dates';
 
-interface Props { group: CollectionEntry<'awards'>['data'] }
+interface Props {
+  group: CollectionEntry<'awards'>['data'];
+}
 const { group } = Astro.props;
 ---
+
 <div class="award-group">
   <h3 class="group in-text">{group.label}</h3>
   <ol class="dated small">
-    {group.items.map((a) => (
-      <li class="row">
-        <span class="date" set:html={dateHtml(a.date)} />
-        <RichText as="p" text={a.text} glue={TYPOGRAPHY.awardKeep} glueWide={TYPOGRAPHY.awardKeepWide} />
-      </li>
-    ))}
+    {group.items.map((a) => <li class="row">
+      <span class="date" set:html={dateHtml(a.date)} />
+      <RichText as="p" text={a.text} glue={TYPOGRAPHY.awardKeep} glueWide={TYPOGRAPHY.awardKeepWide} />
+    </li>)}
   </ol>
 </div>

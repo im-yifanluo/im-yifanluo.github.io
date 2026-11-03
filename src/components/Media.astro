@@ -19,8 +19,9 @@ let loops: Loop[] = [];
 // a drawn chart may carry a phone variant (bigger text, its own aspect ratio) for viewports ≤ 719 px
 let phone: PhonePoster | undefined;
 let alt = '';
-let w = 640, h = 360;
-const strip = 'drawn' in ref;   // drawn in HTML/SVG, not a poster
+let w = 640,
+  h = 360;
+const strip = 'drawn' in ref; // drawn in HTML/SVG, not a poster
 if ('drawn' in ref) {
   poster = { widths: [], avif: [], webp: [], src: '' };
 } else {
@@ -32,31 +33,80 @@ if ('drawn' in ref) {
   loops = [...(part.loops ?? [])].sort((a, b) => a.w - b.w);
   alt = box === 'tile' ? '' : (ref.alt ?? '');
   w = poster.widths[0];
-  h = poster.w && poster.h ? Math.round((w * poster.h) / poster.w) : Math.round((w * 9) / 16);   // a still keeps its own ratio
+  h = poster.w && poster.h ? Math.round((w * poster.h) / poster.w) : Math.round((w * 9) / 16); // a still keeps its own ratio
 }
 const lo = loops[0];
 const hi = loops.length > 1 ? loops[loops.length - 1] : undefined;
 const isLoop = !!lo;
-const cls = [box === 'tile' ? 'tile' : box === 'hero' ? 'hero' : 'fig-media', box === 'figure' && isLoop ? 'loop' : ''].filter(Boolean).join(' ');
+const cls = [box === 'tile' ? 'tile' : box === 'hero' ? 'hero' : 'fig-media', box === 'figure' && isLoop ? 'loop' : '']
+  .filter(Boolean)
+  .join(' ');
 const Tag = href ? 'a' : 'div';
 // A hero box is 16:9; a phone cut with another aspect (the AR window, PhotoGleam's square pair) sets the box's ratio below
 // 720 px through --ar-phone (styles/global.css), so the cut is shown whole, never cover-cropped
-const phoneAr = box === 'hero' && phone && Math.abs(phone.w / phone.h - 16 / 9) > 0.01 ? `--ar-phone: ${phone.w} / ${phone.h}` : undefined;
+const phoneAr =
+  box === 'hero' && phone && Math.abs(phone.w / phone.h - 16 / 9) > 0.01
+    ? `--ar-phone: ${phone.w} / ${phone.h}`
+    : undefined;
 // A tile repeats its title's link: one tab stop per destination, so the tile is hidden from AT and the tab order.
 const linkAttrs = href ? { href, tabindex: '-1', 'aria-hidden': 'true' as const } : {};
 ---
-{strip ? <OrderStrip box={box === 'tile' ? 'tile' : 'hero'} href={href} /> : (
-<Tag class={cls} style={phoneAr} {...linkAttrs}>
-  <picture>
-    {phone && <source media="(max-width: 719px)" type="image/avif" srcset={phone.avif.join(', ')} sizes={sizes} width={phone.w} height={phone.h} />}
-    {phone && <source media="(max-width: 719px)" type="image/webp" srcset={phone.webp.join(', ')} sizes={sizes} width={phone.w} height={phone.h} />}
-    <source type="image/avif" srcset={poster.avif.join(', ')} sizes={sizes} />
-    <img src={poster.src} srcset={poster.webp.join(', ')} sizes={sizes} width={w} height={h} alt={alt}
-      loading={eager ? 'eager' : 'lazy'} decoding="async" fetchpriority={eager ? 'high' : undefined} />
-  </picture>
-  {isLoop && (
-    <video muted loop playsinline disablepictureinpicture disableremoteplayback preload="none" width={lo.w} height={lo.h}
-      aria-hidden="true" tabindex="-1" data-mp4={lo.mp4} data-webm={lo.webm} data-hi-mp4={hi?.mp4} data-hi-webm={hi?.webm}></video>
-  )}
-</Tag>
+
+{strip ? (
+  <OrderStrip box={box === 'tile' ? 'tile' : 'hero'} href={href} />
+) : (
+  <Tag class={cls} style={phoneAr} {...linkAttrs}>
+    <picture>
+      {phone && (
+        <source
+          media="(max-width: 719px)"
+          type="image/avif"
+          srcset={phone.avif.join(', ')}
+          sizes={sizes}
+          width={phone.w}
+          height={phone.h}
+        />
+      )}
+      {phone && (
+        <source
+          media="(max-width: 719px)"
+          type="image/webp"
+          srcset={phone.webp.join(', ')}
+          sizes={sizes}
+          width={phone.w}
+          height={phone.h}
+        />
+      )}
+      <source type="image/avif" srcset={poster.avif.join(', ')} sizes={sizes} />
+      <img
+        src={poster.src}
+        srcset={poster.webp.join(', ')}
+        sizes={sizes}
+        width={w}
+        height={h}
+        alt={alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchpriority={eager ? 'high' : undefined}
+      />
+    </picture>
+    {isLoop && (
+      <video
+        muted
+        loop
+        playsinline
+        disablepictureinpicture
+        disableremoteplayback
+        preload="none"
+        width={lo.w}
+        height={lo.h}
+        aria-hidden="true"
+        tabindex="-1"
+        data-mp4={lo.mp4}
+        data-webm={lo.webm}
+        data-hi-mp4={hi?.mp4}
+        data-hi-webm={hi?.webm}
+      ></video>
+    )}
+  </Tag>
 )}

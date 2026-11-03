@@ -10,179 +10,628 @@
            and the active state. The figure's own width decides, so a text-width figure is a list at every size. */
 
 .dg-fig {
-  --dg-plate: #F6F6F4;               /* the baked media plates' grey (the media script, the World Cup charts) */
-  --dg-line: #D9DEE6;                /* box and frame lines */
-  --dg-edge: #7A8291;                /* edges at rest: 3.6:1 on the plate */
-  --dg-near: rgb(2 33 105 / 0.45);   /* a box at the other end of the active node's edge */
-  --dg-gap: var(--s5);               /* grid column gap */
+  --dg-plate: #f6f6f4; /* the baked media plates' grey (the media script, the World Cup charts) */
+  --dg-line: #d9dee6; /* box and frame lines */
+  --dg-edge: #7a8291; /* edges at rest: 3.6:1 on the plate */
+  --dg-near: rgb(2 33 105 / 0.45); /* a box at the other end of the active node's edge */
+  --dg-gap: var(--s5); /* grid column gap */
 }
-.dg-fig.fig-text { max-width: var(--measure, 520px); }   /* the text measure, like a text-width media figure */
-.dg-plate { position: relative; isolation: isolate; padding: var(--s4); background: var(--dg-plate); border-radius: var(--radius); }
-.dg-plate::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--tile-line); pointer-events: none; }
+.dg-fig.fig-text {
+  max-width: var(--measure, 520px);
+} /* the text measure, like a text-width media figure */
+.dg-plate {
+  position: relative;
+  isolation: isolate;
+  padding: var(--s4);
+  background: var(--dg-plate);
+  border-radius: var(--radius);
+}
+.dg-plate::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--tile-line);
+  pointer-events: none;
+}
 
 /* ---- text roles ---- */
-.dg-l, .dg-s, .dg-d, .dg-rel, .dg-head, .dg-chip, .dg-el, .dg-bars th, .dg-bars td {
-  font-family: var(--font-meta); font-size: var(--fs-meta); font-weight: var(--w-meta); letter-spacing: var(--ls-meta); line-height: 20px; }
-.dg-l { font-weight: 400; color: var(--head); }
-.dg-s, .dg-rel, .dg-head, .dg-el { color: var(--ink-2); }
-.dg-d, .dg-chip { color: var(--ink); }
-.dg-d, .dg-rel { line-height: var(--lh-meta); }
-.dg-fig code { font: inherit; }
-.dg-node { overflow-wrap: break-word; }
+.dg-l,
+.dg-s,
+.dg-d,
+.dg-rel,
+.dg-head,
+.dg-chip,
+.dg-el,
+.dg-bars th,
+.dg-bars td {
+  font-family: var(--font-meta);
+  font-size: var(--fs-meta);
+  font-weight: var(--w-meta);
+  letter-spacing: var(--ls-meta);
+  line-height: 20px;
+}
+.dg-l {
+  font-weight: 400;
+  color: var(--head);
+}
+.dg-s,
+.dg-rel,
+.dg-head,
+.dg-el {
+  color: var(--ink-2);
+}
+.dg-d,
+.dg-chip {
+  color: var(--ink);
+}
+.dg-d,
+.dg-rel {
+  line-height: var(--lh-meta);
+}
+.dg-fig code {
+  font: inherit;
+}
+.dg-node {
+  overflow-wrap: break-word;
+}
 
 /* ---- list layout (default) ---- */
-.dg-grid { position: relative; z-index: 1; counter-reset: dg-step; }
-.dg-head, .dg-frame, .dg-edges, .dg-el { display: none; }
-.dg-head.is-list { display: block; margin: var(--s5) 0 var(--s2); }
-.dg-head.is-list:first-child { margin-top: 0; }
-.dg-item { position: relative; }
-.dg-item + .dg-item { margin-top: var(--s3); }
-.dg-head + .dg-item { margin-top: 0; }
-.dg-item.link-in { margin-top: var(--s6); }
-.dg-item.in-set:not(.set-first), .dg-item.in-group:not(.is-header) { margin-top: var(--s2); }
-.dg-item.is-side, .dg-item.in-set, .dg-item.in-group:not(.is-header) { margin-left: var(--s6); }
+.dg-grid {
+  position: relative;
+  z-index: 1;
+  counter-reset: dg-step;
+}
+.dg-head,
+.dg-frame,
+.dg-edges,
+.dg-el {
+  display: none;
+}
+.dg-head.is-list {
+  display: block;
+  margin: var(--s5) 0 var(--s2);
+}
+.dg-head.is-list:first-child {
+  margin-top: 0;
+}
+.dg-item {
+  position: relative;
+}
+.dg-item + .dg-item {
+  margin-top: var(--s3);
+}
+.dg-head + .dg-item {
+  margin-top: 0;
+}
+.dg-item.link-in {
+  margin-top: var(--s6);
+}
+.dg-item.in-set:not(.set-first),
+.dg-item.in-group:not(.is-header) {
+  margin-top: var(--s2);
+}
+.dg-item.is-side,
+.dg-item.in-set,
+.dg-item.in-group:not(.is-header) {
+  margin-left: var(--s6);
+}
 
 .dg-node {
-  display: flex; flex-direction: column; width: 100%; margin: 0; padding: 10px 14px; text-align: left;
-  background: #FFFFFF; border: 1px solid var(--dg-line); border-radius: var(--radius); color: inherit; font: inherit; cursor: default;
-  -webkit-appearance: none; appearance: none;
-  transition: border-color var(--t-out) var(--ease), box-shadow var(--t-out) var(--ease);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin: 0;
+  padding: 10px 14px;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid var(--dg-line);
+  border-radius: var(--radius);
+  color: inherit;
+  font: inherit;
+  cursor: default;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    border-color var(--t-out) var(--ease),
+    box-shadow var(--t-out) var(--ease);
 }
-.dg-item.is-header .dg-node { padding: 0 0 2px; background: none; border-color: transparent; }
-.dg-item.is-step .dg-l::before { counter-increment: dg-step; content: counter(dg-step); display: inline-block; width: 16px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.dg-item.is-step .dg-s { padding-left: 16px; }
-.dg-d { display: block; margin-top: var(--s2); }
-.dg-rel { display: block; margin-top: var(--s2); padding-left: var(--s2); border-left: 2px solid var(--dg-line); }
-.dg-chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: auto; padding-top: var(--s2); }
-.dg-chip { padding: 2px var(--s2); background: var(--dg-plate); border-radius: 3px; }
+.dg-item.is-header .dg-node {
+  padding: 0 0 2px;
+  background: none;
+  border-color: transparent;
+}
+.dg-item.is-step .dg-l::before {
+  counter-increment: dg-step;
+  content: counter(dg-step);
+  display: inline-block;
+  width: 16px;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.dg-item.is-step .dg-s {
+  padding-left: 16px;
+}
+.dg-d {
+  display: block;
+  margin-top: var(--s2);
+}
+.dg-rel {
+  display: block;
+  margin-top: var(--s2);
+  padding-left: var(--s2);
+  border-left: 2px solid var(--dg-line);
+}
+.dg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s2);
+  margin-top: auto;
+  padding-top: var(--s2);
+}
+.dg-chip {
+  padding: 2px var(--s2);
+  background: var(--dg-plate);
+  border-radius: 3px;
+}
 
 /* the spine (x = 16 px of the list): a line and a chevron into each linked step, passing beside indented items */
-.dg-item.link-in::before, .dg-spine, .dg-spine::before { content: ""; position: absolute; border-left: 1px solid var(--dg-edge); pointer-events: none; }
-.dg-item.link-in::before { left: 16px; top: calc(-1 * var(--s6)); height: 26px; }
-.dg-item.link-in::after, .dg-spine::after { content: ""; position: absolute; width: 6px; height: 6px; border: solid var(--dg-edge); border-width: 0 1px 1px 0; pointer-events: none; }
-.dg-item.link-in::after { left: 13px; top: -10px; transform: rotate(45deg); }
-.dg-spine { left: -16px; top: calc(-1 * var(--s3)); bottom: 0; }
-.dg-item.link-in > .dg-spine { top: calc(-1 * var(--s6)); }
-.dg-spine::before, .dg-spine::after { display: none; }
+.dg-item.link-in::before,
+.dg-spine,
+.dg-spine::before {
+  content: '';
+  position: absolute;
+  border-left: 1px solid var(--dg-edge);
+  pointer-events: none;
+}
+.dg-item.link-in::before {
+  left: 16px;
+  top: calc(-1 * var(--s6));
+  height: 26px;
+}
+.dg-item.link-in::after,
+.dg-spine::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border: solid var(--dg-edge);
+  border-width: 0 1px 1px 0;
+  pointer-events: none;
+}
+.dg-item.link-in::after {
+  left: 13px;
+  top: -10px;
+  transform: rotate(45deg);
+}
+.dg-spine {
+  left: -16px;
+  top: calc(-1 * var(--s3));
+  bottom: 0;
+}
+.dg-item.link-in > .dg-spine {
+  top: calc(-1 * var(--s6));
+}
+.dg-spine::before,
+.dg-spine::after {
+  display: none;
+}
 /* a set (parallel steps): the spine runs down its left and branches into each member */
-.dg-item.in-set > .dg-spine { top: calc(-1 * var(--s2)); }
-.dg-item.in-set.set-first > .dg-spine { top: calc(-1 * var(--s6)); }
-.dg-item.in-set.link-in::before, .dg-item.in-set.link-in::after { display: none; }
-.dg-item.in-set > .dg-spine::before { display: block; left: 0; top: 50%; width: 15px; border-left: 0; border-top: 1px solid var(--dg-edge); }
-.dg-item.in-set > .dg-spine::after { display: block; left: 8px; top: calc(50% - 3px); transform: rotate(-45deg); }
+.dg-item.in-set > .dg-spine {
+  top: calc(-1 * var(--s2));
+}
+.dg-item.in-set.set-first > .dg-spine {
+  top: calc(-1 * var(--s6));
+}
+.dg-item.in-set.link-in::before,
+.dg-item.in-set.link-in::after {
+  display: none;
+}
+.dg-item.in-set > .dg-spine::before {
+  display: block;
+  left: 0;
+  top: 50%;
+  width: 15px;
+  border-left: 0;
+  border-top: 1px solid var(--dg-edge);
+}
+.dg-item.in-set > .dg-spine::after {
+  display: block;
+  left: 8px;
+  top: calc(50% - 3px);
+  transform: rotate(-45deg);
+}
 /* a group (a header and its members): a quiet bracket under the header */
-.dg-item.in-group:not(.is-header) > .dg-spine { top: calc(-1 * var(--s2)); border-left: 2px solid var(--dg-line); left: -17px; }
+.dg-item.in-group:not(.is-header) > .dg-spine {
+  top: calc(-1 * var(--s2));
+  border-left: 2px solid var(--dg-line);
+  left: -17px;
+}
 
 /* with JS, a phone list shows one step's detail at a time (a tap); the chevron says it can. A closed detail stays in the
    button for screen readers (visually hidden), so the list reads as the whole explanation either way. */
-html.js .dg .dg-item:not(.is-open) .dg-d { position: absolute; width: 1px; height: 1px; margin: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-html.js .dg .dg-node { padding-right: 36px; position: relative; }
-html.js .dg .dg-item.is-header .dg-node { padding-right: 36px; }
+html.js .dg .dg-item:not(.is-open) .dg-d {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+html.js .dg .dg-node {
+  padding-right: 36px;
+  position: relative;
+}
+html.js .dg .dg-item.is-header .dg-node {
+  padding-right: 36px;
+}
 html.js .dg .dg-node::after {
-  content: ""; position: absolute; right: 16px; top: 15px; width: 6px; height: 6px; border: solid var(--ink-2); border-width: 0 1px 1px 0;
-  transform: rotate(45deg); transition: transform var(--t-out) var(--ease); }
-html.js .dg .dg-item.is-header .dg-node::after { top: 5px; }
-html.js .dg .dg-item.is-open .dg-node::after { transform: translateY(3px) rotate(-135deg); }
-html.js .dg .dg-item.is-open .dg-node { border-color: var(--head); }
-html.js .dg .dg-item.is-header.is-open .dg-node { border-color: transparent; }
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 15px;
+  width: 6px;
+  height: 6px;
+  border: solid var(--ink-2);
+  border-width: 0 1px 1px 0;
+  transform: rotate(45deg);
+  transition: transform var(--t-out) var(--ease);
+}
+html.js .dg .dg-item.is-header .dg-node::after {
+  top: 5px;
+}
+html.js .dg .dg-item.is-open .dg-node::after {
+  transform: translateY(3px) rotate(-135deg);
+}
+html.js .dg .dg-item.is-open .dg-node {
+  border-color: var(--head);
+}
+html.js .dg .dg-item.is-header.is-open .dg-node {
+  border-color: transparent;
+}
 
 /* ---- the caption: rest text and every node's "Label. Detail" share one cell, so its height never changes ---- */
-.dg-cap { display: grid; }
-.dg-cap > * { grid-area: 1 / 1; }
-.dg-x { display: none; color: var(--ink); visibility: hidden; }
-.dg-hint { display: none; }   /* the drawn grid's cue that the boxes open (shown in the container query below) */
-.dg-x b { font-weight: 400; color: var(--head); }
+.dg-cap {
+  display: grid;
+}
+.dg-cap > * {
+  grid-area: 1 / 1;
+}
+.dg-x {
+  display: none;
+  color: var(--ink);
+  visibility: hidden;
+}
+.dg-hint {
+  display: none;
+} /* the drawn grid's cue that the boxes open (shown in the container query below) */
+.dg-x b {
+  font-weight: 400;
+  color: var(--head);
+}
 
 /* ---- the grid (desktop drawing) ---- */
-html.js .dg { container: dg / inline-size; }
+html.js .dg {
+  container: dg / inline-size;
+}
 @container dg (min-width: 840px) {
-  html.js .dg .dg-plate { padding: var(--s5); }
-  html.js .dg .dg-grid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-template-rows: var(--rows); column-gap: var(--dg-gap); }
-  html.js .dg .dg-grid > li { grid-column: var(--c) / span var(--cs, 1); grid-row: var(--r) / span var(--rs, 1); margin: 0; }
-  html.js .dg .dg-head { display: block; align-self: end; margin: 0; }
+  html.js .dg .dg-plate {
+    padding: var(--s5);
+  }
+  html.js .dg .dg-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    grid-template-rows: var(--rows);
+    column-gap: var(--dg-gap);
+  }
+  html.js .dg .dg-grid > li {
+    grid-column: var(--c) / span var(--cs, 1);
+    grid-row: var(--r) / span var(--rs, 1);
+    margin: 0;
+  }
+  html.js .dg .dg-head {
+    display: block;
+    align-self: end;
+    margin: 0;
+  }
   /* a frame overhangs its members by 10 px at the sides and bottom, never at the top: its top edge and its header label
      line up with the sibling boxes' top edges and labels */
-  html.js .dg .dg-grid > .dg-frame { display: block; z-index: 0; margin: 0 -10px -10px; border: 1px solid var(--dg-line); border-radius: var(--radius);
-    transition: border-color var(--t-out) var(--ease); }
-  html.js .dg .dg-item { display: flex; z-index: 1; }
-  html.js .dg .dg-item.is-center { align-self: center; }
-  html.js .dg .dg-item::before, html.js .dg .dg-item::after, html.js .dg .dg-spine { display: none; }
-  html.js .dg .dg-node { min-height: 64px; padding: 12px 14px; gap: 2px; cursor: pointer; }
+  html.js .dg .dg-grid > .dg-frame {
+    display: block;
+    z-index: 0;
+    margin: 0 -10px -10px;
+    border: 1px solid var(--dg-line);
+    border-radius: var(--radius);
+    transition: border-color var(--t-out) var(--ease);
+  }
+  html.js .dg .dg-item {
+    display: flex;
+    z-index: 1;
+  }
+  html.js .dg .dg-item.is-center {
+    align-self: center;
+  }
+  html.js .dg .dg-item::before,
+  html.js .dg .dg-item::after,
+  html.js .dg .dg-spine {
+    display: none;
+  }
+  html.js .dg .dg-node {
+    min-height: 64px;
+    padding: 12px 14px;
+    gap: 2px;
+    cursor: pointer;
+  }
   /* the cue, one quiet line under the caption at rest: pointer devices hover or tab, touch
      screens tap. It hides with the caption while a box is on, and shares its cell, so nothing moves. */
-  html.js .dg .dg-hint { display: block; }
-  html.js .dg .dg-hint .tp { display: none; }
-  @media (hover: none) { html.js .dg .dg-hint .hv { display: none; } html.js .dg .dg-hint .tp { display: inline; } }
+  html.js .dg .dg-hint {
+    display: block;
+  }
+  html.js .dg .dg-hint .tp {
+    display: none;
+  }
+  @media (hover: none) {
+    html.js .dg .dg-hint .hv {
+      display: none;
+    }
+    html.js .dg .dg-hint .tp {
+      display: inline;
+    }
+  }
   /* the agent frame's -10 px side and bottom margins would sit 14 px from the plate's right and bottom edges: 24 px, like the boxes */
-  html.js .dg#dg-wc .dg-grid { padding: 0 10px 10px 0; }
-  html.js .dg .dg-node::after { display: none; }
-  html.js .dg .dg-item.in-set .dg-node, html.js .dg .dg-item.in-group .dg-node { min-height: 64px; }
-  html.js .dg .dg-item.is-step .dg-node { min-height: 0; padding: var(--s2) 14px; }
+  html.js .dg#dg-wc .dg-grid {
+    padding: 0 10px 10px 0;
+  }
+  html.js .dg .dg-node::after {
+    display: none;
+  }
+  html.js .dg .dg-item.in-set .dg-node,
+  html.js .dg .dg-item.in-group .dg-node {
+    min-height: 64px;
+  }
+  html.js .dg .dg-item.is-step .dg-node {
+    min-height: 0;
+    padding: var(--s2) 14px;
+  }
   /* the header's label sits where a box's does: 1 px border + 12 px padding below the row's top */
-  html.js .dg .dg-item.is-header .dg-node { min-height: 0; padding: 12px 4px var(--s2); }
+  html.js .dg .dg-item.is-header .dg-node {
+    min-height: 0;
+    padding: 12px 4px var(--s2);
+  }
   /* the explanation stays in each button for screen readers; sighted readers get it in the caption cell */
-  html.js .dg .dg-d, html.js .dg .dg-rel { display: block; position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; border: 0;
-    overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  html.js .dg .dg-edges { display: block; position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none;
-    opacity: 0; transition: opacity var(--t-in) var(--ease); }
-  html.js .dg .dg-el { display: block; position: absolute; left: 0; top: 0; z-index: 2; padding: 0 6px; background: var(--dg-plate); white-space: nowrap;
-    pointer-events: none; opacity: 0; transition: opacity var(--t-in) var(--ease), color var(--t-out) var(--ease); }
-  html.js .dg.is-drawn .dg-edges, html.js .dg.is-drawn .dg-el { opacity: 1; }
-  html.js .dg .dg-x { display: block; }
-  html.js .dg .dg-x.show { visibility: visible; }
-  html.js .dg.has-on .dg-c { visibility: hidden; }
+  html.js .dg .dg-d,
+  html.js .dg .dg-rel {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  html.js .dg .dg-edges {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--t-in) var(--ease);
+  }
+  html.js .dg .dg-el {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    padding: 0 6px;
+    background: var(--dg-plate);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+      opacity var(--t-in) var(--ease),
+      color var(--t-out) var(--ease);
+  }
+  html.js .dg.is-drawn .dg-edges,
+  html.js .dg.is-drawn .dg-el {
+    opacity: 1;
+  }
+  html.js .dg .dg-x {
+    display: block;
+  }
+  html.js .dg .dg-x.show {
+    visibility: visible;
+  }
+  html.js .dg.has-on .dg-c {
+    visibility: hidden;
+  }
 
   /* active state: colour and a 1 px ring only (nothing moves); nothing dims */
-  html.js .dg .dg-node.is-on { border-color: var(--head); box-shadow: 0 0 0 1px var(--head); transition-duration: var(--t-in); }
-  html.js .dg .dg-node.is-near { border-color: var(--dg-near); transition-duration: var(--t-in); }
-  html.js .dg .dg-item.is-header .dg-node.is-on, html.js .dg .dg-item.is-header .dg-node.is-near { border-color: transparent; box-shadow: none; }
-  html.js .dg .dg-item.is-header .dg-node.is-on .dg-l { text-decoration: underline 1px; text-underline-offset: var(--ul-off); }
-  html.js .dg .dg-frame.is-on { border-color: var(--head); transition-duration: var(--t-in); }
-  html.js .dg .dg-frame.is-near { border-color: var(--dg-near); transition-duration: var(--t-in); }
-  html.js .dg .dg-el.is-on { color: var(--ink); transition-duration: var(--t-in); }
+  html.js .dg .dg-node.is-on {
+    border-color: var(--head);
+    box-shadow: 0 0 0 1px var(--head);
+    transition-duration: var(--t-in);
+  }
+  html.js .dg .dg-node.is-near {
+    border-color: var(--dg-near);
+    transition-duration: var(--t-in);
+  }
+  html.js .dg .dg-item.is-header .dg-node.is-on,
+  html.js .dg .dg-item.is-header .dg-node.is-near {
+    border-color: transparent;
+    box-shadow: none;
+  }
+  html.js .dg .dg-item.is-header .dg-node.is-on .dg-l {
+    text-decoration: underline 1px;
+    text-underline-offset: var(--ul-off);
+  }
+  html.js .dg .dg-frame.is-on {
+    border-color: var(--head);
+    transition-duration: var(--t-in);
+  }
+  html.js .dg .dg-frame.is-near {
+    border-color: var(--dg-near);
+    transition-duration: var(--t-in);
+  }
+  html.js .dg .dg-el.is-on {
+    color: var(--ink);
+    transition-duration: var(--t-in);
+  }
 }
-.dg-e path { fill: none; stroke: var(--dg-edge); stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round;
-  transition: stroke var(--t-out) var(--ease), stroke-width var(--t-out) var(--ease); }
-.dg-e.is-dashed .ln { stroke-dasharray: 4 3; }
-.dg-e.is-on path { stroke: var(--head); stroke-width: 1.5; transition-duration: var(--t-in); }
+.dg-e path {
+  fill: none;
+  stroke: var(--dg-edge);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    stroke var(--t-out) var(--ease),
+    stroke-width var(--t-out) var(--ease);
+}
+.dg-e.is-dashed .ln {
+  stroke-dasharray: 4 3;
+}
+.dg-e.is-on path {
+  stroke: var(--head);
+  stroke-width: 1.5;
+  transition-duration: var(--t-in);
+}
 
 /* ---- bars: a table with a thin bar under each value ---- */
-.dg-bars .dg-plate { padding: var(--s4) var(--s5) var(--s5); }
-.dg-bars table { width: 100%; border-collapse: collapse; font-variant-numeric: lining-nums tabular-nums; }
-.dg-bars col.dg-name { width: 34%; }
-.dg-bars th, .dg-bars td { padding: 0; text-align: right; vertical-align: bottom; }
-.dg-bars thead th { color: var(--ink-2); padding-bottom: var(--s2); }
-.dg-bars thead th.dg-ch { text-align: right; padding-bottom: 0; }
-.dg-bars thead th.dg-rh, .dg-bars tbody th { text-align: left; }
-.dg-bars tbody th { color: var(--ink); padding: var(--s2) var(--s3) var(--s2) 0; vertical-align: middle; }
-.dg-bars tbody td { padding: var(--s2) 0 var(--s2) var(--s4); }
-.dg-bars tbody tr + tr > * { border-top: 1px solid var(--plate-ink); }
-.dg-bars thead tr:last-child > * { border-bottom: 1px solid var(--dg-line); }
-.dg-v { display: block; color: var(--ink); line-height: 20px; }
-.dg-bar { display: block; height: 4px; margin-top: 4px; background: var(--plate-ink); border-radius: 2px; }
-.dg-bar > span { display: block; height: 100%; min-width: 2px; background: var(--accent); border-radius: 2px; }
-@media (hover: hover) { .dg-bars tbody tr:hover > * { background: rgb(255 255 255 / 0.7); } }
+.dg-bars .dg-plate {
+  padding: var(--s4) var(--s5) var(--s5);
+}
+.dg-bars table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.dg-bars col.dg-name {
+  width: 34%;
+}
+.dg-bars th,
+.dg-bars td {
+  padding: 0;
+  text-align: right;
+  vertical-align: bottom;
+}
+.dg-bars thead th {
+  color: var(--ink-2);
+  padding-bottom: var(--s2);
+}
+.dg-bars thead th.dg-ch {
+  text-align: right;
+  padding-bottom: 0;
+}
+.dg-bars thead th.dg-rh,
+.dg-bars tbody th {
+  text-align: left;
+}
+.dg-bars tbody th {
+  color: var(--ink);
+  padding: var(--s2) var(--s3) var(--s2) 0;
+  vertical-align: middle;
+}
+.dg-bars tbody td {
+  padding: var(--s2) 0 var(--s2) var(--s4);
+}
+.dg-bars tbody tr + tr > * {
+  border-top: 1px solid var(--plate-ink);
+}
+.dg-bars thead tr:last-child > * {
+  border-bottom: 1px solid var(--dg-line);
+}
+.dg-v {
+  display: block;
+  color: var(--ink);
+  line-height: 20px;
+}
+.dg-bar {
+  display: block;
+  height: 4px;
+  margin-top: 4px;
+  background: var(--plate-ink);
+  border-radius: 2px;
+}
+.dg-bar > span {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+@media (hover: hover) {
+  .dg-bars tbody tr:hover > * {
+    background: rgb(255 255 255 / 0.7);
+  }
+}
 @media (max-width: 719px) {
-  .dg-bars .dg-plate { padding: var(--s3) var(--s4) var(--s4); }
-  .dg-bars col.dg-name { width: 30%; }
-  .dg-bars tbody td { padding-left: var(--s3); }
+  .dg-bars .dg-plate {
+    padding: var(--s3) var(--s4) var(--s4);
+  }
+  .dg-bars col.dg-name {
+    width: 30%;
+  }
+  .dg-bars tbody td {
+    padding-left: var(--s3);
+  }
 }
 
 /* ---- Windows high contrast: edges, the active state and the bars keep a system colour ---- */
 @media (forced-colors: active) {
-  .dg-e path { stroke: CanvasText; }
-  .dg-e.is-on path { stroke: Highlight; }
-  html.js .dg .dg-node.is-on, html.js .dg .dg-frame.is-on { border-color: Highlight; }
-  .dg-bar > span { forced-color-adjust: none; background: CanvasText; }
+  .dg-e path {
+    stroke: CanvasText;
+  }
+  .dg-e.is-on path {
+    stroke: Highlight;
+  }
+  html.js .dg .dg-node.is-on,
+  html.js .dg .dg-frame.is-on {
+    border-color: Highlight;
+  }
+  .dg-bar > span {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
 }
 
 /* ---- motion and print ---- */
 @media (prefers-reduced-motion: reduce) {
-  .dg-node, .dg-e path, .dg-frame, .dg-edges, .dg-el, html.js .dg .dg-node::after { transition: none !important; }
+  .dg-node,
+  .dg-e path,
+  .dg-frame,
+  .dg-edges,
+  .dg-el,
+  html.js .dg .dg-node::after {
+    transition: none !important;
+  }
 }
 @media print {
-  html.js .dg { container-type: normal; }
-  html.js .dg .dg-item:not(.is-open) .dg-d { position: static; width: auto; height: auto; margin-top: var(--s2); overflow: visible; clip-path: none; white-space: normal; }
-  html.js .dg .dg-node { padding-right: 14px; }
-  html.js .dg .dg-node::after { display: none; }
+  html.js .dg {
+    container-type: normal;
+  }
+  html.js .dg .dg-item:not(.is-open) .dg-d {
+    position: static;
+    width: auto;
+    height: auto;
+    margin-top: var(--s2);
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+  html.js .dg .dg-node {
+    padding-right: 14px;
+  }
+  html.js .dg .dg-node::after {
+    display: none;
+  }
 }

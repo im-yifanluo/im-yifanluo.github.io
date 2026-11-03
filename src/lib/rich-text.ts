@@ -10,7 +10,8 @@ export function escapeHtml(s: string): string {
 
 /** Text with `code` spans → HTML. */
 function inline(src: string): string {
-  let out = '', last = 0;
+  let out = '',
+    last = 0;
   for (const m of src.matchAll(/`([^`]+)`/g)) {
     out += `${escapeHtml(src.slice(last, m.index))}<code>${escapeHtml(m[1]!)}</code>`;
     last = m.index! + m[0].length;
@@ -41,7 +42,12 @@ export function segs(src: string, extra: string[] = []): string {
   const parts: string[] = [];
   let cur = '';
   for (let i = 0; i < src.length; i++) {
-    if (src.startsWith(' · ', i)) { parts.push(cur); cur = ''; i += 2; continue; }
+    if (src.startsWith(' · ', i)) {
+      parts.push(cur);
+      cur = '';
+      i += 2;
+      continue;
+    }
     cur += src[i];
   }
   if (cur) parts.push(cur);
@@ -49,7 +55,8 @@ export function segs(src: string, extra: string[] = []): string {
   // 41–44 characters from 720 px up only (.nw-w: "FORWARD Data Lab, UIUC (Prof. Kevin Chang)" would otherwise break
   // inside on desktop; kept whole on a 320 px phone it would overflow the column)
   const html = parts.map((p) => {
-    const h = rich(p), n = plain(p).length;
+    const h = rich(p),
+      n = plain(p).length;
     return `<span class="${n <= 40 ? 'nw seg' : n <= 44 ? 'nw-w seg' : 'seg'}">${h}</span>`;
   });
   return [...html, ...extra.map((e) => `<span class="nw seg">${e}</span>`)].join(SEP);

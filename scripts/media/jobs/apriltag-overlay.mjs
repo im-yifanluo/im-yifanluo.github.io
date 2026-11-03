@@ -58,18 +58,28 @@ export default async function apriltagOverlay(h) {
   // never enlarged (a 1024×576 crop would be enlarged ≈3.6× at DPR 2). The printed AprilTag the caption names, the
   // see-through panel and the knob guide are all in view. Corners rounded 8 device px (the 4 px --radius at
   // the hero's 2× scale), like every other image box on the site.
-  const heroW = 1760, heroH = h.h9(heroW), frameH = Math.round(heroH * 0.9);
+  const heroW = 1760,
+    heroH = h.h9(heroW),
+    frameH = Math.round(heroH * 0.9);
   const meta = await sharp(FRAME).metadata();
   const frameW = Math.round((meta.width * frameH) / meta.height);
   const framePng = join(h.WORK, 'ar-hero-frame.png');
   await graded(null, framePng, frameW);
   const fm = await sharp(framePng).metadata(); // 1195×891
   const R = 8;
-  const mask = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${fm.width}" height="${fm.height}"><rect width="${fm.width}" height="${fm.height}" rx="${R}" ry="${R}" fill="#fff"/></svg>`);
-  const frame = await sharp(framePng).ensureAlpha().composite([{ input: mask, blend: 'dest-in' }]).png().toBuffer();
+  const mask = Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${fm.width}" height="${fm.height}"><rect width="${fm.width}" height="${fm.height}" rx="${R}" ry="${R}" fill="#fff"/></svg>`,
+  );
+  const frame = await sharp(framePng)
+    .ensureAlpha()
+    .composite([{ input: mask, blend: 'dest-in' }])
+    .png()
+    .toBuffer();
   const heroPng = join(h.WORK, 'ar-hero-upright.png');
   await sharp({ create: { width: heroW, height: heroH, channels: 3, background: h.SURFACE } })
-    .composite([{ input: frame, left: Math.round((heroW - fm.width) / 2), top: Math.round((heroH - fm.height) / 2) }]).png().toFile(heroPng);
+    .composite([{ input: frame, left: Math.round((heroW - fm.width) / 2), top: Math.round((heroH - fm.height) / 2) }])
+    .png()
+    .toFile(heroPng);
   const heroPoster = await h.posters('apriltag-overlay-hero', heroPng, [1280, 1760]);
   // The phone cut is the same whole window with no plate, full width (its own 4:3-ish aspect; Media.astro gives the hero
   // box that ratio below 720 px), so a 390 phone shows it 350 CSS px wide, not 265. 704 and 1056 px are 2× and 3× of

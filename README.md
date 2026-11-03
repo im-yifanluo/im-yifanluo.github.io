@@ -15,19 +15,21 @@ Personal website: projects, experience, news and awards. Its address is <https:/
 
 Requires Node 24 (see `.nvmrc`; 22.19 or later works). Run everything from the repository root.
 
-| Command | What it does |
-| --- | --- |
-| `npm ci` | Install the exact dependency versions from `package-lock.json` |
-| `npm run dev` | Start the dev server at `http://localhost:4321` |
-| `npm run build` | `astro check`, then `astro build` into `dist/`, then the post-build checks |
-| `npm run preview` | Serve the built `dist/` locally |
-| `npm run check` | Type-check `.astro` and `.ts` files and validate the content against its schema |
-| `npm run astro -- …` | Run any Astro CLI command, e.g. `npm run astro -- add` or `npm run astro -- telemetry disable` |
-| `npm run check:dist` | Run the post-build checks again on an existing `dist/` |
-| `npm run check:links` | Report broken external links in `dist/` (needs the network; never fails the build) |
-| `npm run media` | Rebuild the web media from `$MEDIA_SRC`; `npm run media -- --only <job>` for one job, `-- --help` for the job names |
-| `npm run media:portrait -- <photo>` | Rebuild the homepage portrait from a photo |
-| `npm run fonts:fallbacks` | Re-tune the fallback font faces in `src/styles/fallbacks.css` |
+| Command                             | What it does                                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `npm ci`                            | Install the exact dependency versions from `package-lock.json`                                                      |
+| `npm run dev`                       | Start the dev server at `http://localhost:4321`                                                                     |
+| `npm run build`                     | `astro check`, then `astro build` into `dist/`, then the post-build checks                                          |
+| `npm run preview`                   | Serve the built `dist/` locally                                                                                     |
+| `npm run check`                     | Type-check `.astro` and `.ts` files and validate the content against its schema                                     |
+| `npm run astro -- …`                | Run any Astro CLI command, e.g. `npm run astro -- add` or `npm run astro -- telemetry disable`                      |
+| `npm run check:dist`                | Run the post-build checks again on an existing `dist/`                                                              |
+| `npm run check:links`               | Report broken external links in `dist/` (needs the network; never fails the build)                                  |
+| `npm run format`                    | Format the code with Prettier                                                                                       |
+| `npm run format:check`              | Check the formatting without changing files                                                                         |
+| `npm run media`                     | Rebuild the web media from `$MEDIA_SRC`; `npm run media -- --only <job>` for one job, `-- --help` for the job names |
+| `npm run media:portrait -- <photo>` | Rebuild the homepage portrait from a photo                                                                          |
+| `npm run fonts:fallbacks`           | Re-tune the fallback font faces in `src/styles/fallbacks.css`                                                       |
 
 ## Project structure
 
@@ -58,6 +60,7 @@ src/
 ├── env.d.ts               HTML attributes that Astro's types do not declare
 └── site.config.ts         name, contact links, intro, last-updated date, typography settings
 astro.config.mjs           site URL, static build, redirects for renamed pages
+.prettierrc.json           Prettier settings; .prettierignore skips the generated and served-as-is files
 ```
 
 ## Editing content
@@ -128,10 +131,10 @@ Source footage and full-size images are not in git. They live in a separate fold
 one subfolder per media job, and its `README.md` lists each job's inputs and where they came from. The media scripts
 read from it and write web-ready files into the repository:
 
-| Script | Writes |
-| --- | --- |
-| `npm run media` | `public/media/*` (AVIF and WebP stills, H.264 MP4 and AV1 WebM loops), `src/generated/media.json`, and `public/og.jpg` |
-| `npm run media:portrait -- <photo>` | `public/media/portrait-*` and `src/generated/portrait.json` |
+| Script                              | Writes                                                                                                                 |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `npm run media`                     | `public/media/*` (AVIF and WebP stills, H.264 MP4 and AV1 WebM loops), `src/generated/media.json`, and `public/og.jpg` |
+| `npm run media:portrait -- <photo>` | `public/media/portrait-*` and `src/generated/portrait.json`                                                            |
 
 Settings, all optional (`scripts/media/paths.mjs`):
 

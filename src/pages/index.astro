@@ -15,9 +15,14 @@ import type { Portrait } from '@/lib/media';
 const TILE_SIZES = '(min-width: 944px) 320px, (min-width: 720px) 240px, calc(100vw - 40px)';
 const projects = (await getCollection('projects'))
   .sort((a, b) => a.data.order - b.data.order)
-  .map(({ id: slug, data: p }) => ({ slug, p, meta: segs([p.role, p.org].filter(Boolean).join(' · '), [rangeHtml(p.start, p.end)]) }));
+  .map(({ id: slug, data: p }) => ({
+    slug,
+    p,
+    meta: segs([p.role, p.org].filter(Boolean).join(' · '), [rangeHtml(p.start, p.end)]),
+  }));
 // a list in its file's order (content.config.ts `list`)
-const inOrder = <T extends { position: number }>(entries: { data: T }[]) => entries.map((e) => e.data).sort((a, b) => a.position - b.position);
+const inOrder = <T extends { position: number }>(entries: { data: T }[]) =>
+  entries.map((e) => e.data).sort((a, b) => a.position - b.position);
 const NEWS = inOrder(await getCollection('news'));
 const MORE = inOrder(await getCollection('more'));
 const EXPERIENCE = inOrder(await getCollection('experience'));
@@ -27,111 +32,148 @@ const AWARD_COUNT = AWARDS.reduce((n, g) => n + g.items.length, 0);
 // The portrait photo (`npm run media:portrait -- <photo> --crop …` writes src/generated/portrait.json and the
 // AVIF/WebP files). The box paints the photo's own backdrop (`bg`) until the image decodes, so it never flashes
 // grey. Without a manifest the quiet placeholder holds the same 1:1 box, so nothing else moves.
-const portrait = Object.values(import.meta.glob<Portrait>('../generated/portrait.json', { eager: true, import: 'default' }))[0];
+const portrait = Object.values(
+  import.meta.glob<Portrait>('../generated/portrait.json', { eager: true, import: 'default' }),
+)[0];
 const PORTRAIT_SIZES = '(min-width: 944px) 320px, (min-width: 720px) 240px, 160px';
-const awardsShown = AWARDS.filter((g) => !g.collapsed), awardsMore = AWARDS.filter((g) => g.collapsed);
+const awardsShown = AWARDS.filter((g) => !g.collapsed),
+  awardsMore = AWARDS.filter((g) => g.collapsed);
 ---
+
 <BaseLayout title={SITE.title} description={SITE.description} home>
   <main class="wrap" id="main" tabindex="-1">
     <section class="row intro" aria-labelledby="name">
       {portrait ? (
-        <div class="portrait photo" style={`--portrait-pos: ${portrait.position}${portrait.bg ? `; --portrait-bg: linear-gradient(180deg, ${portrait.bg[0]}, ${portrait.bg[1]})` : ''}`}><picture>
-          <source type="image/avif" srcset={portrait.avif.join(', ')} sizes={PORTRAIT_SIZES} />
-          <img src={portrait.src} srcset={portrait.webp.join(', ')} sizes={PORTRAIT_SIZES} width={portrait.w} height={portrait.h} alt="Yifan Luo" loading="eager" fetchpriority="high" decoding="async" />
-        </picture></div>
+        <div
+          class="portrait photo"
+          style={`--portrait-pos: ${portrait.position}${portrait.bg ? `; --portrait-bg: linear-gradient(180deg, ${portrait.bg[0]}, ${portrait.bg[1]})` : ''}`}
+        ><picture>
+            <source type="image/avif" srcset={portrait.avif.join(', ')} sizes={PORTRAIT_SIZES} />
+            <img
+              src={portrait.src}
+              srcset={portrait.webp.join(', ')}
+              sizes={PORTRAIT_SIZES}
+              width={portrait.w}
+              height={portrait.h}
+              alt="Yifan Luo"
+              loading="eager"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </picture></div>
       ) : (
-        <div class="portrait" role="img" aria-label="Yifan Luo"><svg viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="xMidYMax meet"><circle cx="50" cy="43" r="16" /><path d="M12 100c1-19 17-30 38-30s37 11 38 30z" /></svg></div>
+        <div class="portrait" role="img" aria-label="Yifan Luo"><svg
+            viewBox="0 0 100 100"
+            aria-hidden="true"
+            preserveAspectRatio="xMidYMax meet"
+          ><circle cx="50" cy="43" r="16" /><path d="M12 100c1-19 17-30 38-30s37 11 38 30z" /></svg></div>
       )}
       <div class="intro-text">
         <h1 class="name" id="name">Yifan Luo</h1>
-        <div class="sub">{INTRO.sub.map((l) => (l.keep ? <RichText as="p" class="meta" text={l.text} glue={l.keep} short={l.short} /> : <p class="meta" set:html={segs(l.text)} />))}</div>
-        {INTRO.bio.map((b) => <RichText as="p" class="bio prose" text={b.text} />)}
-        <LinkList items={[{ label: 'Email', url: `mailto:${EMAIL}` }, { label: 'Résumé', url: RESUME }, { label: 'GitHub', url: GITHUB }, { label: 'LinkedIn', url: LINKEDIN }]} />
+        <div class="sub">{INTRO.sub.map((l) =>
+            l.keep ? (
+              <RichText as="p" class="meta" text={l.text} glue={l.keep} short={l.short} />
+            ) : (
+              <p class="meta" set:html={segs(l.text)} />
+            ),
+          )}</div>
+        {INTRO.bio.map((b) => (
+          <RichText as="p" class="bio prose" text={b.text} />
+        ))}
+        <LinkList
+          items={[
+            { label: 'Email', url: `mailto:${EMAIL}` },
+            { label: 'Résumé', url: RESUME },
+            { label: 'GitHub', url: GITHUB },
+            { label: 'LinkedIn', url: LINKEDIN },
+          ]}
+        />
       </div>
     </section>
 
     <section class="sec" id="news" aria-labelledby="news-h">
       <h2 class="h2 in-text sec-head" id="news-h">News</h2>
       <ol class="dated small">
-        {NEWS.map((n) => (
-          <li class="row">
-            <span class="date" set:html={dateHtml(n.date)} />
-            <RichText as="p" class="prose" text={n.text} glue={TYPOGRAPHY.newsKeep} />
-          </li>
-        ))}
+        {NEWS.map((n) => <li class="row">
+          <span class="date" set:html={dateHtml(n.date)} />
+          <RichText as="p" class="prose" text={n.text} glue={TYPOGRAPHY.newsKeep} />
+        </li>)}
       </ol>
     </section>
 
     <section class="sec" id="projects" aria-labelledby="projects-h">
-      <div class="sec-head in-text"><h2 class="h2" id="projects-h">Projects</h2><button class="motion" type="button" hidden>Pause videos</button></div>
+      <div class="sec-head in-text"><h2 class="h2" id="projects-h">Projects</h2
+        ><button class="motion" type="button" hidden>Pause videos</button></div>
       <ol class="projects">
-        {projects.map(({ slug, p, meta }) => (
-          <li class="entry row" id={`p-${slug}`}>
-            <Media ref={p.tile ?? { media: slug, part: 'tile' }} box="tile" sizes={TILE_SIZES} href={`/${slug}/`} />
-            <div class="r">
-              <h3 class="title"><a href={`/${slug}/`} set:html={glue(rich(p.title), TYPOGRAPHY.titleKeep, TYPOGRAPHY.titleKeepWide)} /></h3>
-              <p class="meta" set:html={meta} />
-              {p.award && <RichText as="p" class="meta award" text={p.award} glue={AWARD_LINE_KEEP} />}
-              <RichText as="p" class="desc" text={p.outcome} />
-              <LinkList items={p.links} />
-            </div>
-          </li>
-        ))}
+        {projects.map(({ slug, p, meta }) => <li class="entry row" id={`p-${slug}`}>
+          <Media ref={p.tile ?? { media: slug, part: 'tile' }} box="tile" sizes={TILE_SIZES} href={`/${slug}/`} />
+          <div class="r">
+            <h3 class="title"><a
+                href={`/${slug}/`}
+                set:html={glue(rich(p.title), TYPOGRAPHY.titleKeep, TYPOGRAPHY.titleKeepWide)}
+              /></h3>
+            <p class="meta" set:html={meta} />
+            {p.award && <RichText as="p" class="meta award" text={p.award} glue={AWARD_LINE_KEEP} />}
+            <RichText as="p" class="desc" text={p.outcome} />
+            <LinkList items={p.links} />
+          </div>
+        </li>)}
       </ol>
       <h3 class="title in-text more-head">More projects</h3>
       <ol class="dated small">
-        {MORE.map((m) => (
-          <li class="row">
-            <span class="date" set:html={dateHtml(m.date)} />
-            <RichText as="p" class="prose" text={m.text} />
-          </li>
-        ))}
+        {MORE.map((m) => <li class="row">
+          <span class="date" set:html={dateHtml(m.date)} />
+          <RichText as="p" class="prose" text={m.text} />
+        </li>)}
       </ol>
     </section>
 
     <section class="sec" id="experience" aria-labelledby="experience-h">
       <h2 class="h2 in-text sec-head" id="experience-h">Experience</h2>
       <ol class="dated xp">
-        {EXPERIENCE.map((e) => (
-          <li class="row">
-            <span class="date" set:html={rangeHtml(e.start, e.end)} />
-            <div class="r">
-              <h3 class="title">{e.org}</h3>
-              <p class="meta" set:html={segs(e.role)} />
-              {e.lines.map((l) => <RichText as="p" text={l} />)}
-            </div>
-          </li>
-        ))}
+        {EXPERIENCE.map((e) => <li class="row">
+          <span class="date" set:html={rangeHtml(e.start, e.end)} />
+          <div class="r">
+            <h3 class="title">{e.org}</h3>
+            <p class="meta" set:html={segs(e.role)} />
+            {e.lines.map((l) => (
+              <RichText as="p" text={l} />
+            ))}
+          </div>
+        </li>)}
       </ol>
     </section>
 
     <section class="sec" id="education" aria-labelledby="education-h">
       <h2 class="h2 in-text sec-head" id="education-h">Education</h2>
       <ol class="dated xp">
-        {EDUCATION.map((e) => (
-          <li class="row">
-            <span class="date" set:html={`${monthHtml(e.graduation)} ${escapeHtml(e.dateText)}`} />
-            <div class="r">
-              <h3 class="title">{e.org}</h3>
-              <p class="meta" set:html={segs(e.role)} />
-              {e.lines.map((l) => <RichText as="p" text={l} />)}
-            </div>
-          </li>
-        ))}
+        {EDUCATION.map((e) => <li class="row">
+          <span class="date" set:html={`${monthHtml(e.graduation)} ${escapeHtml(e.dateText)}`} />
+          <div class="r">
+            <h3 class="title">{e.org}</h3>
+            <p class="meta" set:html={segs(e.role)} />
+            {e.lines.map((l) => (
+              <RichText as="p" text={l} />
+            ))}
+          </div>
+        </li>)}
       </ol>
     </section>
 
     <section class="sec" id="awards" aria-labelledby="awards-h">
       <h2 class="h2 in-text sec-head" id="awards-h">Awards</h2>
-      {awardsShown.map((g) => <AwardGroup group={g} />)}
+      {awardsShown.map((g) => (
+        <AwardGroup group={g} />
+      ))}
       {/* the rest behind one quiet control (native <details>: opens without JS, find-in-page reaches its rows, the
           summary carries the expanded state). The label swaps in CSS; the summary is drawn after the rows (global.css). */}
-      {awardsMore.length > 0 && (
-        <details class="awards-more">
-          <summary class="meta in-text"><span class="sh">Show all <span class="awards-n">{AWARD_COUNT}</span> awards</span><span class="hd">Show fewer</span></summary>
-          {awardsMore.map((g) => <AwardGroup group={g} />)}
-        </details>
-      )}
+      {awardsMore.length > 0 && <details class="awards-more">
+        <summary class="meta in-text"><span class="sh">Show all <span class="awards-n">{AWARD_COUNT}</span> awards</span
+          ><span class="hd">Show fewer</span></summary>
+        {awardsMore.map((g) => (
+          <AwardGroup group={g} />
+        ))}
+      </details>}
     </section>
   </main>
 </BaseLayout>

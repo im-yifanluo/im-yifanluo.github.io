@@ -4,28 +4,34 @@
 import { rich } from '@/lib/rich-text';
 import type { BarTable, Caption } from '@/lib/diagrams';
 
-interface Props { d: BarTable; width: 'text' | 'wide'; caption: Caption }
+interface Props {
+  d: BarTable;
+  width: 'text' | 'wide';
+  caption: Caption;
+}
 const { d, width, caption } = Astro.props;
 const pct = (v: number) => Math.max(0, Math.min(100, v));
 ---
+
 <figure class:list={['dg-fig dg-bars', width === 'text' ? 'fig-text' : 'fig-wide']} id={`dg-${d.id}`}>
   <div class="dg-plate">
     <table>
       <caption class="sr" set:html={rich(d.label)} />
-      <colgroup><col class="dg-name" />{d.cols.map(() => <col />)}</colgroup>
+      <colgroup><col class="dg-name" />{d.cols.map(() => (
+          <col />
+        ))}</colgroup>
       <thead>
         <tr><td></td><th scope="colgroup" colspan={d.cols.length} class="dg-ch" set:html={rich(d.colHead)} /></tr>
-        <tr><th scope="col" class="dg-rh" set:html={rich(d.rowHead)} />{d.cols.map((c) => <th scope="col" set:html={rich(c)} />)}</tr>
+        <tr><th scope="col" class="dg-rh" set:html={rich(d.rowHead)} />{d.cols.map((c) => (
+            <th scope="col" set:html={rich(c)} />
+          ))}</tr>
       </thead>
       <tbody>
-        {d.rows.map((r) => (
-          <tr>
-            <th scope="row" set:html={rich(r.name)} />
-            {r.values.map((v) => (
-              <td><span class="dg-v">{v}{d.unit}</span><span class="dg-bar" aria-hidden="true"><span style={`width:${pct(v)}%`} /></span></td>
-            ))}
-          </tr>
-        ))}
+        {d.rows.map((r) => <tr>
+          <th scope="row" set:html={rich(r.name)} />
+          {r.values.map((v) => <td><span class="dg-v">{v}{d.unit}</span
+            ><span class="dg-bar" aria-hidden="true"><span style={`width:${pct(v)}%`} /></span></td>)}
+        </tr>)}
       </tbody>
     </table>
   </div>

@@ -2,52 +2,114 @@
    scripts/fonts/fallbacks.mjs). */
 :root {
   /* space */
-  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px; --s9: 96px;
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+  --s9: 96px;
   /* grid */
-  --content: 880px; --media: 320px; --gap: 40px; --gutter: 32px; --section: var(--s9);
+  --content: 880px;
+  --media: 320px;
+  --gap: 40px;
+  --gutter: 32px;
+  --section: var(--s9);
   /* header: sticky; transparent at the top, frosted once content runs under it. A light saturate + 8 px blur keeps
      passing shapes soft and recognisable (no muddy band over dark tiles); 76 % keeps the nav ≥ 5.7 : 1 worst case */
-  --header-h: 56px; --glass-alpha: 0.76; --glass-filter: saturate(1.15) blur(8px);
+  --header-h: 56px;
+  --glass-alpha: 0.76;
+  --glass-filter: saturate(1.15) blur(8px);
   /* motion: one set for the site. Quick in, slower out; nothing longer than 300 ms, nothing travels more than 4 px */
-  --ease: cubic-bezier(0.4, 0, 0.2, 1);       /* state changes */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1); /* state changes */
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1); /* arrivals (header name, media) */
-  --t-in: 150ms; --t-out: 250ms; --t-ui: 250ms; --t-media: 300ms;
-  --t-loop: 200ms;                              /* a loop dissolves out of its poster (the poster is the loop's first frame) */
-  --zoom: 1.025;                                /* project-row hover: the clip eases in inside its fixed frame */
-  --arrow-rest: 0.5;                            /* the external-link arrow at rest */
+  --t-in: 150ms;
+  --t-out: 250ms;
+  --t-ui: 250ms;
+  --t-media: 300ms;
+  --t-loop: 200ms; /* a loop dissolves out of its poster (the poster is the loop's first frame) */
+  --zoom: 1.025; /* project-row hover: the clip eases in inside its fixed frame */
+  --arrow-rest: 0.5; /* the external-link arrow at rest */
   color-scheme: light;
 }
-@media (max-width: 943px) { :root { --media: 240px; --gap: 32px; } }
-@media (max-width: 719px) { :root { --gutter: 20px; --section: var(--s8); --header-h: 52px; } }
+@media (max-width: 943px) {
+  :root {
+    --media: 240px;
+    --gap: 32px;
+  }
+}
+@media (max-width: 719px) {
+  :root {
+    --gutter: 20px;
+    --section: var(--s8);
+    --header-h: 52px;
+  }
+}
 
 /* ---- colour and type: Source Sans 3 (as "YL Sans") light body, navy regular name/heads/titles, clear blue ---- */
 :root {
-  --bg: #FFFFFF; --bg-rgb: 255 255 255;
-  --head: #022169;   /* name, headings, titles (14.75:1) */
-  --ink: #3B4150;    /* body at 300 (10.2:1), nav (5.7:1 worst case under the glass) */
-  --ink-2: #5D6371;  /* meta, dates (6.0:1; 5.6:1 on surface) */
-  --accent: #0B62C4; --accent-hover: #022169;  /* links 5.9:1; prose-link hover deepens to navy */
-  --title-hover: var(--head);                   /* a project title stays navy; only its underline fades in */
-  --hairline: #E2E6ED; --surface: #F5F6F6; --plate-top: #F9FAFA; --plate-ink: #E5E7E8;  /* neutral greys; the media plates are #F6F6F4 */
-  --tile-line: rgb(2 33 105 / 0.09); --tile-line-hover: rgb(2 33 105 / 0.14); --selection: rgb(11 98 196 / 0.14);
-  --font-name: "YL Sans", "YL Sans Name Fallback", system-ui, sans-serif;
-  --font-h2: "YL Sans", "YL Sans H2 Fallback", system-ui, sans-serif;
-  --font-title: "YL Sans", "YL Sans Title Fallback", system-ui, sans-serif;
-  --font-body: "YL Sans", "YL Sans Body Fallback", system-ui, sans-serif;
-  --font-meta: "YL Sans", "YL Sans Meta Fallback", system-ui, sans-serif;
-  --font-date: "YL Sans", "YL Sans Date Fallback", system-ui, sans-serif;
-  --fs-name: 46px;  --lh-name: 1.08; --w-name: 400; --ls-name: -0.012em;
-  --fs-ptitle: 38px; --lh-ptitle: 1.12;          /* a project page's title: two display lines, not four */
-  --fs-h2: 28px;    --lh-h2: 1.2;    --w-h2: 400;   --ls-h2: -0.006em; --h2-gap: var(--s5);
-  --h2-optical: -0.05em;                         /* the h2's stems start 1 px inside the text edge: pull its ink onto it */
-  --fs-title: 20px; --lh-title: 1.3; --w-title: 400;
-  --fs-body: 17px;  --lh-body: 1.6;  --w-body: 300; --ls-body: 0.006em;
-  --fs-meta: 15px;  --lh-meta: 24px; --w-meta: 360; --ls-meta: 0.01em;   /* meta lighter than 400: never heavier than the body it describes */
-  --fs-date: 15px;  --w-date: 360;   --ls-date: 0.01em;
-  --k-name: 0.323; --k-title: 0.323;            /* capHeight − (ascent − descent) / 2, from the font's own metrics */
+  --bg: #ffffff;
+  --bg-rgb: 255 255 255;
+  --head: #022169; /* name, headings, titles (14.75:1) */
+  --ink: #3b4150; /* body at 300 (10.2:1), nav (5.7:1 worst case under the glass) */
+  --ink-2: #5d6371; /* meta, dates (6.0:1; 5.6:1 on surface) */
+  --accent: #0b62c4;
+  --accent-hover: #022169; /* links 5.9:1; prose-link hover deepens to navy */
+  --title-hover: var(--head); /* a project title stays navy; only its underline fades in */
+  --hairline: #e2e6ed;
+  --surface: #f5f6f6;
+  --plate-top: #f9fafa;
+  --plate-ink: #e5e7e8; /* neutral greys; the media plates are #F6F6F4 */
+  --tile-line: rgb(2 33 105 / 0.09);
+  --tile-line-hover: rgb(2 33 105 / 0.14);
+  --selection: rgb(11 98 196 / 0.14);
+  --font-name: 'YL Sans', 'YL Sans Name Fallback', system-ui, sans-serif;
+  --font-h2: 'YL Sans', 'YL Sans H2 Fallback', system-ui, sans-serif;
+  --font-title: 'YL Sans', 'YL Sans Title Fallback', system-ui, sans-serif;
+  --font-body: 'YL Sans', 'YL Sans Body Fallback', system-ui, sans-serif;
+  --font-meta: 'YL Sans', 'YL Sans Meta Fallback', system-ui, sans-serif;
+  --font-date: 'YL Sans', 'YL Sans Date Fallback', system-ui, sans-serif;
+  --fs-name: 46px;
+  --lh-name: 1.08;
+  --w-name: 400;
+  --ls-name: -0.012em;
+  --fs-ptitle: 38px;
+  --lh-ptitle: 1.12; /* a project page's title: two display lines, not four */
+  --fs-h2: 28px;
+  --lh-h2: 1.2;
+  --w-h2: 400;
+  --ls-h2: -0.006em;
+  --h2-gap: var(--s5);
+  --h2-optical: -0.05em; /* the h2's stems start 1 px inside the text edge: pull its ink onto it */
+  --fs-title: 20px;
+  --lh-title: 1.3;
+  --w-title: 400;
+  --fs-body: 17px;
+  --lh-body: 1.6;
+  --w-body: 300;
+  --ls-body: 0.006em;
+  --fs-meta: 15px;
+  --lh-meta: 24px;
+  --w-meta: 360;
+  --ls-meta: 0.01em; /* meta lighter than 400: never heavier than the body it describes */
+  --fs-date: 15px;
+  --w-date: 360;
+  --ls-date: 0.01em;
+  --k-name: 0.323;
+  --k-title: 0.323; /* capHeight − (ascent − descent) / 2, from the font's own metrics */
   --radius: 4px;
-  --ul-w: 1px; --ul-off: 0.22em; --ul-rest: rgb(11 98 196 / 0.32);
+  --ul-w: 1px;
+  --ul-off: 0.22em;
+  --ul-rest: rgb(11 98 196 / 0.32);
 }
 
 /* phone sizes */
-@media (max-width: 719px) { :root { --fs-name: 36px; --fs-ptitle: 28px; --fs-h2: 24px; } }
+@media (max-width: 719px) {
+  :root {
+    --fs-name: 36px;
+    --fs-ptitle: 28px;
+    --fs-h2: 24px;
+  }
+}

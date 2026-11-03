@@ -19,7 +19,7 @@ import { source } from '../paths.mjs';
 const here = source('photogleam');
 const src = (name) => join(here, `${name}.webp`);
 
-const IPHONE = ['ios-camera', 'ios-bw-classic'];                                           // tile and hero
+const IPHONE = ['ios-camera', 'ios-bw-classic']; // tile and hero
 const THREE_FILTERS = ['filter-cool-hues', 'filter-dark-moody', 'filter-dramatic-stripes']; // page figure
 
 const TILE_LINE = { r: 2, g: 33, b: 105, alpha: 0.09 }; // tokens.css --tile-line
@@ -38,17 +38,33 @@ async function compose(screens, W, out, { surface, fill = FILL.tile, aspect = 9 
   for (const s of screens) {
     const img = sharp(src(s)).resize({ height: sh, kernel: 'lanczos3' });
     const { data, info } = await img.png().toBuffer({ resolveWithObject: true });
-    const w = info.width, r = Math.round(w * RADIUS);
-    const mask = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${sh}"><rect width="${w}" height="${sh}" rx="${r}" fill="#fff"/></svg>`);
-    const ring = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${sh}"><rect x="${line / 2}" y="${line / 2}" width="${w - line}" height="${sh - line}" rx="${r - line / 2}" fill="none" stroke="rgb(${TILE_LINE.r},${TILE_LINE.g},${TILE_LINE.b})" stroke-opacity="${TILE_LINE.alpha}" stroke-width="${line}"/></svg>`);
-    const screen = await sharp(data).ensureAlpha().composite([{ input: mask, blend: 'dest-in' }, { input: ring }]).png().toBuffer();
+    const w = info.width,
+      r = Math.round(w * RADIUS);
+    const mask = Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${sh}"><rect width="${w}" height="${sh}" rx="${r}" fill="#fff"/></svg>`,
+    );
+    const ring = Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${sh}"><rect x="${line / 2}" y="${line / 2}" width="${w - line}" height="${sh - line}" rx="${r - line / 2}" fill="none" stroke="rgb(${TILE_LINE.r},${TILE_LINE.g},${TILE_LINE.b})" stroke-opacity="${TILE_LINE.alpha}" stroke-width="${line}"/></svg>`,
+    );
+    const screen = await sharp(data)
+      .ensureAlpha()
+      .composite([{ input: mask, blend: 'dest-in' }, { input: ring }])
+      .png()
+      .toBuffer();
     layers.push({ input: screen, w });
   }
   const total = layers.reduce((n, l) => n + l.w, 0) + gap * (layers.length - 1);
   let x = Math.round((W - total) / 2);
   const top = Math.round((H - sh) / 2);
-  const composites = layers.map((l) => { const c = { input: l.input, left: x, top }; x += l.w + gap; return c; });
-  await sharp({ create: { width: W, height: H, channels: 3, background: surface } }).composite(composites).png().toFile(out);
+  const composites = layers.map((l) => {
+    const c = { input: l.input, left: x, top };
+    x += l.w + gap;
+    return c;
+  });
+  await sharp({ create: { width: W, height: H, channels: 3, background: surface } })
+    .composite(composites)
+    .png()
+    .toFile(out);
   return out;
 }
 
@@ -60,11 +76,16 @@ async function composedAt(h, name, screens, widths, opts, { stills = false } = {
   for (const w of widths) {
     const png = await compose(screens, w, join(h.WORK, `${name}-${w}.png`), { surface: h.SURFACE, ...opts });
     const p = stills ? await h.stills(name, png, [w]) : await h.posters(name, png, [w]);
-    merged.widths.push(...p.widths); merged.avif.push(...p.avif); merged.webp.push(...p.webp);
+    merged.widths.push(...p.widths);
+    merged.avif.push(...p.avif);
+    merged.webp.push(...p.webp);
     if (p.bytes) Object.assign(merged.bytes, p.bytes);
     last = p;
   }
-  if (stills) { merged.w = last.w; merged.h = last.h; }   // the largest master's size (its aspect is what the box needs)
+  if (stills) {
+    merged.w = last.w;
+    merged.h = last.h;
+  } // the largest master's size (its aspect is what the box needs)
   merged.src = `/media/${name}-${widths[0]}.webp`;
   return merged;
 }
@@ -80,11 +101,32 @@ export default async function photogleam(h) {
   const hero = {
     kind: 'still',
     poster: await composedAt(h, 'photogleam-hero', IPHONE, [1280, 1760], { fill: FILL.hero }),
-    phone: await composedAt(h, 'photogleam-hero-phone', IPHONE, [736, 1104], { fill: 0.88, aspect: 1, gapFrac: 0.046 }, { stills: true }),
+    phone: await composedAt(
+      h,
+      'photogleam-hero-phone',
+      IPHONE,
+      [736, 1104],
+      { fill: 0.88, aspect: 1, gapFrac: 0.046 },
+      { stills: true },
+    ),
   };
   const figure = {
-    poster: await composedAt(h, 'photogleam-filters', THREE_FILTERS, [880, 1320, 1760], { fill: FILL.hero }, { stills: true }),
-    phone: await composedAt(h, 'photogleam-filters-phone', ['filter-dark-moody'], [736, 1104], { fill: 0.9, aspect: 5 / 4 }, { stills: true }),
+    poster: await composedAt(
+      h,
+      'photogleam-filters',
+      THREE_FILTERS,
+      [880, 1320, 1760],
+      { fill: FILL.hero },
+      { stills: true },
+    ),
+    phone: await composedAt(
+      h,
+      'photogleam-filters-phone',
+      ['filter-dark-moody'],
+      [736, 1104],
+      { fill: 0.9, aspect: 5 / 4 },
+      { stills: true },
+    ),
     loops: [],
   };
   return { tile, hero, figure };

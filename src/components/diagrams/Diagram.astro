@@ -12,10 +12,15 @@ import { diagram, type Caption } from '@/lib/diagrams';
 import Flow from './Flow.astro';
 import Bars from './Bars.astro';
 
-interface Props { id: string; width?: 'text' | 'wide'; caption?: Caption }
+interface Props {
+  id: string;
+  width?: 'text' | 'wide';
+  caption?: Caption;
+}
 const { id, width, caption } = Astro.props;
 const d = diagram(id);
 const w = width ?? d.width;
 const cap = caption ?? d.caption;
 ---
+
 {d.kind === 'flow' ? <Flow d={d} width={w} caption={cap} /> : <Bars d={d} width={w} caption={cap} />}

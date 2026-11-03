@@ -111,7 +111,9 @@ const bytes = (s) => Buffer.byteLength(s, 'utf8');
 
 /** Every entry under dir, as POSIX paths relative to dir, with lstat results, in a stable order. */
 function walk(dir, base = dir, out = []) {
-  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+    a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+  );
   for (const entry of entries) {
     const abs = join(dir, entry.name);
     const rel = relative(base, abs).split(sep).join('/');
@@ -197,7 +199,14 @@ const LOCAL = [
   ['[::1]', /\[::1\]/g],
   ['a file:/ URL', /\bfile:\//gi],
 ];
-const ABSOLUTE_META = new Set(['og:url', 'og:image', 'og:image:url', 'og:image:secure_url', 'twitter:url', 'twitter:image']);
+const ABSOLUTE_META = new Set([
+  'og:url',
+  'og:image',
+  'og:image:url',
+  'og:image:secure_url',
+  'twitter:url',
+  'twitter:image',
+]);
 
 function excerpt(text, index) {
   const s = text.slice(Math.max(0, index - 30), index + 40).replace(/\s+/g, ' ');
@@ -259,7 +268,8 @@ function checkPageUrls(pages, site, dist) {
         fail('origin', `${rel}: ${key} ${value || '(empty)'} is not on ${site}`);
         continue;
       }
-      if (key.includes('image') && !served(value, site, dist)) fail('origin', `${rel}: ${key} ${value} has no file in dist`);
+      if (key.includes('image') && !served(value, site, dist))
+        fail('origin', `${rel}: ${key} ${value} has no file in dist`);
     }
   }
 }
@@ -268,7 +278,15 @@ function checkPageUrls(pages, site, dist) {
 // 3. budgets
 
 const BUDGET_FILE = join(here, 'budgets.json');
-const DIST_KEYS = ['publicFileBytes', 'tileLoopBytes', 'heroLoopBytes', 'htmlBytes', 'inlineCssBytes', 'inlineJsBytes', 'externalJsBytes'];
+const DIST_KEYS = [
+  'publicFileBytes',
+  'tileLoopBytes',
+  'heroLoopBytes',
+  'htmlBytes',
+  'inlineCssBytes',
+  'inlineJsBytes',
+  'externalJsBytes',
+];
 
 // Loop renditions are named <name>-<width>.mp4|webm. A tile loop's base rendition is 640 px wide; anything wider is
 // its high-density rendition. Hero loops carry "-hero-" in the name, or are rendered at the hero width or wider.
@@ -300,8 +318,10 @@ function loopLimit(rel, B) {
   const m = LOOP.exec(rel);
   if (!m) return { key: 'tileLoopBytes', max: B.tileLoopBytes.max }; // no width in the name: the strictest limit
   const [, name, width] = m;
-  if (/(?:^|-)hero(?:-|$)/i.test(name) || +width >= HERO_WIDTH) return { key: 'heroLoopBytes', max: B.heroLoopBytes.max };
-  if (+width > TILE_WIDTH) return { key: 'tileLoopBytes', max: B.tileLoopBytes.maxHiDpi, label: 'tileLoopBytes.maxHiDpi' };
+  if (/(?:^|-)hero(?:-|$)/i.test(name) || +width >= HERO_WIDTH)
+    return { key: 'heroLoopBytes', max: B.heroLoopBytes.max };
+  if (+width > TILE_WIDTH)
+    return { key: 'tileLoopBytes', max: B.tileLoopBytes.maxHiDpi, label: 'tileLoopBytes.maxHiDpi' };
   return { key: 'tileLoopBytes', max: B.tileLoopBytes.max };
 }
 
@@ -343,11 +363,16 @@ function checkBudgets(files, pages, B) {
     }
   }
   measure('externalJsBytes', jsTotal, `${jsFiles} file(s) in _astro/`, B.externalJsBytes.max);
-  if (jsTotal > B.externalJsBytes.max) over('externalJsBytes', `_astro/*.js (${jsFiles} files)`, jsTotal, B.externalJsBytes.max);
+  if (jsTotal > B.externalJsBytes.max)
+    over('externalJsBytes', `_astro/*.js (${jsFiles} files)`, jsTotal, B.externalJsBytes.max);
 
   for (const { rel, html, size } of pages) {
     const { css, js } = inlineBytes(html);
-    for (const [key, value] of [['htmlBytes', size], ['inlineCssBytes', css], ['inlineJsBytes', js]]) {
+    for (const [key, value] of [
+      ['htmlBytes', size],
+      ['inlineCssBytes', css],
+      ['inlineJsBytes', js],
+    ]) {
       measure(key, value, rel, B[key].max);
       if (value > B[key].max) over(key, rel, value, B[key].max);
     }
@@ -359,7 +384,9 @@ function printReport(seen) {
   console.log('budget                   largest     limit       headroom  where');
   for (const [key, { value, where, limit }] of Object.entries(seen).sort(([a], [b]) => a.localeCompare(b))) {
     const headroom = limit ? `${Math.round((1 - value / limit) * 100)} %` : '';
-    console.log(`${key.padEnd(24)} ${kib(value).padStart(11)} ${kib(limit).padStart(11)} ${headroom.padStart(9)}  ${where}`);
+    console.log(
+      `${key.padEnd(24)} ${kib(value).padStart(11)} ${kib(limit).padStart(11)} ${headroom.padStart(9)}  ${where}`,
+    );
   }
 }
 
@@ -386,8 +413,10 @@ function runPrivacyScan(dist, strict) {
   }
   const run = spawnSync(process.execPath, [scanner, ...(strict ? ['--strict'] : []), dist], { stdio: 'inherit' });
   if (run.error) fail('privacy', `could not run scripts/privacy-scan.mjs: ${run.error.message}`);
-  else if (run.status === 2) fail('privacy', 'scripts/privacy-scan.mjs exited 2: setup error or unscannable file (see its output above)');
-  else if (run.status !== 0) fail('privacy', `scripts/privacy-scan.mjs exited ${run.status ?? run.signal} (see its output above)`);
+  else if (run.status === 2)
+    fail('privacy', 'scripts/privacy-scan.mjs exited 2: setup error or unscannable file (see its output above)');
+  else if (run.status !== 0)
+    fail('privacy', `scripts/privacy-scan.mjs exited ${run.status ?? run.signal} (see its output above)`);
   return run.error ? null : run.status;
 }
 
@@ -460,7 +489,9 @@ async function checkExternalLinks(pages, site) {
       console.log(`broken   ${r.status}  ${url}  (on ${on})`);
     }
   }
-  console.log(`check-dist --external-links: ${found.size} external links, ${ok} ok, ${broken} broken, ${skip} skipped (report only)`);
+  console.log(
+    `check-dist --external-links: ${found.size} external links, ${ok} ok, ${broken} broken, ${skip} skipped (report only)`,
+  );
 }
 
 // ---------------------------------------------------------------------------------------------------------------
@@ -506,7 +537,9 @@ async function main() {
   }
   const byCheck = {};
   for (const f of failures) byCheck[f.check] = (byCheck[f.check] ?? 0) + 1;
-  const counts = Object.entries(byCheck).map(([k, n]) => `${k} ${n}`).join(', ');
+  const counts = Object.entries(byCheck)
+    .map(([k, n]) => `${k} ${n}`)
+    .join(', ');
   console.log(`check-dist: ${where} FAILED, ${failures.length} failure(s): ${counts}`);
   // a scan that could not run to the end is a setup error, unless something else failed as well
   return privacyStatus === 2 && failures.every((f) => f.check === 'privacy') ? 2 : 1;

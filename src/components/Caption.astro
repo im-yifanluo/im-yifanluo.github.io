@@ -3,9 +3,13 @@
 // the figure shows its `phone` cut (global.css .cap-w / .cap-p).
 import RichText from './RichText.astro';
 
-interface Props { text: string; phone?: string }
+interface Props {
+  text: string;
+  phone?: string;
+}
 const { text, phone } = Astro.props;
 ---
+
 {phone ? (
   <figcaption class="cap meta"><RichText class="cap-w" text={text} /><RichText class="cap-p" text={phone} /></figcaption>
 ) : (

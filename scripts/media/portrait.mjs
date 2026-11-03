@@ -56,7 +56,8 @@ function parseArgs(argv) {
     } else if (a.startsWith('-')) return { error: `unknown option: ${a}` };
     else files.push(a);
   }
-  if (out.remove) return files.length || out.crop || out.focus ? { error: '--remove takes no other arguments' } : { remove: true };
+  if (out.remove)
+    return files.length || out.crop || out.focus ? { error: '--remove takes no other arguments' } : { remove: true };
   if (files.length !== 1) return { error: files.length ? 'one photo at a time' : 'no photo given' };
   if (!existsSync(files[0])) return { error: `${files[0]}: no such file` };
   return { ...out, src: files[0] };
@@ -64,8 +65,14 @@ function parseArgs(argv) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (args.help) { console.log(USAGE); return 0; }
-  if (args.error) { console.error(`media:portrait: ${args.error}\n\n${USAGE}`); return 2; }
+  if (args.help) {
+    console.log(USAGE);
+    return 0;
+  }
+  if (args.error) {
+    console.error(`media:portrait: ${args.error}\n\n${USAGE}`);
+    return 2;
+  }
   if (args.remove) {
     const files = portraitFiles();
     for (const f of files) rmSync(join(OUT, f));
@@ -75,12 +82,18 @@ async function main() {
     return 0;
   }
 
-  const img = sharp(args.src).rotate();   // honour EXIF orientation; sharp drops all metadata (location, camera) on output
+  const img = sharp(args.src).rotate(); // honour EXIF orientation; sharp drops all metadata (location, camera) on output
   const { width, height } = await img.metadata();
   let left, top, side;
   if (args.crop) {
     [left, top, side] = args.crop.split(',').map(Number);
-    if (![left, top, side].every(Number.isInteger) || left < 0 || top < 0 || left + side > width || top + side > height) {
+    if (
+      ![left, top, side].every(Number.isInteger) ||
+      left < 0 ||
+      top < 0 ||
+      left + side > width ||
+      top + side > height
+    ) {
       console.error(`media:portrait: --crop ${args.crop} does not fit a ${width}×${height} photo`);
       return 2;
     }
@@ -95,18 +108,40 @@ async function main() {
   /** The backdrop's colour in a small patch at the left edge, `y` of the way down. */
   async function backdrop(y) {
     const n = Math.max(4, Math.round(side * 0.02));
-    const { data } = await sharp(square).extract({ left: 0, top: Math.min(side - n, Math.round(side * y)), width: n, height: n }).raw().toBuffer({ resolveWithObject: true });
-    const avg = [0, 1, 2].map((c) => Math.round(data.filter((_, i) => i % 3 === c).reduce((a, b) => a + b, 0) / (data.length / 3)));
-    return `#${avg.map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+    const { data } = await sharp(square)
+      .extract({ left: 0, top: Math.min(side - n, Math.round(side * y)), width: n, height: n })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const avg = [0, 1, 2].map((c) =>
+      Math.round(data.filter((_, i) => i % 3 === c).reduce((a, b) => a + b, 0) / (data.length / 3)),
+    );
+    return `#${avg
+      .map((v) => v.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase()}`;
   }
 
   mkdirSync(OUT, { recursive: true });
   const widths = WIDTHS.filter((w) => w <= side);
-  const out = { avif: [], webp: [], src: '', w: widths.at(-1), h: widths.at(-1), position: '50% 50%', bg: [await backdrop(0.01), await backdrop(0.5)] };
+  const out = {
+    avif: [],
+    webp: [],
+    src: '',
+    w: widths.at(-1),
+    h: widths.at(-1),
+    position: '50% 50%',
+    bg: [await backdrop(0.01), await backdrop(0.5)],
+  };
   for (const w of widths) {
     const s = sharp(square).resize(w, w, { kernel: 'lanczos3' });
-    await s.clone().avif({ quality: 55, effort: 7 }).toFile(join(OUT, `portrait-${w}.avif`));
-    await s.clone().webp({ quality: 80, effort: 6 }).toFile(join(OUT, `portrait-${w}.webp`));
+    await s
+      .clone()
+      .avif({ quality: 55, effort: 7 })
+      .toFile(join(OUT, `portrait-${w}.avif`));
+    await s
+      .clone()
+      .webp({ quality: 80, effort: 6 })
+      .toFile(join(OUT, `portrait-${w}.webp`));
     out.avif.push(`/media/portrait-${w}.avif ${w}w`);
     out.webp.push(`/media/portrait-${w}.webp ${w}w`);
   }
@@ -116,7 +151,13 @@ async function main() {
   const written = new Set(widths.flatMap((w) => [`portrait-${w}.avif`, `portrait-${w}.webp`]));
   for (const f of portraitFiles().filter((f) => !written.has(f))) rmSync(join(OUT, f));
   console.log(`crop ${left},${top},${side} of ${width}×${height}; backdrop ${out.bg.join(' → ')}`);
-  console.log(widths.map((w) => `${w}: ${(statSync(join(OUT, `portrait-${w}.avif`)).size / 1024).toFixed(1)} KB avif`).join(' · '), '→', MANIFEST);
+  console.log(
+    widths
+      .map((w) => `${w}: ${(statSync(join(OUT, `portrait-${w}.avif`)).size / 1024).toFixed(1)} KB avif`)
+      .join(' · '),
+    '→',
+    MANIFEST,
+  );
   return 0;
 }
 

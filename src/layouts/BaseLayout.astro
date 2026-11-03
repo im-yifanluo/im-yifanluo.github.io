@@ -1,6 +1,6 @@
 ---
 // Page shell: head, the sticky glass header (nav ends on the right edge), the footer and the one inline module (header
-// state, active section, poster fades, loops).
+// state, active section, poster fades, loops). Both inline scripts ship exactly as written, so Prettier skips them.
 import '@/styles/fonts.css';
 import '@/styles/fallbacks.css';
 import '@/styles/tokens.css';
@@ -11,9 +11,14 @@ import { EMAIL, GITHUB, LINKEDIN, OG_IMAGE_ALT, RESUME, REVISED, SITE } from '@/
 import { SEP } from '@/lib/typography';
 import LinkList from '@/components/LinkList.astro';
 
-interface Props { title: string; description: string; home?: boolean; noindex?: boolean }
+interface Props {
+  title: string;
+  description: string;
+  home?: boolean;
+  noindex?: boolean;
+}
 const { title, description, home = false, noindex = false } = Astro.props;
-const site = Astro.site!;   // astro.config.mjs always sets `site`
+const site = Astro.site!; // astro.config.mjs always sets `site`
 const canonical = new URL(Astro.url.pathname, site).href;
 const og = new URL('/og.jpg', site).href;
 const nav = [
@@ -28,43 +33,58 @@ const nav = [
 const UPDATED = [...(await getCollection('news')).map((n) => n.data.date), REVISED].sort().at(-1)!;
 const YEAR = UPDATED.slice(0, 4);
 ---
+
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="light" />
-  <meta name="theme-color" content="#FFFFFF" />
-  <script is:inline>document.documentElement.classList.add('js')</script>
-  <title>{title}</title>
-  <meta name="description" content={description} />
-  {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
-  <meta property="og:image" content={og} />
-  <meta property="og:image:alt" content={OG_IMAGE_ALT} />
-  {!noindex && <meta property="og:url" content={canonical} />}
-  <meta name="twitter:card" content="summary_large_image" />
-</head>
-<body>
-  <a class="skip" href="#main">Skip to content</a>
-  <header class="site-header">
-    <div class="wrap"><div class="bar">
-      {home ? <a class="home hn title" href="#top">{SITE.title}</a> : <a class="home title" href="/">{SITE.title}</a>}
-      <nav aria-label="Sections"><ul>{nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></nav>
-    </div></div>
-  </header>
-  <slot />
-  <footer class="site-footer">
-    <div class="wrap"><div class="bar">
-      <p class="copy meta"><span class="nw">© <time datetime={YEAR}>{YEAR}</time> {SITE.title}</span><Fragment set:html={SEP} /><span class="upd nw">Last updated <Fragment set:html={monthHtml(UPDATED)} /></span></p>
-      <LinkList items={[{ label: EMAIL, url: `mailto:${EMAIL}` }, { label: 'Résumé', url: RESUME }, { label: 'GitHub', url: GITHUB }, { label: 'LinkedIn', url: LINKEDIN }]} />
-    </div></div>
-  </footer>
-  <script is:inline type="module">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#FFFFFF" />
+    {/* prettier-ignore */}<script is:inline>document.documentElement.classList.add('js')</script>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={og} />
+    <meta property="og:image:alt" content={OG_IMAGE_ALT} />
+    {!noindex && <meta property="og:url" content={canonical} />}
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap"><div class="bar">
+          {home ? (
+            <a class="home hn title" href="#top">{SITE.title}</a>
+          ) : (
+            <a class="home title" href="/">{SITE.title}</a>
+          )}
+          <nav aria-label="Sections"><ul>{nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></nav>
+        </div></div>
+    </header>
+    <slot />
+    <footer class="site-footer">
+      <div class="wrap"><div class="bar">
+          <p class="copy meta"><span class="nw">© <time datetime={YEAR}>{YEAR}</time> {SITE.title}</span
+            ><Fragment set:html={SEP} /><span class="upd nw"
+              >Last updated <Fragment set:html={monthHtml(UPDATED)}
+            /></span></p>
+          <LinkList
+            items={[
+              { label: EMAIL, url: `mailto:${EMAIL}` },
+              { label: 'Résumé', url: RESUME },
+              { label: 'GitHub', url: GITHUB },
+              { label: 'LinkedIn', url: LINKEDIN },
+            ]}
+          />
+        </div></div>
+    </footer>
+    {/* prettier-ignore */}<script is:inline type="module">
 const d=document.documentElement,H=document.querySelector('.site-header');
 // header: frosted + hairline once anything has scrolled under it (a 1 px sentinel at the top; no scroll listener)
 const sn=document.createElement('div');sn.setAttribute('aria-hidden','true');sn.style.cssText='position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none';document.body.prepend(sn);
@@ -113,5 +133,5 @@ const paint=()=>B.forEach(b=>{b.textContent=P?'Play videos':'Pause videos';b.hid
 B.forEach(b=>{b.addEventListener('click',()=>{P=!P;try{localStorage.setItem('motion',P?'paused':'on')}catch{}paint();all()})});
 paint();R.addEventListener('change',()=>{paint();all()});document.addEventListener('visibilitychange',all)}
   </script>
-</body>
+  </body>
 </html>

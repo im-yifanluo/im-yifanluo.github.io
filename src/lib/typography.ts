@@ -68,16 +68,20 @@ export function typoHtml(html: string): string {
         return part;
       }
       if (inCode || !part) return part;
-      return typoText(part)
-        .replace(/(\d[\d,.]*\+?-(?:person|page|episode|hour|second))\b/g, '<span class="nw">$1</span>')
-        .replace(/(\d[\d,.]*%?–\d[\d,.]*%?)/g, '<span class="nw">$1</span>')
-        .replace(KEEP_RE, '<span class="nw">$1</span>')
-        // a person's name never splits ("Prof. Kevin / Chang"); short hyphenated compounds never break at the hyphen
-        // ("LLM-/curated"): the font has no U+2011, so they are kept whole with .nw (≤ 14 characters)
-        .replace(new RegExp(`Prof\\.${NB}\\p{Lu}[\\p{L}’]+ \\p{Lu}[\\p{L}’]+`, 'gu'), '<span class="nw">$&</span>')
-        // (also multi-hyphen compounds such as "video-to-3D" or "end-to-end")
-        .replace(/(?<![\p{L}\d/.-])\p{L}[\p{L}\d]*(?:-[\p{L}\d]+)+(?![\p{L}\d/-]|\.[\p{L}\d])/gu, (m) => (m.length <= 14 ? `<span class="nw cpd">${m}</span>` : m))
-        .replace(new RegExp(`${NB}· `, 'g'), SEP);
+      return (
+        typoText(part)
+          .replace(/(\d[\d,.]*\+?-(?:person|page|episode|hour|second))\b/g, '<span class="nw">$1</span>')
+          .replace(/(\d[\d,.]*%?–\d[\d,.]*%?)/g, '<span class="nw">$1</span>')
+          .replace(KEEP_RE, '<span class="nw">$1</span>')
+          // a person's name never splits ("Prof. Kevin / Chang"); short hyphenated compounds never break at the hyphen
+          // ("LLM-/curated"): the font has no U+2011, so they are kept whole with .nw (≤ 14 characters)
+          .replace(new RegExp(`Prof\\.${NB}\\p{Lu}[\\p{L}’]+ \\p{Lu}[\\p{L}’]+`, 'gu'), '<span class="nw">$&</span>')
+          // (also multi-hyphen compounds such as "video-to-3D" or "end-to-end")
+          .replace(/(?<![\p{L}\d/.-])\p{L}[\p{L}\d]*(?:-[\p{L}\d]+)+(?![\p{L}\d/-]|\.[\p{L}\d])/gu, (m) =>
+            m.length <= 14 ? `<span class="nw cpd">${m}</span>` : m,
+          )
+          .replace(new RegExp(`${NB}· `, 'g'), SEP)
+      );
     })
     .join('');
 }

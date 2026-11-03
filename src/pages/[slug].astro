@@ -31,9 +31,16 @@ export async function getStaticPaths() {
       throw new Error(`src/content/projects/${id}.yaml: the slug "${id}" shadows the site's /${id}/ path`);
     }
   }
-  return projects.map((entry, i) => ({ params: { slug: entry.id }, props: { entry, prev: projects[i - 1], next: projects[i + 1] } }));
+  return projects.map((entry, i) => ({
+    params: { slug: entry.id },
+    props: { entry, prev: projects[i - 1], next: projects[i + 1] },
+  }));
 }
-interface Props { entry: Project; prev?: Project; next?: Project }
+interface Props {
+  entry: Project;
+  prev?: Project;
+  next?: Project;
+}
 const { entry, prev, next } = Astro.props;
 const p = entry.data;
 
@@ -46,7 +53,8 @@ const didGroups = p.didGroups ?? [{ id: '', label: '', did: p.did! }];
 // Figures: media (a photo, a screen, a loop, a chart) and interactive diagrams (components/diagrams: a whole <figure>
 // with its plate and caption, drawn from src/data/diagrams.ts; its script and styles ship only on pages that render one).
 const figures = p.figures;
-const isDiagram = (f: (typeof figures)[number]): f is Extract<(typeof figures)[number], { diagram: string }> => 'diagram' in f;
+const isDiagram = (f: (typeof figures)[number]): f is Extract<(typeof figures)[number], { diagram: string }> =>
+  'diagram' in f;
 
 const isLoop = (r: MediaRef) => (mediaPart(r)?.loops?.length ?? 0) > 0;
 // The page's one Pause control sits on the caption line of the first loop: the hero's, or else the first looping figure's
@@ -62,6 +70,7 @@ const title = `${plain(p.short)} · ${SITE.title}`;
 // the link preview reads the homepage row's one-line summary (≤ 160 characters)
 const description = summarize(plain(p.outcome), 160);
 ---
+
 <BaseLayout title={title} description={description}>
   <main class="wrap p-body" id="main" tabindex="-1">
     <div class="p-head">
@@ -80,35 +89,41 @@ const description = summarize(plain(p.outcome), 160);
     </figure>
 
     <div class="lead">
-      {p.lead.map((l) => <RichText as="p" text={l} />)}
+      {p.lead.map((l) => (
+        <RichText as="p" text={l} />
+      ))}
     </div>
 
     <section class="p-sec" aria-labelledby="did-h">
       <h2 class="h2" id="did-h">What I did</h2>
-      {didGroups.map((g) => (
-        <div class="did-group" id={g.id || undefined}>
-          {g.label && <h3 class="group">{g.label}</h3>}
-          <ul class="did">{g.did.map((d) => <RichText as="li" text={d} />)}</ul>
-        </div>
-      ))}
+      {didGroups.map((g) => <div class="did-group" id={g.id || undefined}>
+        {g.label && <h3 class="group">{g.label}</h3>}
+        <ul class="did">{g.did.map((d) => (
+            <RichText as="li" text={d} />
+          ))}</ul>
+      </div>)}
     </section>
 
-    {figures.length > 0 && (
-      <section class="p-sec" aria-labelledby="fig-h">
-        <h2 class="h2" id="fig-h">Figures</h2>
-        <div class="figs">
-          {figures.map((f, k) => isDiagram(f) ? (
-            <Diagram id={f.diagram} width={f.width} caption={f.caption !== undefined ? { text: f.caption } : undefined} />
+    {figures.length > 0 && <section class="p-sec" aria-labelledby="fig-h">
+      <h2 class="h2" id="fig-h">Figures</h2>
+      <div class="figs">
+        {figures.map((f, k) =>
+          isDiagram(f) ? (
+            <Diagram
+              id={f.diagram}
+              width={f.width}
+              caption={f.caption !== undefined ? { text: f.caption } : undefined}
+            />
           ) : (
             <figure class={f.width === 'text' ? 'fig-text' : 'fig-wide'}>
               <Media ref={f} box="figure" sizes={f.width === 'text' ? TEXT_SIZES : HERO_SIZES} />
               {k === firstLoopFig && <Fragment set:html={Motion()} />}
               <Caption text={f.caption} phone={f.captionPhone} />
             </figure>
-          ))}
-        </div>
-      </section>
-    )}
+          ),
+        )}
+      </div>
+    </section>}
 
     <section class="p-sec" aria-labelledby="bw-h">
       <h2 class="h2" id="bw-h">Built with</h2>
@@ -117,7 +132,9 @@ const description = summarize(plain(p.outcome), 160);
 
     <section class="p-sec credits" aria-labelledby="cr-h">
       <h2 class="h2" id="cr-h">Credits</h2>
-      {p.credits.map((c) => <RichText as="p" class="meta" text={c} />)}
+      {p.credits.map((c) => (
+        <RichText as="p" class="meta" text={c} />
+      ))}
     </section>
 
     <nav class="pn meta" aria-label="More projects">

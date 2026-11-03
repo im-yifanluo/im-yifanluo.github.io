@@ -29,20 +29,49 @@ import { FFMPEG, FFPROBE, MANIFEST, MEDIA_CACHE, MEDIA_OUT, MEDIA_SRC, OG_OUT, s
 const OUT = MEDIA_OUT;
 const WORK = MEDIA_CACHE;
 
-const SURFACE = '#F6F6F4';         // the media plate: the grey every composed still is set on
-const TILE_MAX = 400 * 1024;       // the loop limits (scripts/budgets.json tileLoopBytes.max and heroLoopBytes.max)
+const SURFACE = '#F6F6F4'; // the media plate: the grey every composed still is set on
+const TILE_MAX = 400 * 1024; // the loop limits (scripts/budgets.json tileLoopBytes.max and heroLoopBytes.max)
 const HERO_MAX = 1024 * 1024;
 
-const ff = (args) => execFileSync(FFMPEG, ['-hide_banner', '-v', 'error', '-y', ...args], { stdio: ['ignore', 'inherit', 'inherit'], maxBuffer: 1 << 28, env: { ...process.env, SVT_LOG: '1' } });
-const probe = (file) => JSON.parse(execFileSync(FFPROBE, ['-v', 'error', '-show_entries', 'stream=codec_type,codec_name,width,height,r_frame_rate:format=duration', '-of', 'json', file]).toString());
+const ff = (args) =>
+  execFileSync(FFMPEG, ['-hide_banner', '-v', 'error', '-y', ...args], {
+    stdio: ['ignore', 'inherit', 'inherit'],
+    maxBuffer: 1 << 28,
+    env: { ...process.env, SVT_LOG: '1' },
+  });
+const probe = (file) =>
+  JSON.parse(
+    execFileSync(FFPROBE, [
+      '-v',
+      'error',
+      '-show_entries',
+      'stream=codec_type,codec_name,width,height,r_frame_rate:format=duration',
+      '-of',
+      'json',
+      file,
+    ]).toString(),
+  );
 const bytes = (f) => statSync(f).size;
 const h9 = (w) => Math.round((w * 9) / 16);
 
 /** Lossless master (H.264 qp 0, yuv444p) from an ffmpeg input + filter graph ending in [out]. */
 function master(name, inputs, graph, w) {
   const file = join(WORK, `${name}.master.mkv`);
-  ff([...inputs, '-filter_complex', `${graph};[out]scale=${w}:${h9(w)}:flags=lanczos,fps=30,format=yuv444p[m]`, '-map', '[m]',
-    '-c:v', 'libx264', '-qp', '0', '-preset', 'veryfast', '-an', file]);
+  ff([
+    ...inputs,
+    '-filter_complex',
+    `${graph};[out]scale=${w}:${h9(w)}:flags=lanczos,fps=30,format=yuv444p[m]`,
+    '-map',
+    '[m]',
+    '-c:v',
+    'libx264',
+    '-qp',
+    '0',
+    '-preset',
+    'veryfast',
+    '-an',
+    file,
+  ]);
   return file;
 }
 
@@ -53,32 +82,96 @@ function loop(name, masterFile, w, max) {
   const webm = join(OUT, `${name}-${w}.webm`);
   let crf = w >= 1280 ? 24 : 25;
   for (;;) {
-    ff(['-i', masterFile, '-vf', vf, '-c:v', 'libx264', '-profile:v', 'high', '-preset', 'slow', '-crf', String(crf), '-g', '60',
-      '-movflags', '+faststart', '-an', '-map_metadata', '-1', '-metadata:s:v', 'handler_name=', mp4]);
+    ff([
+      '-i',
+      masterFile,
+      '-vf',
+      vf,
+      '-c:v',
+      'libx264',
+      '-profile:v',
+      'high',
+      '-preset',
+      'slow',
+      '-crf',
+      String(crf),
+      '-g',
+      '60',
+      '-movflags',
+      '+faststart',
+      '-an',
+      '-map_metadata',
+      '-1',
+      '-metadata:s:v',
+      'handler_name=',
+      mp4,
+    ]);
     if (bytes(mp4) <= max || crf >= 30) break;
     crf += 1;
   }
   let crfAv1 = 35;
   for (;;) {
     // bitexact: the WebM muxer otherwise writes a random track UID, so a rerun would rewrite an unchanged loop
-    ff(['-i', masterFile, '-vf', vf, '-c:v', 'libsvtav1', '-preset', '6', '-crf', String(crfAv1), '-g', '60', '-an',
-      '-map_metadata', '-1', '-fflags', '+bitexact', webm]);
+    ff([
+      '-i',
+      masterFile,
+      '-vf',
+      vf,
+      '-c:v',
+      'libsvtav1',
+      '-preset',
+      '6',
+      '-crf',
+      String(crfAv1),
+      '-g',
+      '60',
+      '-an',
+      '-map_metadata',
+      '-1',
+      '-fflags',
+      '+bitexact',
+      webm,
+    ]);
     if (bytes(webm) <= Math.min(max, bytes(mp4)) || crfAv1 >= 42) break;
     crfAv1 += 1;
   }
   const p = probe(mp4);
   const v = p.streams.find((s) => s.codec_type === 'video');
   if (p.streams.some((s) => s.codec_type === 'audio')) throw new Error(`${mp4}: has an audio stream`);
-  return { w, h: h9(w), mp4: `/media/${name}-${w}.mp4`, webm: `/media/${name}-${w}.webm`, mp4Bytes: bytes(mp4), webmBytes: bytes(webm),
-    crf, crfAv1, duration: Number(Number(p.format.duration).toFixed(2)), fps: v.r_frame_rate };
+  return {
+    w,
+    h: h9(w),
+    mp4: `/media/${name}-${w}.mp4`,
+    webm: `/media/${name}-${w}.webm`,
+    mp4Bytes: bytes(mp4),
+    webmBytes: bytes(webm),
+    crf,
+    crfAv1,
+    duration: Number(Number(p.format.duration).toFixed(2)),
+    fps: v.r_frame_rate,
+  };
 }
 
 /** Rotate a seamless master so it starts at t (lossless). The poster is then the loop's own first frame, so the poster →
  *  loop dissolve shows one image, never two poses; the poster keeps the moment chosen for it. */
 function rotate(name, masterFile, t) {
   const file = join(WORK, `${name}.rot.mkv`);
-  ff(['-i', masterFile, '-filter_complex', `[0]split[a][b];[a]trim=start=${t},setpts=PTS-STARTPTS[x];[b]trim=end=${t},setpts=PTS-STARTPTS[y];[x][y]concat=n=2:v=1[m]`,
-    '-map', '[m]', '-c:v', 'libx264', '-qp', '0', '-preset', 'veryfast', '-an', file]);
+  ff([
+    '-i',
+    masterFile,
+    '-filter_complex',
+    `[0]split[a][b];[a]trim=start=${t},setpts=PTS-STARTPTS[x];[b]trim=end=${t},setpts=PTS-STARTPTS[y];[x][y]concat=n=2:v=1[m]`,
+    '-map',
+    '[m]',
+    '-c:v',
+    'libx264',
+    '-qp',
+    '0',
+    '-preset',
+    'veryfast',
+    '-an',
+    file,
+  ]);
   return file;
 }
 
@@ -95,13 +188,21 @@ async function posters(name, png, widths) {
   const out = { widths: ws, avif: [], webp: [] };
   for (const w of ws) {
     const img = sharp(png).resize(w, h9(w), { fit: 'cover', kernel: 'lanczos3' });
-    await img.clone().avif({ quality: 50, effort: 7 }).toFile(join(OUT, `${name}-${w}.avif`));
-    await img.clone().webp({ quality: 78, effort: 6 }).toFile(join(OUT, `${name}-${w}.webp`));
+    await img
+      .clone()
+      .avif({ quality: 50, effort: 7 })
+      .toFile(join(OUT, `${name}-${w}.avif`));
+    await img
+      .clone()
+      .webp({ quality: 78, effort: 6 })
+      .toFile(join(OUT, `${name}-${w}.webp`));
     out.avif.push(`/media/${name}-${w}.avif ${w}w`);
     out.webp.push(`/media/${name}-${w}.webp ${w}w`);
   }
   out.src = `/media/${name}-${ws[0]}.webp`;
-  out.bytes = Object.fromEntries(ws.map((w) => [w, { avif: bytes(join(OUT, `${name}-${w}.avif`)), webp: bytes(join(OUT, `${name}-${w}.webp`)) }]));
+  out.bytes = Object.fromEntries(
+    ws.map((w) => [w, { avif: bytes(join(OUT, `${name}-${w}.avif`)), webp: bytes(join(OUT, `${name}-${w}.webp`)) }]),
+  );
   return out;
 }
 
@@ -112,8 +213,14 @@ async function stills(name, png, widths) {
   const out = { widths: ws, avif: [], webp: [], w: meta.width, h: meta.height };
   for (const w of ws) {
     const img = sharp(png).resize(w, null, { kernel: 'lanczos3' });
-    await img.clone().avif({ quality: 55, effort: 7 }).toFile(join(OUT, `${name}-${w}.avif`));
-    await img.clone().webp({ quality: 80, effort: 6 }).toFile(join(OUT, `${name}-${w}.webp`));
+    await img
+      .clone()
+      .avif({ quality: 55, effort: 7 })
+      .toFile(join(OUT, `${name}-${w}.avif`));
+    await img
+      .clone()
+      .webp({ quality: 80, effort: 6 })
+      .toFile(join(OUT, `${name}-${w}.webp`));
     out.avif.push(`/media/${name}-${w}.avif ${w}w`);
     out.webp.push(`/media/${name}-${w}.webp ${w}w`);
   }
@@ -139,8 +246,10 @@ const jobs = {};
 // ── Framelight: the shipped app's landscape screen, whole, a still; the hero is the same minute as three screens (jobs/framelight.mjs) ──
 jobs.framelight = async () => (await import('./jobs/framelight.mjs')).framelight({ posters, h9, WORK, SURFACE });
 // Page figures (not 16:9, so `stills`): three live-view prompts and four photos shot with the app
-jobs['framelight-prompts'] = async () => (await import('./jobs/framelight.mjs')).framelightPrompts({ stills, WORK, SURFACE });
-jobs['framelight-shots'] = async () => (await import('./jobs/framelight.mjs')).framelightShots({ stills, WORK, SURFACE });
+jobs['framelight-prompts'] = async () =>
+  (await import('./jobs/framelight.mjs')).framelightPrompts({ stills, WORK, SURFACE });
+jobs['framelight-shots'] = async () =>
+  (await import('./jobs/framelight.mjs')).framelightShots({ stills, WORK, SURFACE });
 
 // ── Robot learning: the tile is the real wrist camera turning the knob (a policy I trained, after the fixes),
 // boomeranged; the hero is the UR5e itself.
@@ -150,8 +259,12 @@ jobs['framelight-shots'] = async () => (await import('./jobs/framelight.mjs')).f
 // misstate its speed). The rotation keeps the poster on source time 1.2 s (0.9 s in). ──────────────────────────────────
 const WRIST_IN = 0.3;
 jobs['robot-learning'] = async () => {
-  const m0 = master('robot-learning-wrist', ['-i', join(source('robot-learning'), 'deploy-wrist-knob.mp4')],
-    `[0]trim=start=${WRIST_IN},setpts=PTS-STARTPTS,fps=30,crop=640:360:0:60,${fmtGrade},split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1[out]`, 640);
+  const m0 = master(
+    'robot-learning-wrist',
+    ['-i', join(source('robot-learning'), 'deploy-wrist-knob.mp4')],
+    `[0]trim=start=${WRIST_IN},setpts=PTS-STARTPTS,fps=30,crop=640:360:0:60,${fmtGrade},split[a][b];[b]reverse[r];[a][r]concat=n=2:v=1[out]`,
+    640,
+  );
   const m = rotate('robot-learning-wrist', m0, 1.2 - WRIST_IN);
   const png = frame(m, 0, join(WORK, 'robot-learning-poster.png'));
   const poster = await posters('robot-learning', png, [640]);
@@ -167,7 +280,8 @@ jobs['robot-learning'] = async () => {
 
 // ── AR overlay: the tool's own output, the door fixture's guide stood upright and see-through in front of the UR5e; the
 // tile is a crop of that real frame, the hero the whole frame on the plate (jobs/apriltag-overlay.mjs). ─────────────────
-jobs['apriltag-overlay'] = async () => (await import('./jobs/apriltag-overlay.mjs')).default({ WORK, SURFACE, h9, posters, stills });
+jobs['apriltag-overlay'] = async () =>
+  (await import('./jobs/apriltag-overlay.mjs')).default({ WORK, SURFACE, h9, posters, stills });
 
 // The second YCB layout, a page figure: the source's first 5 columns are white (a capture margin), which would draw a
 // 1.5 px sliver inside the figure's left hairline, so 6 px come off its left edge; text width, at 520, 780 and 1040 px
@@ -176,7 +290,10 @@ jobs['ar-overlay-ycb-2'] = async () => {
   const src = join(source('ar-overlay-ycb-2'), 'robotouch_object_rendering_overlay_ycb_2.jpg');
   const { width, height } = await sharp(src).metadata();
   const png = join(WORK, 'ar-overlay-ycb-2.png');
-  await sharp(src).extract({ left: 6, top: 0, width: width - 6, height }).png().toFile(png);
+  await sharp(src)
+    .extract({ left: 6, top: 0, width: width - 6, height })
+    .png()
+    .toFile(png);
   return { figure: { poster: await stills('ar-overlay-ycb-2', png, [520, 780, 1040]), loops: [] } };
 };
 
@@ -187,11 +304,29 @@ jobs['ar-overlay-ycb-2'] = async () => {
 jobs['umi-demo'] = async () => {
   const src = join(source('umi-demo'), 'umi-grasp-cylinder-demo-gx010450.mp4');
   const dur = Number(probe(src).format.duration);
-  const L = Math.min(7.6, dur), d = 0.25; // a short dissolve: the handheld view changes a lot between the clip's ends
+  const L = Math.min(7.6, dur),
+    d = 0.25; // a short dissolve: the handheld view changes a lot between the clip's ends
   const pre = join(WORK, 'umi-pre.mkv');
-  ff(['-i', src, '-vf', `trim=0:${L},setpts=PTS-STARTPTS,fps=30,crop=640:360:160:200,${fmtGrade},format=yuv444p`, '-an', '-c:v', 'libx264', '-qp', '0', '-preset', 'veryfast', pre]);
-  const m0 = master('umi-demo', ['-i', pre, '-i', pre],
-    `[0]trim=${d}:${L},setpts=PTS-STARTPTS,fps=30[x];[1]trim=0:${d},setpts=PTS-STARTPTS,fps=30[y];[x][y]xfade=transition=fade:duration=${d}:offset=${(L - 2 * d).toFixed(3)}[out]`, 640);
+  ff([
+    '-i',
+    src,
+    '-vf',
+    `trim=0:${L},setpts=PTS-STARTPTS,fps=30,crop=640:360:160:200,${fmtGrade},format=yuv444p`,
+    '-an',
+    '-c:v',
+    'libx264',
+    '-qp',
+    '0',
+    '-preset',
+    'veryfast',
+    pre,
+  ]);
+  const m0 = master(
+    'umi-demo',
+    ['-i', pre, '-i', pre],
+    `[0]trim=${d}:${L},setpts=PTS-STARTPTS,fps=30[x];[1]trim=0:${d},setpts=PTS-STARTPTS,fps=30[y];[x][y]xfade=transition=fade:duration=${d}:offset=${(L - 2 * d).toFixed(3)}[out]`,
+    640,
+  );
   const m = rotate('umi-demo', m0, 3.0);
   const png = frame(m, 0, join(WORK, 'umi-demo-poster.png'));
   return { figure: { poster: await posters('umi-demo', png, [640]), loops: [loop('umi-demo', m, 640, TILE_MAX)] } };
@@ -202,23 +337,42 @@ jobs['umi-demo'] = async () => {
 // (= the poster), no text. Hero and figures: labelled stills, each with a `phone` variant for viewports up to 719 px,
 // which Media.astro serves there.
 const WC = join(source('world-cup-forecasting'), 'render');
-const wcNeed = (f) => { if (!existsSync(join(WC, f))) throw new Error(`${f}: missing from ${WC}`); return join(WC, f); };
+const wcNeed = (f) => {
+  if (!existsSync(join(WC, f))) throw new Error(`${f}: missing from ${WC}`);
+  return join(WC, f);
+};
 jobs['world-cup-forecasting'] = async () => {
   const f0 = wcNeed('tile/f0000.png');
-  const m = master('world-cup-forecasting', ['-framerate', '30', '-i', join(WC, 'tile/f%04d.png')], '[0]format=yuv444p,setsar=1[out]', 1280);
+  const m = master(
+    'world-cup-forecasting',
+    ['-framerate', '30', '-i', join(WC, 'tile/f%04d.png')],
+    '[0]format=yuv444p,setsar=1[out]',
+    1280,
+  );
   const poster = await posters('world-cup-forecasting', f0, [640, 960, 1280]);
-  return { tile: { poster, loops: [loop('world-cup-forecasting', m, 640, TILE_MAX), loop('world-cup-forecasting', m, 960, TILE_MAX * 1.6)] } };
+  return {
+    tile: {
+      poster,
+      loops: [loop('world-cup-forecasting', m, 640, TILE_MAX), loop('world-cup-forecasting', m, 960, TILE_MAX * 1.6)],
+    },
+  };
 };
 // The hero is its own entry: labelled stills from their own renders, rebuilt alone (--only world-cup-forecasting-hero)
 // without re-encoding the tile's loops.
 jobs['world-cup-forecasting-hero'] = async () => ({
-  hero: { kind: 'still', poster: await posters('world-cup-forecasting-hero', wcNeed('hero.png'), [1280, 1760]),
-    phone: await stills('world-cup-forecasting-hero-phone', wcNeed('hero-phone.png'), [736, 1104]) },
+  hero: {
+    kind: 'still',
+    poster: await posters('world-cup-forecasting-hero', wcNeed('hero.png'), [1280, 1760]),
+    phone: await stills('world-cup-forecasting-hero-phone', wcNeed('hero-phone.png'), [736, 1104]),
+  },
 });
 for (const f of ['calibration', 'categories']) {
   jobs[`world-cup-forecasting-${f}`] = async () => ({
-    figure: { poster: await posters(`world-cup-forecasting-${f}`, wcNeed(`${f}.png`), [880, 1320, 1760]), loops: [],
-      phone: await stills(`world-cup-forecasting-${f}-phone`, wcNeed(`${f}-phone.png`), [736, 1104]) },
+    figure: {
+      poster: await posters(`world-cup-forecasting-${f}`, wcNeed(`${f}.png`), [880, 1320, 1760]),
+      loops: [],
+      phone: await stills(`world-cup-forecasting-${f}-phone`, wcNeed(`${f}-phone.png`), [736, 1104]),
+    },
   });
 }
 
@@ -243,8 +397,11 @@ jobs.og = async () => {
   if (!existsSync(src)) throw new Error('run --only framelight first (it writes framelight-hero.png to MEDIA_CACHE)');
   const { width, height } = await sharp(src).metadata();
   const h = Math.round((width * 630) / 1200);
-  await sharp(src).extract({ left: 0, top: Math.round((height - h) / 2), width, height: h }).resize(1200, 630, { kernel: 'lanczos3' })
-    .jpeg({ quality: 84, mozjpeg: true }).toFile(OG_OUT);
+  await sharp(src)
+    .extract({ left: 0, top: Math.round((height - h) / 2), width, height: h })
+    .resize(1200, 630, { kernel: 'lanczos3' })
+    .jpeg({ quality: 84, mozjpeg: true })
+    .toFile(OG_OUT);
   return { og: { src: '/og.jpg', w: 1200, h: 630, bytes: bytes(OG_OUT) } };
 };
 
@@ -268,8 +425,12 @@ function parseArgs(argv) {
     if (a === '-h' || a === '--help') return { help: true };
     if (a === '--only' || a.startsWith('--only=')) {
       const v = a === '--only' ? argv[++i] : a.slice('--only='.length);
-      only = (v ?? '').split(',').map((n) => n.trim()).filter(Boolean);
-      if (!v || v.startsWith('-') || only.length === 0) return { error: '--only needs a comma-separated list of job names' };
+      only = (v ?? '')
+        .split(',')
+        .map((n) => n.trim())
+        .filter(Boolean);
+      if (!v || v.startsWith('-') || only.length === 0)
+        return { error: '--only needs a comma-separated list of job names' };
       continue;
     }
     return { error: `unknown argument: ${a}` };
@@ -280,14 +441,25 @@ function parseArgs(argv) {
 async function main() {
   const names = Object.keys(jobs);
   const args = parseArgs(process.argv.slice(2));
-  if (args.help) { console.log(usage(names)); return 0; }
-  if (args.error) { console.error(`media: ${args.error}\n\n${usage(names)}`); return 2; }
+  if (args.help) {
+    console.log(usage(names));
+    return 0;
+  }
+  if (args.error) {
+    console.error(`media: ${args.error}\n\n${usage(names)}`);
+    return 2;
+  }
   const unknown = (args.only ?? []).filter((n) => !names.includes(n));
-  if (unknown.length) { console.error(`media: no such job: ${unknown.join(', ')}\njobs: ${names.join(', ')}`); return 2; }
+  if (unknown.length) {
+    console.error(`media: no such job: ${unknown.join(', ')}\njobs: ${names.join(', ')}`);
+    return 2;
+  }
   const selected = names.filter((n) => !args.only || args.only.includes(n));
   // every job but og reads MEDIA_SRC (og cuts the Framelight hero from MEDIA_CACHE)
   if (selected.some((n) => n !== 'og') && !existsSync(MEDIA_SRC)) {
-    console.error(`media: MEDIA_SRC not found: ${MEDIA_SRC}\nSet MEDIA_SRC to the media sources folder (one subfolder per job).`);
+    console.error(
+      `media: MEDIA_SRC not found: ${MEDIA_SRC}\nSet MEDIA_SRC to the media sources folder (one subfolder per job).`,
+    );
     return 2;
   }
   mkdirSync(OUT, { recursive: true });
@@ -298,7 +470,15 @@ async function main() {
     const t0 = Date.now();
     manifest[name] = await jobs[name]();
     const l = [manifest[name].tile, manifest[name].hero, manifest[name].figure].flatMap((x) => x?.loops ?? []);
-    console.log(`${name.padEnd(22)} ${((Date.now() - t0) / 1000).toFixed(1)} s  ` + l.map((x) => `${x.w}: ${(x.mp4Bytes / 1024).toFixed(0)} KB h264 crf${x.crf} / ${(x.webmBytes / 1024).toFixed(0)} KB av1, ${x.duration} s`).join(' · '));
+    console.log(
+      `${name.padEnd(22)} ${((Date.now() - t0) / 1000).toFixed(1)} s  ` +
+        l
+          .map(
+            (x) =>
+              `${x.w}: ${(x.mp4Bytes / 1024).toFixed(0)} KB h264 crf${x.crf} / ${(x.webmBytes / 1024).toFixed(0)} KB av1, ${x.duration} s`,
+          )
+          .join(' · '),
+    );
   }
   // Read the manifest just before writing and replace only the entries this run made, so a concurrent `--only` run
   // elsewhere is not undone.
@@ -313,6 +493,8 @@ try {
   process.exitCode = await main();
 } catch (e) {
   const missing = e?.code === 'ENOENT' && String(e.syscall).startsWith('spawn');
-  console.error(`media: ${missing ? `${e.path}: not found (set FFMPEG / FFPROBE, or put ffmpeg on PATH)` : e?.message ?? e}`);
+  console.error(
+    `media: ${missing ? `${e.path}: not found (set FFMPEG / FFPROBE, or put ffmpeg on PATH)` : (e?.message ?? e)}`,
+  );
   process.exitCode = 1;
 }

@@ -6,8 +6,8 @@
    the font is there before the first layout, nothing re-wraps when it arrives (a late swap costs layout shift).
    `optional` with a data: URI still misses the window in Chrome, so it is not used. */
 @font-face {
-  font-family: "YL Sans";
-  src: url("../assets/fonts/yl-sans.woff2") format("woff2");
+  font-family: 'YL Sans';
+  src: url('../assets/fonts/yl-sans.woff2') format('woff2');
   font-weight: 300 600;
   font-style: normal;
   font-display: block;

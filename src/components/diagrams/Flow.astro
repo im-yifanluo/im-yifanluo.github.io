@@ -13,21 +13,35 @@ import { rich } from '@/lib/rich-text';
 import { glue, plain, typoText } from '@/lib/typography';
 import { listModel, type Caption, type Cell, type FlowDiagram } from '@/lib/diagrams';
 
-interface Props { d: FlowDiagram; width: 'text' | 'wide'; caption: Caption }
+interface Props {
+  d: FlowDiagram;
+  width: 'text' | 'wide';
+  caption: Caption;
+}
 const { d, width, caption } = Astro.props;
 const { linkIn, rel } = listModel(d);
 
-const cell = (at: Cell) => `--c:${at.col};--r:${at.row}${at.colSpan ? `;--cs:${at.colSpan}` : ''}${at.rowSpan ? `;--rs:${at.rowSpan}` : ''}`;
-const html = (s: string, keep: string[] = []) => glue(rich(s), keep.map(typoText));   // phrases in their typeset form (NBSPs)
+const cell = (at: Cell) =>
+  `--c:${at.col};--r:${at.row}${at.colSpan ? `;--cs:${at.colSpan}` : ''}${at.rowSpan ? `;--rs:${at.rowSpan}` : ''}`;
+const html = (s: string, keep: string[] = []) => glue(rich(s), keep.map(typoText)); // phrases in their typeset form (NBSPs)
 const did = (id: string) => `dg-${d.id}-${id}`;
-const SR_STOP = '<span class="sr">. </span>';   // a spoken pause between label, sub and detail (the button's name is all three)
+const SR_STOP = '<span class="sr">. </span>'; // a spoken pause between label, sub and detail (the button's name is all three)
 
 const nodes = d.nodes.map((n, k) => {
   const prev = d.nodes[k - 1];
   const cls = [
-    'dg-item', n.side && 'is-side', n.set && 'in-set', n.set && prev?.set !== n.set && 'set-first', n.group && 'in-group',
-    n.header && 'is-header', n.step && 'is-step', n.center && 'is-center', linkIn.has(n.id) && 'link-in',
-  ].filter(Boolean).join(' ');
+    'dg-item',
+    n.side && 'is-side',
+    n.set && 'in-set',
+    n.set && prev?.set !== n.set && 'set-first',
+    n.group && 'in-group',
+    n.header && 'is-header',
+    n.step && 'is-step',
+    n.center && 'is-center',
+    linkIn.has(n.id) && 'link-in',
+  ]
+    .filter(Boolean)
+    .join(' ');
   const relLines = rel.get(n.id) ?? [];
   return { n, cls, relLines };
 });
@@ -35,40 +49,85 @@ const heads = (d.heads ?? []).map((h) => ({ h, html: rich(h.text) }));
 const headsAt = (before?: string) => heads.filter((x) => x.h.before === before);
 const edges = d.edges.map((e, k) => ({ e, k }));
 ---
+
 <figure class:list={['dg-fig dg', width === 'text' ? 'fig-text' : 'fig-wide']} id={`dg-${d.id}`}>
   <div class="dg-plate">
     <ol class="dg-grid" role="list" aria-label={plain(d.label)} style={`--cols:${d.cols};--rows:${d.rows}`}>
-      {headsAt(undefined).map(({ h, html }) => <li class:list={['dg-head', h.list && 'is-list']} aria-hidden={h.list ? undefined : 'true'} style={cell(h.at)} set:html={html} />)}
-      {nodes.map(({ n, cls, relLines }) => (
-        <Fragment>
-          {headsAt(n.id).map(({ h, html }) => <li class:list={['dg-head', h.list && 'is-list']} aria-hidden={h.list ? undefined : 'true'} style={cell(h.at)} set:html={html} />)}
-          <li class={cls} style={cell(n.at)} data-id={n.id} data-group={n.group}>
-            <button type="button" class="dg-node" id={did(n.id)}>
-              <span class="dg-l" set:html={html(n.label, n.keep) + SR_STOP} />
-              {n.sub && <span class="dg-s" set:html={html(n.sub, n.keep) + SR_STOP} />}
-              {n.chips && <span class="dg-chips">{n.chips.map((c) => <span class="dg-chip" set:html={rich(c)} />)}</span>}
-              <span class="dg-d" set:html={html(n.detail, n.keep)} />
-              {relLines.map((r) => <span class="dg-rel" set:html={rich(r.text)} />)}
-            </button>
-            {(n.side || n.set || (n.group && !n.header)) && <span class="dg-spine" aria-hidden="true" />}
-          </li>
-        </Fragment>
+      {headsAt(undefined).map(({ h, html }) => (
+        <li
+          class:list={['dg-head', h.list && 'is-list']}
+          aria-hidden={h.list ? undefined : 'true'}
+          style={cell(h.at)}
+          set:html={html}
+        />
       ))}
-      {(d.groups ?? []).map((g) => <li class="dg-frame" aria-hidden="true" data-group={g.id} style={cell(g.at)} />)}
+      {nodes.map(({ n, cls, relLines }) => <Fragment>
+        {headsAt(n.id).map(({ h, html }) => (
+          <li
+            class:list={['dg-head', h.list && 'is-list']}
+            aria-hidden={h.list ? undefined : 'true'}
+            style={cell(h.at)}
+            set:html={html}
+          />
+        ))}
+        <li class={cls} style={cell(n.at)} data-id={n.id} data-group={n.group}>
+          <button type="button" class="dg-node" id={did(n.id)}>
+            <span class="dg-l" set:html={html(n.label, n.keep) + SR_STOP} />
+            {n.sub && <span class="dg-s" set:html={html(n.sub, n.keep) + SR_STOP} />}
+            {n.chips && <span class="dg-chips"
+              >{n.chips.map((c) => (
+                <span class="dg-chip" set:html={rich(c)} />
+              ))}</span
+            >}
+            <span class="dg-d" set:html={html(n.detail, n.keep)} />
+            {relLines.map((r) => (
+              <span class="dg-rel" set:html={rich(r.text)} />
+            ))}
+          </button>
+          {(n.side || n.set || (n.group && !n.header)) && <span class="dg-spine" aria-hidden="true" />}
+        </li>
+      </Fragment>)}
+      {(d.groups ?? []).map((g) => (
+        <li class="dg-frame" aria-hidden="true" data-group={g.id} style={cell(g.at)} />
+      ))}
     </ol>
     <svg class="dg-edges" aria-hidden="true" focusable="false">
-      {edges.map(({ e, k }) => (
-        <g class:list={['dg-e', e.dashed && 'is-dashed']} data-k={k} data-from={e.from} data-to={e.to} data-route={e.route}
-          data-fa={e.fromAt} data-ta={e.toAt} data-ch={e.channel} data-side={e.labelSide} data-both={e.both ? '' : undefined}>
-          <path class="ln" /><path class="hd" />{e.both && <path class="hd hd0" />}
-        </g>
-      ))}
+      {edges.map(({ e, k }) => <g
+        class:list={['dg-e', e.dashed && 'is-dashed']}
+        data-k={k}
+        data-from={e.from}
+        data-to={e.to}
+        data-route={e.route}
+        data-fa={e.fromAt}
+        data-ta={e.toAt}
+        data-ch={e.channel}
+        data-side={e.labelSide}
+        data-both={e.both ? '' : undefined}
+      >
+        <path class="ln" /><path class="hd" />{e.both && <path class="hd hd0" />}
+      </g>)}
     </svg>
-    {edges.filter(({ e }) => e.label).map(({ e, k }) => <span class="dg-el" aria-hidden="true" data-k={k} set:html={rich(e.label!)} />)}
+    {edges
+      .filter(({ e }) => e.label)
+      .map(({ e, k }) => (
+        <span class="dg-el" aria-hidden="true" data-k={k} set:html={rich(e.label!)} />
+      ))}
   </div>
   <figcaption class="cap meta dg-cap">
-    <span class="dg-c"><Fragment set:html={rich(caption.text)} /><span class="dg-hint" aria-hidden="true"><span class="hv">Hover over a box, or tab to it, for how that step works.</span><span class="tp">Tap a box for how that step works.</span></span></span>
-    {d.nodes.map((n) => <span class="dg-x" aria-hidden="true" data-for={n.id} set:html={`<b>${html(n.label, n.keep)}.</b> ${html(n.detail, n.keep)}`} />)}
+    <span class="dg-c"
+      ><Fragment set:html={rich(caption.text)} /><span class="dg-hint" aria-hidden="true"
+        ><span class="hv">Hover over a box, or tab to it, for how that step works.</span
+        ><span class="tp">Tap a box for how that step works.</span></span
+      ></span
+    >
+    {d.nodes.map((n) => (
+      <span
+        class="dg-x"
+        aria-hidden="true"
+        data-for={n.id}
+        set:html={`<b>${html(n.label, n.keep)}.</b> ${html(n.detail, n.keep)}`}
+      />
+    ))}
   </figcaption>
 </figure>
 <script>

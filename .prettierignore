@@ -1,0 +1,11 @@
+# build output and generated types
+dist/
+.astro/
+
+# served as is
+public/
+
+# written by scripts and the package manager
+src/generated/
+src/styles/fallbacks.css
+package-lock.json

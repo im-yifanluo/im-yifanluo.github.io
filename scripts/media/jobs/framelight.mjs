@@ -35,19 +35,32 @@ const CORNER = 165 / 1290; // the display's corner radius as a fraction of its s
 /** A screen resized to w×h with the display's rounded corners (transparent outside). */
 async function screen(file, w, h) {
   const r = Math.round(Math.min(w, h) * CORNER);
-  const mask = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`);
-  return sharp(file).resize(w, h, { fit: 'fill', kernel: 'lanczos3' }).ensureAlpha().composite([{ input: mask, blend: 'dest-in' }]).png().toBuffer();
+  const mask = Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`,
+  );
+  return sharp(file)
+    .resize(w, h, { fit: 'fill', kernel: 'lanczos3' })
+    .ensureAlpha()
+    .composite([{ input: mask, blend: 'dest-in' }])
+    .png()
+    .toBuffer();
 }
 
 /** The plate with the given layers composited (each { input, left, top }). */
-const plate = (w, h, SURFACE, layers) => sharp({ create: { width: w, height: h, channels: 3, background: SURFACE } }).composite(layers).png();
+const plate = (w, h, SURFACE, layers) =>
+  sharp({ create: { width: w, height: h, channels: 3, background: SURFACE } })
+    .composite(layers)
+    .png();
 
 /** The landscape screen whole, centred on a w×(w·9/16) plate at `frac` of its width. */
 async function wholeLandscape(w, h9, SURFACE, frac = 0.92) {
   const { width: sw0, height: sh0 } = await sharp(SRC.perfect).metadata();
   const H = h9(w);
-  const sw = Math.round(w * frac), sh = Math.round((sw * sh0) / sw0);
-  return plate(w, H, SURFACE, [{ input: await screen(SRC.perfect, sw, sh), left: Math.round((w - sw) / 2), top: Math.round((H - sh) / 2) }]);
+  const sw = Math.round(w * frac),
+    sh = Math.round((sw * sh0) / sw0);
+  return plate(w, H, SURFACE, [
+    { input: await screen(SRC.perfect, sw, sh), left: Math.round((w - sw) / 2), top: Math.round((H - sh) / 2) },
+  ]);
 }
 
 export async function framelight({ posters, h9, WORK, SURFACE }) {
@@ -59,11 +72,15 @@ export async function framelight({ posters, h9, WORK, SURFACE }) {
   const tile = { poster: await posters('framelight', tilePng, [640, 960, 1280]), loops: [] };
 
   // ── hero: prompt → "Perfect!" → the shot, one minute at golden hour ──
-  const W = 1760, H = h9(W);
-  const ph = Math.round(H * 0.82), pw = Math.round((ph * 1290) / 2796); // a portrait screen; the landscape one is pw tall, ph wide
+  const W = 1760,
+    H = h9(W);
+  const ph = Math.round(H * 0.82),
+    pw = Math.round((ph * 1290) / 2796); // a portrait screen; the landscape one is pw tall, ph wide
   const room = W - (2 * pw + ph);
-  const gap = Math.round(room / 4.4), side = Math.round((room - 2 * gap) / 2); // outer margins 1.2× the gaps
-  const yP = Math.round((H - ph) / 2), yL = Math.round((H - pw) / 2);
+  const gap = Math.round(room / 4.4),
+    side = Math.round((room - 2 * gap) / 2); // outer margins 1.2× the gaps
+  const yP = Math.round((H - ph) / 2),
+    yL = Math.round((H - pw) / 2);
   const heroPng = join(WORK, 'framelight-hero.png');
   await plate(W, H, SURFACE, [
     { input: await screen(SRC.move, pw, ph), left: side, top: yP },
@@ -92,22 +109,50 @@ const FIG = {
  *  so its prompt stays readable (≈ 180 CSS px wide instead of ≈ 100). */
 export async function framelightPrompts({ stills, WORK, SURFACE }) {
   for (const f of FIG.prompts) if (!existsSync(f)) throw new Error(`${f}: missing from MEDIA_SRC`);
-  const W = 1760, pad = 48, gap = 48;
-  const sw = Math.floor((W - 2 * pad - 2 * gap) / 3), sh = Math.round((sw * 2796) / 1290), H = sh + 2 * pad;
+  const W = 1760,
+    pad = 48,
+    gap = 48;
+  const sw = Math.floor((W - 2 * pad - 2 * gap) / 3),
+    sh = Math.round((sw * 2796) / 1290),
+    H = sh + 2 * pad;
   const x0 = Math.round((W - (3 * sw + 2 * gap)) / 2);
-  const layers = await Promise.all(FIG.prompts.map(async (f, i) => ({ input: await screen(f, sw, sh), left: x0 + i * (sw + gap), top: pad })));
+  const layers = await Promise.all(
+    FIG.prompts.map(async (f, i) => ({ input: await screen(f, sw, sh), left: x0 + i * (sw + gap), top: pad })),
+  );
   const wide = join(WORK, 'framelight-prompts.png');
   await plate(W, H, SURFACE, layers).toFile(wide);
-  const PW = 1104, PH = 1380, psh = Math.round(PH * 0.9), psw = Math.round((psh * 1290) / 2796);
+  const PW = 1104,
+    PH = 1380,
+    psh = Math.round(PH * 0.9),
+    psw = Math.round((psh * 1290) / 2796);
   const phonePng = join(WORK, 'framelight-prompts-phone.png');
-  await plate(PW, PH, SURFACE, [{ input: await screen(FIG.prompts[0], psw, psh), left: Math.round((PW - psw) / 2), top: Math.round((PH - psh) / 2) }]).toFile(phonePng);
-  return { figure: { poster: await stills('framelight-prompts', wide, [880, 1320, 1760]), loops: [], phone: await stills('framelight-prompts-phone', phonePng, [736, 1104]) } };
+  await plate(PW, PH, SURFACE, [
+    {
+      input: await screen(FIG.prompts[0], psw, psh),
+      left: Math.round((PW - psw) / 2),
+      top: Math.round((PH - psh) / 2),
+    },
+  ]).toFile(phonePng);
+  return {
+    figure: {
+      poster: await stills('framelight-prompts', wide, [880, 1320, 1760]),
+      loops: [],
+      phone: await stills('framelight-prompts-phone', phonePng, [736, 1104]),
+    },
+  };
 }
 
 /** A photo resized to w×h with `r` px corners (transparent outside). */
 async function rounded(file, w, h, r) {
-  const mask = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`);
-  return sharp(file).resize(w, h, { fit: 'cover', kernel: 'lanczos3' }).ensureAlpha().composite([{ input: mask, blend: 'dest-in' }]).png().toBuffer();
+  const mask = Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`,
+  );
+  return sharp(file)
+    .resize(w, h, { fit: 'cover', kernel: 'lanczos3' })
+    .ensureAlpha()
+    .composite([{ input: mask, blend: 'dest-in' }])
+    .png()
+    .toBuffer();
 }
 
 /** Four photos shot with the app, whole at 3:4, in a row on the plate (wide, 880 CSS px; drawn at 2×); phones get a
@@ -116,14 +161,28 @@ export async function framelightShots({ stills, WORK, SURFACE }) {
   for (const f of FIG.shots) if (!existsSync(f)) throw new Error(`${f}: missing from MEDIA_SRC`);
   const grid = async (W, cols, pad, gap, r) => {
     const rows = Math.ceil(FIG.shots.length / cols);
-    const pw = Math.floor((W - 2 * pad - (cols - 1) * gap) / cols), ph = Math.round((pw * 4) / 3);
+    const pw = Math.floor((W - 2 * pad - (cols - 1) * gap) / cols),
+      ph = Math.round((pw * 4) / 3);
     const H = 2 * pad + rows * ph + (rows - 1) * gap;
     const x0 = Math.round((W - (cols * pw + (cols - 1) * gap)) / 2);
-    const layers = await Promise.all(FIG.shots.map(async (f, i) => ({ input: await rounded(f, pw, ph, r), left: x0 + (i % cols) * (pw + gap), top: pad + Math.floor(i / cols) * (ph + gap) })));
+    const layers = await Promise.all(
+      FIG.shots.map(async (f, i) => ({
+        input: await rounded(f, pw, ph, r),
+        left: x0 + (i % cols) * (pw + gap),
+        top: pad + Math.floor(i / cols) * (ph + gap),
+      })),
+    );
     return plate(W, H, SURFACE, layers);
   };
-  const wide = join(WORK, 'framelight-shots.png'), phonePng = join(WORK, 'framelight-shots-phone.png');
-  await (await grid(1760, 4, 48, 24, 8)).toFile(wide);         // 24 px padding, 12 px gaps, 4 px corners at 2×
-  await (await grid(1104, 2, 48, 36, 12)).toFile(phonePng);    // 16 px padding, 12 px gaps, 4 px corners at 3×
-  return { figure: { poster: await stills('framelight-shots', wide, [880, 1320, 1760]), loops: [], phone: await stills('framelight-shots-phone', phonePng, [736, 1104]) } };
+  const wide = join(WORK, 'framelight-shots.png'),
+    phonePng = join(WORK, 'framelight-shots-phone.png');
+  await (await grid(1760, 4, 48, 24, 8)).toFile(wide); // 24 px padding, 12 px gaps, 4 px corners at 2×
+  await (await grid(1104, 2, 48, 36, 12)).toFile(phonePng); // 16 px padding, 12 px gaps, 4 px corners at 3×
+  return {
+    figure: {
+      poster: await stills('framelight-shots', wide, [880, 1320, 1760]),
+      loops: [],
+      phone: await stills('framelight-shots-phone', phonePng, [736, 1104]),
+    },
+  };
 }

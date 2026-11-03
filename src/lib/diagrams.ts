@@ -9,7 +9,12 @@
 import { DIAGRAMS } from '@/data/diagrams';
 
 /** A cell of the desktop grid (1-based; spans default to 1). */
-export interface Cell { col: number; row: number; colSpan?: number; rowSpan?: number }
+export interface Cell {
+  col: number;
+  row: number;
+  colSpan?: number;
+  rowSpan?: number;
+}
 
 export interface FlowNode {
   /** Unique within the diagram; the button's id is `dg-<diagram>-<id>`. */
@@ -71,7 +76,10 @@ export interface FlowEdge {
   relText?: string;
 }
 
-export interface FlowGroup { id: string; at: Cell }
+export interface FlowGroup {
+  id: string;
+  at: Cell;
+}
 export interface FlowHead {
   text: string;
   at: Cell;
@@ -82,7 +90,9 @@ export interface FlowHead {
 }
 
 /** The figure's caption (visible at rest). A project's figure may give its own, which then wins. */
-export interface Caption { text: string }
+export interface Caption {
+  text: string;
+}
 
 export interface FlowDiagram {
   kind: 'flow';
@@ -154,16 +164,26 @@ export function listModel(d: FlowDiagram): ListModel {
   const linkIn = new Set<string>();
   const rel = new Map<string, { text: string }[]>();
   for (const e of d.edges) {
-    const a = bare(e.from), b = bare(e.to);
-    const A = byId.get(a), B = byId.get(b);
+    const a = bare(e.from),
+      b = bare(e.to);
+    const A = byId.get(a),
+      B = byId.get(b);
     if (!A || !B) throw new Error(`diagram ${d.id}: edge ${e.from} → ${e.to} names no node`);
-    const ia = ids.indexOf(a), ib = ids.indexOf(b);
+    const ia = ids.indexOf(a),
+      ib = ids.indexOf(b);
     if (A.side || B.side) {
-      if (A.side && B.side && ib === ia + 1) { linkIn.add(b); continue; }
+      if (A.side && B.side && ib === ia + 1) {
+        linkIn.add(b);
+        continue;
+      }
     } else {
-      const ba = blockIdx(a), bb = blockIdx(b);
-      if (ba === bb) continue;   // inside one set or group: the bracket or frame says it
-      if (bb === ba + 1) { linkIn.add(d.nodes.find((m) => blockOf(m) === blocks[bb])!.id); continue; }
+      const ba = blockIdx(a),
+        bb = blockIdx(b);
+      if (ba === bb) continue; // inside one set or group: the bracket or frame says it
+      if (bb === ba + 1) {
+        linkIn.add(d.nodes.find((m) => blockOf(m) === blocks[bb])!.id);
+        continue;
+      }
     }
     const text = e.relText ?? `${ib < ia ? 'Back to' : 'Into'}: ${B.label}${e.label ? ` (${e.label})` : ''}`;
     const list = rel.get(a) ?? [];

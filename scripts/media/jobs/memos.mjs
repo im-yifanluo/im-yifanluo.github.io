@@ -19,15 +19,23 @@ import { join } from 'node:path';
 import { source } from '../paths.mjs';
 
 const here = source('memos');
-const need = (f) => { const p = join(here, f); if (!existsSync(p)) throw new Error(`${p}: missing from MEDIA_SRC`); return p; };
+const need = (f) => {
+  const p = join(here, f);
+  if (!existsSync(p)) throw new Error(`${p}: missing from MEDIA_SRC`);
+  return p;
+};
 /** A seamless loop from a clip whose last `d` seconds continue into its first: dissolve them over the seam. */
-const seam = (L, d, grade) => `[0]trim=${d}:${L},setpts=PTS-STARTPTS,fps=30,${grade}[x];[1]trim=0:${d},setpts=PTS-STARTPTS,fps=30,${grade}[y];[x][y]xfade=transition=fade:duration=${d}:offset=${(L - 2 * d).toFixed(3)}[out]`;
+const seam = (L, d, grade) =>
+  `[0]trim=${d}:${L},setpts=PTS-STARTPTS,fps=30,${grade}[x];[1]trim=0:${d},setpts=PTS-STARTPTS,fps=30,${grade}[y];[x][y]xfade=transition=fade:duration=${d}:offset=${(L - 2 * d).toFixed(3)}[out]`;
 
 export async function memos({ master, loop, frame, posters, WORK, TILE_MAX, fmtGrade }) {
   const tileSrc = need('rotunda-tile.mp4');
   const m = master('memos', ['-i', tileSrc, '-i', tileSrc], seam(6.5, 0.5, fmtGrade), 1280);
   const png = frame(m, 0, join(WORK, 'memos-poster.png'));
-  const tile = { poster: await posters('memos', png, [640, 960, 1280]), loops: [loop('memos', m, 640, TILE_MAX), loop('memos', m, 960, TILE_MAX * 1.6)] };
+  const tile = {
+    poster: await posters('memos', png, [640, 960, 1280]),
+    loops: [loop('memos', m, 640, TILE_MAX), loop('memos', m, 960, TILE_MAX * 1.6)],
+  };
   return { tile };
 }
 
@@ -37,5 +45,11 @@ export async function memosHero({ master, rotate, loop, frame, posters, WORK, TI
   // Start (and pose) at 3.0 s: people small in the middle of the plaza, not the two close ghosts of 0–2 s.
   const m = rotate('memos-hero', m0, 3.0);
   const png = frame(m, 0, join(WORK, 'memos-hero-poster.png'));
-  return { hero: { kind: 'loop', poster: await posters('memos-hero', png, [640, 960, 1280]), loops: [loop('memos-hero', m, 960, TILE_MAX * 1.6), loop('memos-hero', m, 1280, HERO_MAX)] } };
+  return {
+    hero: {
+      kind: 'loop',
+      poster: await posters('memos-hero', png, [640, 960, 1280]),
+      loops: [loop('memos-hero', m, 960, TILE_MAX * 1.6), loop('memos-hero', m, 1280, HERO_MAX)],
+    },
+  };
 }

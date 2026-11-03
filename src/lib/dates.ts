@@ -22,7 +22,8 @@ export function monthHtml(ym: string): string {
 /** A month range as HTML: Sep 2025 – present · Apr – Jul 2026 · Dec 2025 – Aug 2026. */
 export function rangeHtml(start: string, end: string): string {
   if (end === 'present') return `${t(start, month(start))}${NB}– present`;
-  const s = parts(start), e = parts(end);
+  const s = parts(start),
+    e = parts(end);
   if (start === end) return t(start, month(start));
   if (s.y === e.y) return `${t(start, s.m)}${NB}– ${t(end, month(end))}`;
   return `${t(start, month(start))}${NB}– ${t(end, month(end))}`;
@@ -34,7 +35,7 @@ export function dateHtml(d: string): string {
   if (/^\d{4}-\d{2}$/.test(d)) return monthHtml(d);
   if (/^\d{4}$/.test(d)) return `<time datetime="${d}">${d}</time>`;
   const span = /^(\d{4})–(\d{2})$/.exec(d);
-  if (span) return `<time datetime="${span[1]}">${span[1]}</time>–<time datetime="${span[1].slice(0, 2)}${span[2]}">${span[2]}</time>`;
+  if (span)
+    return `<time datetime="${span[1]}">${span[1]}</time>–<time datetime="${span[1].slice(0, 2)}${span[2]}">${span[2]}</time>`;
   throw new Error(`date "${d}": expected YYYY-MM, YYYY or YYYY–YY`);
 }
-

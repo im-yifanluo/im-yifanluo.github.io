@@ -100,7 +100,10 @@ const projects = defineCollection({
 
 const dated = z.object({ date: dateCol, text: z.string() });
 // News is dated by month only: the footer's "Last updated" is the newest News month (layouts/BaseLayout.astro)
-const news = defineCollection({ loader: list('src/data/news.yaml'), schema: z.object({ position, date: ym, text: z.string() }) });
+const news = defineCollection({
+  loader: list('src/data/news.yaml'),
+  schema: z.object({ position, date: ym, text: z.string() }),
+});
 const more = defineCollection({ loader: list('src/data/more-projects.yaml'), schema: dated.extend({ position }) });
 const experience = defineCollection({
   loader: list('src/data/experience.yaml'),
