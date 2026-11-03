@@ -13,7 +13,8 @@ Personal website: projects, experience, news and awards. Its address is <https:/
 
 ## Commands
 
-Requires Node 24 (see `.nvmrc`; 22.19 or later works). Run everything from the repository root.
+Requires Node 24 (see `.nvmrc`; 22.19 or later builds the site, and `npm run lint` needs 22.22.3 or 24.16 or later). Run
+everything from the repository root.
 
 | Command                             | What it does                                                                                                        |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -25,6 +26,7 @@ Requires Node 24 (see `.nvmrc`; 22.19 or later works). Run everything from the r
 | `npm run astro -- …`                | Run any Astro CLI command, e.g. `npm run astro -- add` or `npm run astro -- telemetry disable`                      |
 | `npm run check:dist`                | Run the post-build checks again on an existing `dist/`                                                              |
 | `npm run check:links`               | Report broken external links in `dist/` (needs the network; never fails the build)                                  |
+| `npm run lint`                      | Lint the code with ESLint, including accessibility rules for `.astro` templates                                     |
 | `npm run format`                    | Format the code with Prettier                                                                                       |
 | `npm run format:check`              | Check the formatting without changing files                                                                         |
 | `npm run media`                     | Rebuild the web media from `$MEDIA_SRC`; `npm run media -- --only <job>` for one job, `-- --help` for the job names |
@@ -61,6 +63,7 @@ src/
 └── site.config.ts         name, contact links, intro, last-updated date, typography settings
 astro.config.mjs           site URL, static build, redirects for renamed pages
 .prettierrc.json           Prettier settings; .prettierignore skips the generated and served-as-is files
+eslint.config.js           ESLint rules: JavaScript, TypeScript, Astro and accessibility
 ```
 
 ## Editing content

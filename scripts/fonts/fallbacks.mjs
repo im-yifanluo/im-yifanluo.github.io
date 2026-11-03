@@ -92,6 +92,7 @@ async function pages() {
 }
 const PAGES = await pages();
 
+/* global document, getComputedStyle -- the page.evaluate() callback below runs in the browser */
 async function measure(width, roles) {
   const acc = {};
   for (const path of PAGES) {
@@ -136,7 +137,7 @@ async function measure(width, roles) {
   return acc;
 }
 
-let report = [];
+let report;
 for (let round = 1; round <= ROUNDS; round++) {
   const cur = current();
   const faces = {};

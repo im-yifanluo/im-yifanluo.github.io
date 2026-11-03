@@ -351,8 +351,8 @@ const OBF_SPELLED = new RegExp(
 );
 const deobfuscate = (s) =>
   s
-    .replace(/\s*[\[({<]\s*(?:at|@)\s*[\])}>]\s*|\s+at\s+/i, '@')
-    .replace(/\s*[\[({<]\s*(?:dot|\.)\s*[\])}>]\s*|\s+dot\s+/gi, '.')
+    .replace(/\s*[[({<]\s*(?:at|@)\s*[\])}>]\s*|\s+at\s+/i, '@')
+    .replace(/\s*[[({<]\s*(?:dot|\.)\s*[\])}>]\s*|\s+dot\s+/gi, '.')
     .replace(/\s+/g, '')
     .toLowerCase();
 const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -566,6 +566,7 @@ export function compilePrivateRules(json, { anonymize = false } = {}) {
         binary: r.binary === true,
       };
     } catch (e) {
+      // eslint-disable-next-line preserve-caught-error -- the cause would quote the private pattern
       throw new Error(
         `${where}: invalid regular expression or flags (${/: ([^:/]+)$/.exec(e.message)?.[1] ?? 'syntax'})`,
       );
@@ -581,6 +582,7 @@ function globToRe(glob) {
     .replace(/\*\*\/?/g, '\u0000')
     .replace(/\*/g, '[^/]*')
     .replace(/\?/g, '[^/]')
+    // eslint-disable-next-line no-control-regex -- NUL stands in for a ** segment (no path contains it)
     .replace(/\u0000/g, '(?:.*/)?');
   return new RegExp(`^${s}$`);
 }
@@ -589,7 +591,7 @@ function compileIgnore(e, from) {
   if (!e || (!e.rule && !e.file) || typeof e.reason !== 'string' || !e.reason.trim()) {
     throw new Error(`${from}: every ignore entry needs "rule" or "file", and a "reason"`);
   }
-  let matchRe = null;
+  let matchRe;
   try {
     matchRe = e.match ? new RegExp(e.match) : null;
   } catch {
@@ -613,7 +615,7 @@ export function loadConfig() {
     try {
       priv = compilePrivateRules(rulesSrc.text, { anonymize: isSet(process.env.CI) });
     } catch (e) {
-      throw new Error(`${rulesSrc.from}: ${e.message}`);
+      throw new Error(`${rulesSrc.from}: ${e.message}`, { cause: e });
     }
   }
   if (!priv.rules.length) missing.push('private rules (PRIVACY_SCAN_RULES / PRIVACY_SCAN_RULES_FILE)');
@@ -698,6 +700,7 @@ const NAMED_ENTITIES = {
 };
 const ESCAPE_RE =
   /&#(\d{1,7});?|&#[xX]([0-9a-fA-F]{1,6});?|&([a-zA-Z]{2,10});|((?:%[0-9a-fA-F]{2})+)|\\u\{([0-9a-fA-F]{1,6})\}|\\u([0-9a-fA-F]{4})|\\x([0-9a-fA-F]{2})|\\\//g;
+// eslint-disable-next-line no-control-regex -- [^\x00-\x7f] is any non-ASCII character
 const NEEDS_NORMALIZING = /[^\x00-\x7f]|&#|&[a-zA-Z]{2,10};|%[0-9a-fA-F]{2}|\\u|\\x[0-9a-fA-F]|\\\//;
 const DASHES = /[\p{Pd}−‐‑﹣－]/u;
 const ZERO_WIDTH = /[\u200B-\u200D\u2060\uFEFF\u00AD]/;
@@ -712,6 +715,7 @@ function decodeEscape(m) {
   if (pct) {
     try {
       const s = decodeURIComponent(pct);
+      // eslint-disable-next-line no-control-regex -- a decoded control character is not text
       return /[\x00-\x1f\x7f]/.test(s) ? null : s;
     } catch {
       return null;
@@ -1131,7 +1135,8 @@ async function videoMeta(file, cfg) {
         { maxBuffer: 8 << 20 },
       ));
     } catch (e) {
-      if (typeof e?.code !== 'number') throw new Error(`could not run ffprobe (${e?.code ?? e?.message ?? e})`);
+      if (typeof e?.code !== 'number')
+        throw new Error(`could not run ffprobe (${e?.code ?? e?.message ?? e})`, { cause: e });
       const why =
         String(e.stderr ?? '')
           .trim()
@@ -1139,6 +1144,7 @@ async function videoMeta(file, cfg) {
           .pop()
           ?.replace(`${file}: `, '')
           .slice(0, 200) || `exit ${e.code}`;
+      // eslint-disable-next-line preserve-caught-error -- the cause would carry ffprobe's output, the file's own metadata
       throw new Error(`ffprobe could not read this file: ${why}`);
     }
     let j;
@@ -1196,6 +1202,7 @@ const metaFinding = (rule, severity, desc, file, source, context = '') => ({
 });
 
 // control bytes that text files do not contain (tab, newline, carriage return, form feed and escape excepted)
+// eslint-disable-next-line no-control-regex -- the control bytes are what it looks for
 const CONTROL_BYTES = /[\x00-\x08\x0e-\x1a\x1c-\x1f]/;
 
 /**
