@@ -1,0 +1,39 @@
+order: 3
+title: "memos: walking back into a moment, together"
+short: memos
+role: Vision pipeline and integration
+org: Cal Hacks 13
+start: 2026-10
+end: 2026-10
+roleLine: Vision pipeline and integration · Cal Hacks 13, team of three
+outcome: I built the pipeline that turns a Ray-Ban Meta clip into a 3D scene you walk back into with friends, on a Quest, a phone or a laptop.
+links:
+  - label: Code
+    url: https://github.com/im-yifanluo/memos
+hero:
+  media: memos-hero
+  part: hero
+  alt: "The plaza in front of the Palace of Fine Arts rotunda, rebuilt as a Gaussian splat: salmon-pink columns and a tall arch against a blue sky, a pine on the left, gray paving in front. People cross the plaza as dark point-cloud figures while the view slides slowly from side to side."
+  caption: "A walk past the Palace of Fine Arts rotunda during Cal Hacks 13, rebuilt by my pipeline from one Ray-Ban Meta clip: the place is a Gaussian splat, and the people crossing it are moving point ghosts."
+lead:
+  - "Record a moment on Ray-Ban Meta glasses, then step back inside it with friends. memos rebuilds the clip as a 3D scene that moves over time: the room as a Gaussian splat at real scale, the people as moving ghosts, the small things as objects you can grab and throw."
+  - "Everyone relives it on one shared clock, on a Quest 3S, a phone or a laptop. Pause, throw something, and the edit becomes a new take; the original recording stays as it was. We built it at Cal Hacks 13 as a team of three: I built the pipeline from video to scene and brought our parts together into one app."
+did:
+  - "Built the pipeline that turns one clip into a scene: NVIDIA ViPE for the camera path and depth, a level metric world frame, a gsplat room, people as moving ghosts and props you can throw."
+  - Ran it on all nine Ray-Ban Meta clips we recorded at the event, indoors and out, and scored every scene against its own video.
+  - "Brought our three parts into one app: the adapter that ties the viewer to SpacetimeDB, the party panel and avatars, and the GPU worker that publishes each scene."
+  - "Built the ways to relive a memory: follow the recorded walk, guided exploration, the wearer's view, and VR grabbing that freezes time."
+  - "Ran a true 4D Gaussian splatting track alongside: 30.5 dB PSNR on held-out frames, with sharp moving people."
+figures:
+  - diagram: memos
+builtWith:
+  - NVIDIA ViPE
+  - gsplat
+  - three.js + Spark
+  - Rapier
+  - WebXR
+  - SpacetimeDB
+  - Runpod
+credits:
+  - Built at Cal Hacks 13 with Jerry and Nikko.
+  - Builds on three.js, Spark, Rapier, SpacetimeDB, NVIDIA ViPE, gsplat and the Meta Wearables Device Access Toolkit.

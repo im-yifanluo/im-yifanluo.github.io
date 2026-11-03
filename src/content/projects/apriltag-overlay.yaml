@@ -1,0 +1,40 @@
+order: 4
+title: Showing where each benchmark object goes, in AR
+short: AprilTag AR overlay
+role: Sole author, from tag detection to overlay
+org: RoboTouch Lab
+start: 2026-06
+end: 2026-07
+roleLine: Sole author · RoboTouch Lab, UIUC (Prof. Wenzhen Yuan)
+outcome: I built a ROS 2 tool that finds a printed AprilTag and draws the benchmark layout over live video.
+links:
+  - label: Code
+    url: https://github.com/im-yifanluo/object_rendering
+hero:
+  media: apriltag-overlay
+  part: hero
+  alt: "A live camera view of the lab table in front of the UR5e arm: a rendered benchmark fixture, a board with a key and a handle, stands upright as a see-through guide, and a second rendered object sits to its right; a printed AprilTag lies on the table in the foreground."
+  caption: The benchmark layout, rendered from the printed tag's pose and blended over the live RealSense view.
+lead:
+  - A printed AprilTag tells the camera where it is, and my ROS 2 tool draws the benchmark layout over live video.
+  - Whoever sets up a benchmark scene sees, on the live image, where each real object has to go. I built it as sole author.
+did:
+  - "Built the ROS 2 tool end to end: it finds a printed AprilTag, recovers the camera pose and blends the benchmark layout over live video."
+  - "Made the render line up with the real camera: an off-axis OpenGL frustum built from the intrinsics K."
+  - Wrote a mesh converter that splits multi-material meshes into per-material URDFs and verifies the geometry is preserved.
+  - Designed a hand-editable YAML scene format and moved capture from ROS topics to direct pyrealsense2.
+figures:
+  - diagram: ar
+  - media: ar-overlay-ycb-2
+    part: figure
+    alt: "A camera view of the same lab table with semi-transparent rendered objects overlaid: a sugar box, a small patterned box, a yellow mustard bottle and an orange ball, positioned relative to the fiducial markers; a robot controller tablet sits in the foreground."
+    width: text
+    caption: "A second benchmark layout on the same table: the sugar box, mustard bottle and ball are renders, placed from the tag’s pose over the live frame."
+builtWith:
+  - ROS 2
+  - RealSense (pyrealsense2)
+  - AprilTag (tag36h11)
+  - PyBullet
+  - OpenGL camera math
+credits:
+  - "Builds on ManipulationNet: its benchmark scenes and the tag-to-render math I re-implemented as a standalone tool. YCB object meshes (CC BY 4.0). With Prof. Wenzhen Yuan."

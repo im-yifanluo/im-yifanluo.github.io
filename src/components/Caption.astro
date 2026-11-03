@@ -1,0 +1,13 @@
+---
+// A figure's caption. With a `phone` form, both are in the HTML and CSS shows one: the phone form below 720 px, where
+// the figure shows its `phone` cut (global.css .cap-w / .cap-p).
+import RichText from './RichText.astro';
+
+interface Props { text: string; phone?: string }
+const { text, phone } = Astro.props;
+---
+{phone ? (
+  <figcaption class="cap meta"><RichText class="cap-w" text={text} /><RichText class="cap-p" text={phone} /></figcaption>
+) : (
+  <RichText as="figcaption" class="cap meta" text={text} />
+)}

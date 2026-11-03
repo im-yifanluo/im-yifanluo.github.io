@@ -1,0 +1,35 @@
+- id: framelight
+  start: 2025-09
+  end: present
+  org: Framelight
+  role: Technical lead
+  lines:
+    - Led a 15-person team to ship a camera app that coaches your framing on the phone, live on the App Store and Google Play.
+- id: robotouch-lab-uiuc
+  start: 2026-01
+  end: present
+  org: RoboTouch Lab, UIUC
+  role: Undergraduate researcher · Prof. Wenzhen Yuan
+  lines:
+    - Built an imitation-learning pipeline for a UR5e arm, from handheld demonstrations to diffusion policies deployed on the real robot.
+- id: forward-data-lab-uiuc
+  start: 2025-12
+  end: 2026-08
+  org: FORWARD Data Lab, UIUC
+  role: Research assistant · Prof. Kevin Chang
+  lines:
+    - Built two RAG harnesses and evaluated 10+ published methods in them.
+- id: wideaccel-communication
+  start: 2024-10
+  end: 2025-01
+  org: WideAccel Communication
+  role: Assistant network engineer
+  lines:
+    - Ran daily network monitoring and built the company website.
+- id: pioneer-academics
+  start: 2024-07
+  end: 2024-09
+  org: Pioneer Academics
+  role: Cryptography researcher · Prof. Suleyman Uludag
+  lines:
+    - Wrote a 45-page thesis benchmarking 9 NIST post-quantum algorithms.

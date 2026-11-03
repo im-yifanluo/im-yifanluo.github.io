@@ -1,0 +1,54 @@
+order: 1
+title: "Framelight: coaching the shot before it's taken"
+short: Framelight
+role: Technical lead
+start: 2025-09
+end: present
+roleLine: Technical lead of a 15-person team
+award: Hoveida Foundation Prize · Cozad New Venture Challenge
+outcome: Live on the App Store and Google Play. I led its 15-person team, designed its on-device guidance loop and trained its composition model.
+links:
+  - label: App Store
+    url: https://apps.apple.com/us/app/framelight/id6785136047
+  - label: Google Play
+    url: https://play.google.com/store/apps/details?id=ai.framelight.mobile
+  - label: Website
+    url: https://www.framelight.ai/
+hero:
+  media: framelight
+  part: hero
+  alt: "Three Framelight screens from one iPhone at golden hour, all of the same building in construction wrap lit orange by the low sun: the live view asking “Move up-left”, with an arrow to a target dot; the phone turned sideways, the prompt now “Perfect!” over its score bar, the zoom dial and the Guided, Quick and Free modes beside the shutter; and the photo just taken, in a row of film looks with “Slide Ember” selected above Cancel and Save photo."
+  caption: "One shot at golden hour on an iPhone: Framelight prompts “Move up-left”, says “Perfect!” once the framing is right, then suggests film looks for the photo."
+  captionPhone: "Framelight on an iPhone at golden hour, held sideways: “Perfect!” once the framing is right."
+lead:
+  - Framelight is a camera app that reads the live preview on the phone and tells you where to point, how far to zoom and when to shoot. It is live on the App Store and Google Play.
+  - "I'm its technical lead: I designed the guidance loop, trained and deployed its composition model, set the app's architecture and led the 15-person team that built and shipped it."
+did:
+  - "Designed the real-time guidance loop: it finds the subject on-device, scores 7–8 framings anchored on it and turns the best into one steady prompt."
+  - Trained and deployed the on-device composition model (MobileNetV2, TFLite, int8 weights); on CADB it picks the better of two photos 76.8% of the time.
+  - "Set the app's architecture and led everything we built: camera-thread subject tracking, auto-zoom, selfie mode, a level guide and zoom dial, and framelight.ai."
+  - "Designed and built the film-look pipeline: ~296 source LUTs curated to 60 looks, ranked per photo and graded by one GPU shader."
+  - "Shipped the app to both stores: a native Kotlin module for scoped-storage saving, Android 15's 16 KB page-size compliance and App Review."
+figures:
+  - diagram: fl
+  - media: framelight-prompts
+    part: figure
+    alt: "Three Framelight live views on an iPhone, each in Guided mode: “Move down-left” with an arrow to a target dot over a domed auditorium across a lawn, the subject locked and the zoom at 1.7×; “Zoom in” with a box around two flower planters on a sidewalk, the subject locked; and “Move up-left” with an arrow to a target dot over a tree-lined brick path."
+    width: wide
+    caption: "More of the coaching: “Move down-left” and “Zoom in” on subjects locked with a tap, and “Move up-left” on a tree-lined path. Each prompt is one steady move or zoom until “Perfect!”"
+    captionPhone: "“Move down-left” on a subject locked with a tap: each prompt is one steady move or zoom until “Perfect!”"
+  - media: framelight-shots
+    part: figure
+    alt: "Four photos shot with Framelight: a lake at sunset under a gold sky, a garden bed of red and orange flowers under trees, the Chicago River between glass towers, and red amaranth against a pink sky."
+    width: wide
+    caption: "Shot with Framelight: four photos from our launch footage, two of them on our App Store page."
+builtWith:
+  - React Native (Expo)
+  - VisionCamera
+  - OpenCV + ML Kit
+  - TFLite
+  - Skia (SkSL)
+  - Kotlin
+credits:
+  - "Built with the Framelight team: Suhaan Khan, Ryan Yin, Ronald Wen, Nihar Jain, Cobbi Liu, James Cao and the wider team."
+  - Film looks derive from Film-Luts (MIT); the composition model is trained on the AVA and CADB datasets.

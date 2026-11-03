@@ -1,0 +1,128 @@
+---
+// Project page template: title, meta, award, links; the 16:9 hero; lead; What I did; Figures;
+// Built with; Credits; previous / next in homepage order. Same header, tokens and footer as the homepage.
+// One left edge: title, text, captions and every figure start at
+// x0, the header name's edge; text keeps the homepage's 520 px measure; the hero and wide figures run to the right edge.
+import { getCollection, type CollectionEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import RichText from '@/components/RichText.astro';
+import LinkList from '@/components/LinkList.astro';
+import Media from '@/components/Media.astro';
+import Diagram from '@/components/diagrams/Diagram.astro';
+import Caption from '@/components/Caption.astro';
+import { AWARD_LINE_KEEP, SITE, TYPOGRAPHY } from '@/site.config';
+import { rangeHtml } from '@/lib/dates';
+import { rich, segs } from '@/lib/rich-text';
+import { summarize } from '@/lib/summarize';
+import { glue, plain } from '@/lib/typography';
+import { mediaPart, type MediaRef } from '@/lib/media';
+
+type Project = CollectionEntry<'projects'>;
+
+// One page per project, in homepage order (/deployment-debugging/ is a redirect to /robot-learning/#on-the-robot:
+// astro.config.mjs). A slug (the YAML file's name) must not shadow a top-level path of the built site, or the source of
+// a redirect (astro.config.mjs `redirects`; its prerenderConflictBehavior also fails such a build).
+export async function getStaticPaths() {
+  const RESERVED = ['media', 'fonts', '_astro', '404', 'og', 'robots', 'sitemap-index', 'sitemap-0'];
+  const REDIRECTS = ['deployment-debugging']; // the sources of astro.config.mjs `redirects`
+  const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+  for (const { id } of projects) {
+    if ([...RESERVED, ...REDIRECTS].includes(id)) {
+      throw new Error(`src/content/projects/${id}.yaml: the slug "${id}" shadows the site's /${id}/ path`);
+    }
+  }
+  return projects.map((entry, i) => ({ params: { slug: entry.id }, props: { entry, prev: projects[i - 1], next: projects[i + 1] } }));
+}
+interface Props { entry: Project; prev?: Project; next?: Project }
+const { entry, prev, next } = Astro.props;
+const p = entry.data;
+
+// the meta line's dates render as <time>s like every other date on the site
+const meta = segs(p.roleLine, [rangeHtml(p.start, p.end)]);
+
+// "What I did": titled halves with their own anchors where the project has them, else one list
+const didGroups = p.didGroups ?? [{ id: '', label: '', did: p.did! }];
+
+// Figures: media (a photo, a screen, a loop, a chart) and interactive diagrams (components/diagrams: a whole <figure>
+// with its plate and caption, drawn from src/data/diagrams.ts; its script and styles ship only on pages that render one).
+const figures = p.figures;
+const isDiagram = (f: (typeof figures)[number]): f is Extract<(typeof figures)[number], { diagram: string }> => 'diagram' in f;
+
+const isLoop = (r: MediaRef) => (mediaPart(r)?.loops?.length ?? 0) > 0;
+// The page's one Pause control sits on the caption line of the first loop: the hero's, or else the first looping figure's
+// (on /robot-learning/ the hero is a still photo and the loops are far below it).
+const heroLoops = isLoop(p.hero);
+const firstLoopFig = heroLoops ? -1 : figures.findIndex((f) => !isDiagram(f) && isLoop(f));
+const Motion = () => '<button class="motion" type="button" hidden>Pause videos</button>';
+
+const HERO_SIZES = '(min-width: 944px) 880px, (min-width: 720px) calc(100vw - 64px), calc(100vw - 40px)';
+const TEXT_SIZES = '(min-width: 720px) 520px, calc(100vw - 40px)';
+// `short` takes inline markup like the title: rendered in previous / next, as plain text in the browser tab
+const title = `${plain(p.short)} · ${SITE.title}`;
+// the link preview reads the homepage row's one-line summary (≤ 160 characters)
+const description = summarize(plain(p.outcome), 160);
+---
+<BaseLayout title={title} description={description}>
+  <main class="wrap p-body" id="main" tabindex="-1">
+    <div class="p-head">
+      <h1 class="name" set:html={glue(rich(p.title), TYPOGRAPHY.titleKeep, TYPOGRAPHY.titleKeepWide)} />
+      <p class="meta" set:html={meta} />
+      {p.award && <RichText as="p" class="meta award" text={p.award} glue={AWARD_LINE_KEEP} />}
+      <div class="ctl-row">
+        <LinkList items={p.links} />
+      </div>
+    </div>
+
+    <figure>
+      <Media ref={p.hero} box="hero" sizes={HERO_SIZES} eager />
+      {heroLoops && <Fragment set:html={Motion()} />}
+      <Caption text={p.hero.caption} phone={p.hero.captionPhone} />
+    </figure>
+
+    <div class="lead">
+      {p.lead.map((l) => <RichText as="p" text={l} />)}
+    </div>
+
+    <section class="p-sec" aria-labelledby="did-h">
+      <h2 class="h2" id="did-h">What I did</h2>
+      {didGroups.map((g) => (
+        <div class="did-group" id={g.id || undefined}>
+          {g.label && <h3 class="group">{g.label}</h3>}
+          <ul class="did">{g.did.map((d) => <RichText as="li" text={d} />)}</ul>
+        </div>
+      ))}
+    </section>
+
+    {figures.length > 0 && (
+      <section class="p-sec" aria-labelledby="fig-h">
+        <h2 class="h2" id="fig-h">Figures</h2>
+        <div class="figs">
+          {figures.map((f, k) => isDiagram(f) ? (
+            <Diagram id={f.diagram} width={f.width} caption={f.caption !== undefined ? { text: f.caption } : undefined} />
+          ) : (
+            <figure class={f.width === 'text' ? 'fig-text' : 'fig-wide'}>
+              <Media ref={f} box="figure" sizes={f.width === 'text' ? TEXT_SIZES : HERO_SIZES} />
+              {k === firstLoopFig && <Fragment set:html={Motion()} />}
+              <Caption text={f.caption} phone={f.captionPhone} />
+            </figure>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <section class="p-sec" aria-labelledby="bw-h">
+      <h2 class="h2" id="bw-h">Built with</h2>
+      <p class="meta ink" set:html={segs(p.builtWith.join(' · '))} />
+    </section>
+
+    <section class="p-sec credits" aria-labelledby="cr-h">
+      <h2 class="h2" id="cr-h">Credits</h2>
+      {p.credits.map((c) => <RichText as="p" class="meta" text={c} />)}
+    </section>
+
+    <nav class="pn meta" aria-label="More projects">
+      {prev && <a class="prev" href={`/${prev.id}/`}>← Previous: <span set:html={rich(prev.data.short)} /></a>}
+      {next && <a class="next" href={`/${next.id}/`}>Next: <span set:html={rich(next.data.short)} /> →</a>}
+    </nav>
+  </main>
+</BaseLayout>

@@ -1,0 +1,64 @@
+{
+  "$comment": "Size and performance budgets, defined once. Byte limits are binary (1 KiB = 1024 B). scope says who enforces each one: dist = scripts/check-dist.mjs after every build; repo and e2e = the repository and browser tests, which are not in this repository yet (until then those budgets are targets, checked by hand).",
+  "trackedBytes": {
+    "scope": "repo",
+    "max": 31457280,
+    "what": "all tracked files together (git ls-files)"
+  },
+  "publicFileBytes": {
+    "scope": "dist",
+    "max": 1048576,
+    "what": "any single non-HTML file in dist/: everything copied from public/, and _astro/ files (the largest is a hero loop, which the media script keeps under 1 MiB)"
+  },
+  "tileLoopBytes": {
+    "scope": "dist",
+    "max": 409600,
+    "maxHiDpi": 655360,
+    "what": "each tile or figure loop, media/<name>-<w>.mp4|webm: max for w <= 640, maxHiDpi for the wider rendition served to high-density screens (the limits the media script encodes to)"
+  },
+  "heroLoopBytes": {
+    "scope": "dist",
+    "max": 1048576,
+    "what": "each project hero loop: media/<name>-hero-<w>.mp4|webm, or any loop rendered 1280 px wide or wider (the limit the media script encodes to)"
+  },
+  "htmlBytes": {
+    "scope": "dist",
+    "max": 131072,
+    "what": "each HTML page, including its inlined CSS (and so the inlined font)"
+  },
+  "inlineCssBytes": {
+    "scope": "dist",
+    "max": 65536,
+    "what": "the contents of every <style> element on one page, including the font, which is inlined as a data: URI (about 21 KiB)"
+  },
+  "inlineJsBytes": {
+    "scope": "dist",
+    "max": 8192,
+    "what": "the contents of every inline <script> on one page (JSON data blocks excluded)"
+  },
+  "externalJsBytes": {
+    "scope": "dist",
+    "max": 7961,
+    "what": "all _astro/*.js files together (the diagram script; limit = measured x 1.5)"
+  },
+  "firstLoadBytes": {
+    "scope": "e2e",
+    "max": 1048576,
+    "what": "bytes transferred for one page before any scrolling"
+  },
+  "fontRequests": {
+    "scope": "e2e",
+    "max": 0,
+    "what": "font files requested by one page (the font is inlined into the CSS, so none)"
+  },
+  "cls": {
+    "scope": "e2e",
+    "max": 0.001,
+    "what": "cumulative layout shift of one page, at every tested width and on throttled slow 4G; must stay below max (sub-pixel shifts of a few 1e-5 occur)"
+  },
+  "lcpSlow4gMs": {
+    "scope": "e2e",
+    "max": 2500,
+    "what": "largest contentful paint in ms under slow-4G throttling"
+  }
+}

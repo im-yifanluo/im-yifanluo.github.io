@@ -1,0 +1,31 @@
+{
+  "name": "yifan-luo-website",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build && node scripts/check-dist.mjs",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "check:dist": "node scripts/check-dist.mjs",
+    "check:links": "node scripts/check-dist.mjs --external-links",
+    "media": "node scripts/media/build.mjs",
+    "media:portrait": "node scripts/media/portrait.mjs",
+    "fonts:fallbacks": "node scripts/fonts/fallbacks.mjs"
+  },
+  "dependencies": {
+    "astro": "7.3.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@types/node": "24.19.2",
+    "pdfjs-dist": "6.4.299",
+    "sharp": "0.35.5",
+    "typescript": "6.0.3",
+    "yaml": "2.9.1"
+  }
+}

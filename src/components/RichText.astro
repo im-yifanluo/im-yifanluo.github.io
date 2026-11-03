@@ -1,0 +1,12 @@
+---
+// One string of copy: inline markup → HTML (lib/rich-text.ts `rich`).   <RichText text={…} as="p" class="prose" />
+// `glue`: phrases that must not split (lib/typography.ts glue); `glueWide`: only from 720 px up; `short`: a phrase's phone
+// form (lib/typography.ts shortForms).
+import { rich } from '@/lib/rich-text';
+import { glue, shortForms } from '@/lib/typography';
+import type { HTMLTag } from 'astro/types';
+interface Props { text: string; as?: HTMLTag; class?: string; glue?: string[]; glueWide?: string[]; short?: Record<string, string> }
+const { text, as: Tag = 'span', class: cls, glue: keep, glueWide, short } = Astro.props;
+const html = shortForms(glue(rich(text), keep, glueWide), short);
+---
+<Tag class={cls} set:html={html} />

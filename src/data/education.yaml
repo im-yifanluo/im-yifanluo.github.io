@@ -1,0 +1,8 @@
+- id: university-of-illinois-urbana-champaign
+  graduation: 2028-05
+  dateText: (expected)
+  org: University of Illinois Urbana-Champaign
+  role: B.S. Computer Science · 4.00 GPA · James Scholar · Dean's List
+  lines:
+    - "Fall 2026: Machine Perception (CS 498), Algorithms and Models of Computation (CS 374) and Computer Architecture."
+    - "Languages: C++, Python, Java, TypeScript, JavaScript, Rust, Dart, Kotlin."

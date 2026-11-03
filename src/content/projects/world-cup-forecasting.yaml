@@ -1,0 +1,48 @@
+order: 6
+title: Calibrated World Cup forecasts, run by an agent
+short: World Cup forecasting
+role: Sole author
+org: Jump Trading Probability Cup
+start: 2026-06
+end: 2026-07
+roleLine: Sole author · Jump Trading Probability Cup
+award: "#17 of 4,013 overall · #5 in the knockout stage"
+outcome: I built an engine that prices 65 types of match question from betting odds, and ran it with a Claude Code agent for 38 days.
+links:
+  - label: Code
+    url: https://github.com/im-yifanluo/jump-probability-cup
+hero:
+  media: world-cup-forecasting-hero
+  part: hero
+  alt: "Two lines climb from zero across 103 matches, slowly in the group stage and steeply in the knockouts and the final: my first bot ends at +4,732 points, #17 of 4,013 overall; my second at +4,451."
+  caption: "Match by match: knockout forecasts counted double and the final triple; the final alone moved my first bot from 31st to 17th."
+lead:
+  - "The Jump Trading Probability Cup asked for a probability on about ten yes/no questions in each of the 104 World Cup matches, scored against the field. My first bot finished #17 of 4,013; my second finished #5 in the knockout stage."
+  - "The engine never rates teams itself: it anchors every answer on the betting market's odds and models only what the market does not price. A Claude Code agent ran it in production for 38 days, under rules I set: every number came from the pipeline, and every submission was checked."
+did:
+  - "Built the pricing engine: one Dixon–Coles scoreline grid, fitted to de-margined bookmaker and Polymarket odds, answers every goal question consistently."
+  - Fitted negative-binomial models for corners, cards, shots and fouls on odds-implied scoring rates from ~41k club matches; player props follow the confirmed lineup.
+  - Mapped every question to one of 65 families, building and testing 19 new ones during the knockouts, each on the day it appeared.
+  - "Designed the agent operations: a Claude Code agent ran it for 38 days, scheduling passes before each kickoff, researching lineups and verifying every submission."
+  - "Ran my second bot as a live A/B bench: a change reached my main bot only after winning its own settled markets."
+figures:
+  - diagram: wc
+  - media: world-cup-forecasting-calibration
+    part: figure
+    alt: "Reliability diagram: my first bot’s live forecasts follow the diagonal; the crowd’s average forecast on the same markets sits below it, over-pricing events. Right: the club backtest’s 782,157 forecasts lie on the diagonal."
+    width: wide
+    caption: Forecast against outcome. Live, my forecasts averaged 42.2% where 42.2% happened; the crowd averaged 47.1%. The club backtest held within 2 points of the diagonal.
+  - media: world-cup-forecasting-categories
+    part: figure
+    alt: "Bars of my first bot’s points by market type, every one positive: goals and results +1,462, player shots on target +662, goal scorers +627, cards +479, corners +362, and smaller gains on the rest."
+    width: wide
+    caption: "Where the points came from: every market type scored above the field."
+builtWith:
+  - Python
+  - NumPy · SciPy · pandas · statsmodels
+  - Claude Code
+  - SportsPredict Model API
+  - DraftKings and Polymarket odds
+  - StatsBomb · football-data.co.uk
+credits:
+  - Odds from DraftKings (via ESPN) and Polymarket; event data from StatsBomb open data; club results and closing odds from football-data.co.uk; player season rates from API-Football. Operated with Claude Code. Not affiliated with Jump Trading, SportsPredict or FIFA.

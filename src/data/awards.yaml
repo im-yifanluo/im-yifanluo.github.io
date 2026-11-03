@@ -1,0 +1,63 @@
+- id: research-and-academic-honors
+  label: Research and academic honors
+  items:
+    - date: "2026"
+      text: URSA Best Research Poster Award, for visuomotor policy learning
+    - date: "2026"
+      text: Dean's List, Fall 2025 and Spring 2026
+    - date: "2026"
+      text: James Scholar Honors Program, The Grainger College of Engineering
+- id: competitions-and-prizes
+  label: Competitions and prizes
+  items:
+    - date: "2026"
+      text: "Jump Trading Probability Cup: #17 of 4,013 overall; #5 in the knockout stage"
+    - date: "2026"
+      text: Hoveida Foundation Commitment to Entrepreneurship Prize, Cozad New Venture Challenge (Framelight)
+    - date: "2024"
+      text: First Place, Mobile and Web, IgniteCS Programming Expo (PhotoGleam)
+- id: graduation-awards
+  label: Graduation awards
+  items:
+    - date: "2025"
+      text: Governor General's Bronze Academic Medal, highest graduating average
+    - date: "2025"
+      text: Rodger Allan Mathematics Award, top math student in the school board
+    - date: "2025"
+      text: Vishva & Kamlesh Sharma Math Award
+    - date: "2025"
+      text: DSBN Excellence in Education Award, top all-round graduating student
+- id: mathematics-contests
+  label: Mathematics contests
+  collapsed: true
+  items:
+    - date: "2024"
+      text: Caribou Mathematics Cup, top 4% worldwide and 22nd in Canada
+    - date: "2024"
+      text: Canadian Senior Mathematics Contest, Certificate of Distinction
+    - date: "2024"
+      text: Hypatia Contest, Certificate of Distinction and School Champion
+    - date: "2024"
+      text: Fermat Contest, Certificate of Distinction and School Champion
+    - date: 2023–24
+      text: Euclid Contest, Certificate of Distinction
+    - date: 2023–24
+      text: Canadian Open Mathematics Challenge, Performance with Distinction
+    - date: "2023"
+      text: Cayley Contest, Honour Roll (214th of 19,654), Certificate of Distinction and School Champion
+    - date: "2023"
+      text: Canadian Senior Mathematics Contest, Certificate of Distinction and School Champion
+    - date: "2023"
+      text: Galois Contest, Certificate of Distinction and School Champion
+    - date: "2022"
+      text: Pascal Contest, Certificate of Distinction and School Champion
+    - date: "2022"
+      text: Canadian Intermediate Mathematics Contest, Certificate of Distinction
+- id: chess
+  label: Chess
+  collapsed: true
+  items:
+    - date: "2023"
+      text: Ontario Chess Challenge, Top 10 Finalist
+    - date: "2023"
+      text: DSBN Chess Tournament, First Place

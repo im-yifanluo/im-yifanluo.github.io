@@ -1,0 +1,117 @@
+---
+// Page shell: head, the sticky glass header (nav ends on the right edge), the footer and the one inline module (header
+// state, active section, poster fades, loops).
+import '@/styles/fonts.css';
+import '@/styles/fallbacks.css';
+import '@/styles/tokens.css';
+import '@/styles/global.css';
+import { getCollection } from 'astro:content';
+import { monthHtml } from '@/lib/dates';
+import { EMAIL, GITHUB, LINKEDIN, OG_IMAGE_ALT, RESUME, REVISED, SITE } from '@/site.config';
+import { SEP } from '@/lib/typography';
+import LinkList from '@/components/LinkList.astro';
+
+interface Props { title: string; description: string; home?: boolean; noindex?: boolean }
+const { title, description, home = false, noindex = false } = Astro.props;
+const site = Astro.site!;   // astro.config.mjs always sets `site`
+const canonical = new URL(Astro.url.pathname, site).href;
+const og = new URL('/og.jpg', site).href;
+const nav = [
+  { label: 'Projects', href: home ? '#projects' : '/#projects' },
+  { label: 'Experience', href: home ? '#experience' : '/#experience' },
+  { label: 'Résumé', href: RESUME },
+];
+// Footer: the header's two anchors, mirrored. Left at x0 (where the header's name sits): "© year Name · Last updated
+// Mon YYYY"; right, ending on the right edge (where the nav ends): the contact links in the hero's order. "Last updated"
+// is the newer of the newest News item and the site's content revision (site.config.ts REVISED), so it never points at
+// an item that was removed. The year is that month's, so a rebuild never changes it on its own.
+const UPDATED = [...(await getCollection('news')).map((n) => n.data.date), REVISED].sort().at(-1)!;
+const YEAR = UPDATED.slice(0, 4);
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <script is:inline>document.documentElement.classList.add('js')</script>
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:image" content={og} />
+  <meta property="og:image:alt" content={OG_IMAGE_ALT} />
+  {!noindex && <meta property="og:url" content={canonical} />}
+  <meta name="twitter:card" content="summary_large_image" />
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap"><div class="bar">
+      {home ? <a class="home hn title" href="#top">{SITE.title}</a> : <a class="home title" href="/">{SITE.title}</a>}
+      <nav aria-label="Sections"><ul>{nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}</ul></nav>
+    </div></div>
+  </header>
+  <slot />
+  <footer class="site-footer">
+    <div class="wrap"><div class="bar">
+      <p class="copy meta"><span class="nw">© <time datetime={YEAR}>{YEAR}</time> {SITE.title}</span><Fragment set:html={SEP} /><span class="upd nw">Last updated <Fragment set:html={monthHtml(UPDATED)} /></span></p>
+      <LinkList items={[{ label: EMAIL, url: `mailto:${EMAIL}` }, { label: 'Résumé', url: RESUME }, { label: 'GitHub', url: GITHUB }, { label: 'LinkedIn', url: LINKEDIN }]} />
+    </div></div>
+  </footer>
+  <script is:inline type="module">
+const d=document.documentElement,H=document.querySelector('.site-header');
+// header: frosted + hairline once anything has scrolled under it (a 1 px sentinel at the top; no scroll listener)
+const sn=document.createElement('div');sn.setAttribute('aria-hidden','true');sn.style.cssText='position:absolute;top:0;left:0;width:1px;height:1px;pointer-events:none';document.body.prepend(sn);
+new IntersectionObserver(([e])=>d.toggleAttribute('data-scrolled',!e.isIntersecting)).observe(sn);
+// homepage: the name arrives in the bar only once the h1 has left the glass too (never two names in the bar at once)
+const h1=document.getElementById('name'),hn=H.querySelector('.hn');
+if(h1&&hn)new IntersectionObserver(([e])=>d.toggleAttribute('data-name',!e.isIntersecting&&e.boundingClientRect.bottom<=0)).observe(h1);
+// where am I: the nav item of the last section whose top has passed the reading band 40–41 % down (none above the first);
+// the observer on that line only says when to look again
+const nav=[...H.querySelectorAll('nav a[href^="#"]')],byId=new Map(nav.map(a=>[a.hash.slice(1),a])),secs=[...document.querySelectorAll('main section[id]')];
+if(byId.size&&secs.length){const paint=()=>{const y=innerHeight*.41;let cur=null;for(const x of secs)if(x.getBoundingClientRect().top<=y)cur=x;const hit=cur&&byId.get(cur.id);for(const a of nav)a===hit?a.setAttribute('aria-current','location'):a.removeAttribute('aria-current')};
+const io=new IntersectionObserver(paint,{rootMargin:'-40% 0px -59% 0px'});secs.forEach(x=>io.observe(x))}
+// a "·" never ends a line: a separator whose next item starts on a lower line is hidden. It changes
+// no layout (visibility only); without JS the dots simply stay. Re-run on resize, after the web font is ready.
+const eol=()=>{const S=[...document.querySelectorAll('.sep')];for(const s of S)s.style.visibility='';
+for(const s of S){const a=s.getBoundingClientRect();if(!a.height)continue;const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);w.currentNode=s;let n,b=null;
+while((n=w.nextNode())){if(s.contains(n))continue;const k=n.data.search(/\S/);if(k<0)continue;const r=document.createRange();r.setStart(n,k);r.setEnd(n,k+1);b=r.getClientRects()[0];if(b)break}
+if(b&&b.top>a.top+a.height/2)s.style.visibility='hidden'}};
+let eq=0;document.fonts.ready.then(eol);addEventListener('resize',()=>{cancelAnimationFrame(eq);eq=requestAnimationFrame(eol)});
+// <details> (Awards "Show all"): its rows are laid out only once open, so the end-of-line pass runs again on toggle.
+// Printing shows them: CSS does it where ::details-content exists; elsewhere a closed one opens for the print and closes after.
+document.addEventListener('toggle',e=>{if(e.target.matches?.('details'))eol()},true);
+if(!CSS.supports('selector(::details-content)')){let pd=[];addEventListener('beforeprint',()=>{pd=[...document.querySelectorAll('details:not([open])')];pd.forEach(x=>x.open=true)});addEventListener('afterprint',()=>{pd.forEach(x=>x.open=false);pd=[]})}
+// lazy posters still loading fade in over the surface (never the eager/LCP image)
+for(const i of document.querySelectorAll('.tile img,.hero img,.fig-media img')){if(i.loading==='eager'||(i.complete&&i.naturalWidth))continue;i.classList.add('fade');const ok=()=>i.classList.add('in');i.addEventListener('load',ok,{once:true});i.addEventListener('error',ok,{once:true})}
+// loops: attach and play in view only; pause off-screen, in a hidden tab, on Pause, and under reduced motion (hover/focus plays)
+const V=[...document.querySelectorAll('video[data-mp4]')];
+if(V.length){
+const B=[...document.querySelectorAll('.motion')],R=matchMedia('(prefers-reduced-motion: reduce)'),S=new Set();
+let P=false;try{P=localStorage.getItem('motion')==='paused'}catch{}
+const box=v=>v.closest('.entry,.p-body,figure')||v.parentElement;
+const load=v=>{if(v.dataset.on)return;v.dataset.on=1;const hi=v.dataset.hiMp4&&v.clientWidth*devicePixelRatio>v.width*1.1,dd=v.dataset;
+for(const[t,s]of[['video/webm; codecs="av01.0.05M.08"',hi?dd.hiWebm:dd.webm],['video/mp4',hi?dd.hiMp4:dd.mp4]]){const e=document.createElement('source');e.type=t;e.src=s;v.append(e)}
+const i=v.parentElement.querySelector('img');if(i&&i.currentSrc)v.poster=i.currentSrc;
+v.addEventListener('playing',()=>v.classList.add('on'),{once:true});v.load()};
+// Save-Data keeps the posters (the loops never load)
+const SD=!!navigator.connection?.saveData;
+const want=v=>S.has(v)&&!SD&&!document.hidden&&(R.matches?box(v).matches(':hover,:focus-within'):!P);
+const sync=v=>{if(want(v)){load(v);v.play().catch(()=>{})}else if(!v.paused)v.pause()};
+const all=()=>V.forEach(sync);
+const io=new IntersectionObserver(es=>{for(const e of es){e.isIntersecting?S.add(e.target):S.delete(e.target);sync(e.target)}},{rootMargin:'200px',threshold:.25});
+V.forEach(v=>{io.observe(v);const b=box(v);for(const t of['mouseenter','mouseleave','focusin','focusout'])b.addEventListener(t,()=>R.matches&&sync(v))});
+// under reduced motion nothing plays on its own (a loop plays only while pointed at or focused), so there is nothing to
+// pause and the control is hidden (it would say "Pause videos" over still posters)
+const paint=()=>B.forEach(b=>{b.textContent=P?'Play videos':'Pause videos';b.hidden=R.matches||SD});
+B.forEach(b=>{b.addEventListener('click',()=>{P=!P;try{localStorage.setItem('motion',P?'paused':'on')}catch{}paint();all()})});
+paint();R.addEventListener('change',()=>{paint();all()});document.addEventListener('visibilitychange',all)}
+  </script>
+</body>
+</html>

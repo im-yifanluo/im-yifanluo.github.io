@@ -1,0 +1,34 @@
+order: 7
+title: "Same chunks, different order: context assembly for long-document RAG"
+short: Long-document RAG
+role: Sole author of both harnesses
+org: FORWARD Data Lab
+start: 2025-12
+end: 2026-08
+roleLine: Sole author of both harnesses · FORWARD Data Lab, UIUC (Prof. Kevin Chang)
+outcome: "I built two controlled RAG harnesses and showed passage order alone moves accuracy about 4–5 points: up on QuALITY, down on ContractNLI."
+links: []
+tile:
+  drawn: order-strip
+hero:
+  drawn: order-strip
+  caption: "One QuALITY question I annotated by hand: the same retrieved passages, one bar each, in two orders. Only in document order did the gold passage sit beside the misleading one, and only then did the model answer right."
+lead:
+  - Putting the same retrieved passages in document order, not relevance order, raised accuracy on QuALITY and cut it on ContractNLI, by about 4–5 points each. The best order depends on the task.
+did:
+  - "Built two controlled long-document RAG harnesses as sole author: a SCROLLS context-assembly benchmark and a Hamlet QA instrument."
+  - Evaluated 10+ published RAG methods in those harnesses, official code where it exists and faithful ports otherwise, under the same retrieval, reader and token budget.
+  - Found that at high budgets the context already covered nearly whole documents on most tasks, then isolated passage order with the chunks held fixed.
+  - Showed that document order raises QuALITY accuracy by 5.13 points and cuts ContractNLI by 3.95 on the full validation set.
+  - "Designed, implemented and unit-tested an evidence-role context assembler: it finds up to five evidence roles a question needs, builds source-faithful units, covers every role greedily under the token budget and orders the result anchor-first, then by document."
+figures:
+  - diagram: rag
+  - diagram: rag-coverage
+builtWith:
+  - Python
+  - vLLM
+  - FAISS and BM25
+  - rerankers
+  - Qwen2.5 and Qwen3
+credits:
+  - "Builds on published RAG methods compared on the SCROLLS benchmark: DOS-RAG, RAPTOR, ReadAgent, SetR, CRAG, MacRAG and RECOMP, by their original authors. With Prof. Kevin Chang."

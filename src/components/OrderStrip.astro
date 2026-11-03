@@ -1,0 +1,105 @@
+---
+// The RAG study's hand-annotated QuALITY question as a still strip in the diagram style: the same
+// retrieved passages in two orders, one bar each, the gold passage in the accent blue and the misleading one in ink.
+// A still drawing, not a loop: it reads at tile size and needs only a one-line caption.
+//   box="hero"  HTML labels at the site's meta size over an SVG of the bars, so it reflows on a phone (the page hero)
+//   box="tile"  one 320 × 180 drawing for the homepage row; decorative and hidden from AT like every tile, no numbers
+// Positions (1-based) from the study's evidence map and annotations: chunk ids 21 (gold) and 22 (misleading) of
+// question 52845_75VB1ISR_1 ("10 hours vs 12 years"). Relevance order puts the misleading passage 1st and the gold
+// 42nd, document order puts them 22nd and 23rd.
+// 76 passages in all (the count stays off the page).
+
+interface Props { box: 'hero' | 'tile'; href?: string }
+const { box, href } = Astro.props;
+
+const N = 76;
+const ROWS = [
+  { name: 'Relevance order', out: 'answered wrong', gold: 42, dist: 1, ok: false },
+  { name: 'Document order', out: 'answered right', gold: 22, dist: 23, ok: true },
+] as const;
+const ord = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th'}`;
+const G = (n: number) => `<span class="g">gold, ${ord(n)}</span>`, Dm = (n: number) => `<span class="d">misleading, ${ord(n)}</span>`;
+/** The labels under a row's two marked bars, left-aligned on each bar; side by side they share one label. */
+const marks = (r: (typeof ROWS)[number]) =>
+  Math.abs(r.gold - r.dist) === 1
+    ? [{ at: Math.min(r.gold, r.dist), html: r.gold < r.dist ? `${G(r.gold)} · ${Dm(r.dist)}` : `${Dm(r.dist)} · ${G(r.gold)}` }]
+    : [{ at: r.gold, html: G(r.gold) }, { at: r.dist, html: Dm(r.dist) }].sort((a, b) => a.at - b.at);
+
+// bars: a 10-unit pitch, 4 units wide (the hero's SVG stretches to the plate's width; the tile's draws at 320 × 180)
+const PITCH = 10, BW = 4;
+const fill = (r: (typeof ROWS)[number], p: number) => (p === r.gold ? 'var(--os-gold)' : p === r.dist ? 'var(--os-dist)' : 'var(--os-bar)');
+/** A bar's left edge, in % of the row (the mark's --x; CSS turns it into a container-relative position). */
+const pct = (p: number) => +((((p - 1) * PITCH + (PITCH - BW) / 2) / (N * PITCH)) * 100).toFixed(3);
+// the tile's drawing box: two rows (name baseline, then the bars) and a key under them (which bar is the gold passage),
+// number-free like every tile
+const T = { x0: 20, x1: 300, bar: 34, rowY: [30, 96], keyY: 160 };
+const tx = (p: number) => T.x0 + ((p - 1) * (T.x1 - T.x0)) / N + ((T.x1 - T.x0) / N - 1.6) / 2;
+---
+{box === 'hero' ? (
+  <div class="hero os">
+    {ROWS.map((r) => (
+      <div class="os-row">
+        <p class="os-head"><span class="os-name">{r.name}</span><span class="sr">: </span><span class:list={['os-out', r.ok && 'ok']}>{r.out}</span><span class="sr">.</span></p>
+        <svg class="os-bars" viewBox={`0 0 ${N * PITCH} 1`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          {Array.from({ length: N }, (_, k) => <rect x={k * PITCH + (PITCH - BW) / 2} width={BW} height="1" fill={fill(r, k + 1)} />)}
+        </svg>
+        <p class="os-marks">{marks(r).map((m, k) => <Fragment>{k > 0 && <span class="sr">, </span>}<span class="os-mark" style={`--x:${pct(m.at)}`} set:html={m.html} /></Fragment>)}</p>
+      </div>
+    ))}
+  </div>
+) : (
+  <a class="tile os-tile" href={href} tabindex="-1" aria-hidden="true">
+    <svg viewBox="0 0 320 180" focusable="false">
+      {ROWS.map((r, i) => {
+        const y = T.rowY[i];
+        return (
+          <g>
+            <text x={T.x0} y={y} class="n">{r.name}</text>
+            <text x={T.x1} y={y} text-anchor="end" class:list={['o', r.ok && 'ok']}>{r.ok ? 'right answer' : 'wrong answer'}</text>
+            {Array.from({ length: N }, (_, k) => <rect x={tx(k + 1).toFixed(2)} y={y + 8} width="1.6" height={T.bar} fill={fill(r, k + 1)} />)}
+          </g>
+        );
+      })}
+      <g class="key">
+        <rect x={T.x0} y={T.keyY - 10} width="2.4" height="11" fill="var(--os-gold)" />
+        <text x={T.x0 + 8} y={T.keyY}>gold passage</text>
+        <rect x={T.x0 + 104} y={T.keyY - 10} width="2.4" height="11" fill="var(--os-dist)" />
+        <text x={T.x0 + 112} y={T.keyY}>misleading passage</text>
+      </g>
+    </svg>
+  </a>
+)}
+
+<style>
+  .os, .os-tile { --os-plate: #F6F6F4; --os-bar: #CFCFCB; --os-dist: var(--ink-2); --os-gold: var(--accent); }
+  .os { aspect-ratio: auto; padding: var(--s5); background: var(--os-plate); }
+  .os-row + .os-row { margin-top: var(--s5); }
+  .os-head, .os-marks { font-family: var(--font-meta); font-size: var(--fs-meta); line-height: var(--lh-meta); font-weight: var(--w-meta);
+    letter-spacing: var(--ls-meta); }
+  .os-head { display: flex; justify-content: space-between; gap: var(--s4); text-wrap: nowrap; }
+  .os-name { color: var(--head); font-weight: 400; }
+  .os-out { color: var(--ink-2); }
+  .os-out.ok { color: var(--head); }
+  .os-bars { display: block; width: 100%; height: 56px; margin-top: var(--s2); }
+  .os-marks { position: relative; height: var(--lh-meta); margin-top: var(--s1); container-type: inline-size; }
+  /* left-aligned on its bar; a label that would run past the bars' right edge shifts left just enough to end there
+     (320 px phones) */
+  .os-mark { position: absolute; top: 0; white-space: nowrap; left: calc(var(--x) * 1cqw); translate: min(0px, calc(100cqw - var(--x) * 1cqw - 100%)) 0; }
+  .os-mark :global(.g) { color: var(--accent); }   /* set:html content carries no scope class */
+  .os-mark :global(.d) { color: var(--ink); }
+  .os-tile { background: var(--os-plate); }
+  .os-tile svg { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform var(--t-media) var(--ease-out); }
+  .os-tile text { font-family: var(--font-meta); font-size: 13px; font-weight: var(--w-meta); letter-spacing: var(--ls-meta); fill: var(--head); }
+  .os-tile text.o { fill: var(--ink-2); }
+  .os-tile text.o.ok { fill: var(--head); }
+  .os-tile .key text { fill: var(--ink-2); }
+  /* Windows high contrast: SVG fills are not forced, so the bars take system colours that stay apart */
+  @media (forced-colors: active) {
+    .os, .os-tile { --os-bar: GrayText; --os-dist: CanvasText; --os-gold: Highlight; }
+    .os-mark :global(.g) { color: Highlight; }
+  }
+  @media (max-width: 719px) {
+    .os { padding: var(--s4); }
+    .os-bars { height: 40px; }
+  }
+</style>

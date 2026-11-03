@@ -1,0 +1,45 @@
+order: 5
+title: "PhotoGleam: Gemini picks the edits for each photo"
+short: PhotoGleam
+role: Sole developer
+start: 2024-04
+end: 2024-08
+roleLine: Sole developer
+award: First Place, Mobile and Web · IgniteCS Programming Expo
+outcome: "A photo app on both app stores: Gemini writes a set of named filters for each photo, and my server applies them."
+links:
+  - label: App Store
+    url: https://apps.apple.com/us/app/photogleam/id6584512120
+  - label: Google Play
+    url: https://play.google.com/store/apps/details?id=com.codingminds.yifan_ai_filters
+hero:
+  media: photogleam
+  part: hero
+  alt: "Two iPhone screens: the PhotoGleam camera page aimed at a monitor box on a wooden floor, then the filter page with the same shot in black and white under the title B&W Classic, its description and a Save Image button."
+  caption: "PhotoGleam on an iPhone: a shot from the camera page, and the first filter Gemini returned for it, B&W Classic."
+lead:
+  - "PhotoGleam edits a photo the way a photographer would, without asking anything. Gemini looks at the photo and writes a set of filters for it alone: each has a name, four adjustments (brightness, contrast, color and sharpness) and a sentence on what it does. Swipe through them and save the one you like."
+  - "I built all three parts: the Flutter app, the Flask server and the engine between Gemini and Pillow. It shipped on the App Store and Google Play in 2024, won First Place, Mobile and Web, at the IgniteCS Programming Expo 2024 and has a patent filed."
+did:
+  - "Built the Flutter app for iOS and Android: camera and upload, a swipeable carousel of the returned filters with their names and reasons, saving to the phone, and a gallery."
+  - "Wrote the engine: one call sends the photo to Gemini with a fixed prompt and a JSON template and gets back named filters, each a factor for brightness, contrast, color and sharpness plus a one-line reason; Pillow's ImageEnhance applies them in that order."
+  - Ran it as a Flask server on AWS EC2 with two routes, one that asks Gemini for filters and one that renders a filter; each upload is deleted after its request.
+  - "Shipped v1.0 on the App Store in July 2024 and v2.0 in September 2024, and kept it current: in May 2026 I moved it from Gemini 1.5 Pro to Gemini 2.5 Flash."
+figures:
+  - diagram: photogleam
+  - media: photogleam
+    part: figure
+    alt: "Three PhotoGleam screens side by side, each titled AI-Generated Filters and showing the same photo of a zebra in dry grass under a different filter: Cool Hues, Dark & Moody and Dramatic Stripes, each with a one-line description and a Save Image button."
+    width: wide
+    caption: "One photo, three of the filters Gemini wrote for it: Cool Hues, Dark & Moody and Dramatic Stripes, each with its own adjustments and a sentence on what it does."
+    captionPhone: "One of the filters Gemini wrote for a photo: Dark & Moody, with its own adjustments and a sentence on what it does."
+builtWith:
+  - Flutter (Dart)
+  - Flask (Python)
+  - Gemini API
+  - Pillow
+  - OpenCV
+  - TensorFlow
+  - AWS EC2
+credits:
+  - Builds on the Gemini API and Pillow.

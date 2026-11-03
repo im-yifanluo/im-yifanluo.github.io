@@ -1,0 +1,12 @@
+---
+// A link row: items glued to their separator ("App Store&nbsp;· Google Play"), so a line never starts with "·".
+import { SEP } from '@/lib/typography';
+
+interface Props { items: { label: string; url: string }[] }
+const { items } = Astro.props;
+---
+{items.length > 0 && (
+  <ul class="links">
+    {items.map((l, i) => <li><a href={l.url}>{l.label}</a>{i < items.length - 1 && <Fragment set:html={SEP} />}</li>)}
+  </ul>
+)}

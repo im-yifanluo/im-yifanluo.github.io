@@ -1,0 +1,6 @@
+- id: rem
+  date: "2026"
+  text: "Rem, at the Berkeley AI Hackathon: I owned the video-to-3D reconstruction stage (`ffmpeg` → COLMAP → gsplat) in a team of five."
+- id: space-and-shapes
+  date: "2026"
+  text: "[Space and Shapes](https://space-and-shapes.vercel.app): two p5.js pieces, 'The Doorway' and 'Crosshatched'."

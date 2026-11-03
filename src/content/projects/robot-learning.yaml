@@ -1,0 +1,59 @@
+order: 2
+title: Imitation learning on a real UR5e, from capture to rollout
+short: Robot learning
+role: Built it end to end
+org: RoboTouch Lab
+start: 2026-04
+end: 2026-07
+roleLine: Built it end to end · RoboTouch Lab, UIUC (Prof. Wenzhen Yuan)
+award: URSA Best Research Poster Award
+outcome: I built a pipeline from 500+ demonstrations to diffusion policies; after my fixes, ones I trained on lab data grasped an Allen key and turned a knob.
+links:
+  - label: Code
+    url: https://github.com/im-yifanluo/universal_manipulation_interface_custom/blob/main/CUSTOM_USAGE.md
+hero:
+  media: robot-learning
+  part: hero
+  alt: A UR5e robot arm with a two-finger gripper over a lab table, an AprilTag board and a small red cube in front of it.
+  caption: The UR5e arm and gripper my policies ran on, at RoboTouch Lab.
+lead:
+  - I built a real-world imitation-learning pipeline on the UMI stack, on my own rig and data, and trained diffusion policies for a UR5e arm; the work won the URSA Best Research Poster Award (2026).
+  - On the real arm I traced three failures from the logs and fixed them; after the fixes, policies I trained on the lab's teleop datasets grasped an Allen key and turned a knob.
+didGroups:
+  - id: data
+    label: From handheld clips to trained policies
+    did:
+      - Collected 500+ demonstrations, handheld and in simulation, and built the data path that turns my GoPro clips into metric 3D trajectories and training episodes.
+      - "Tracked my recordings with ORB-SLAM3 + IMU and built a SLAM QA tool to check them: all 197 cylinder grasps tracked start to finish."
+      - Trained diffusion policies for ≈180 GPU-hours on one RTX 5080, after porting the stack to Blackwell, and wrote an HDF5 → zarr converter with validation for the lab's datasets.
+      - Pretrained a visuo-tactile CLIP encoder (FreeTacMan method), fixed its scheduler and normalization bugs, and integrated it into the lab's Diffusion Policy fork.
+  - id: on-the-robot
+    label: From logs to working rollouts
+    did:
+      - Wrote the ROS 2 node that runs the policies on the UR5e, smoothing 10 Hz plans into 60 Hz commands, and a step-mode harness that logs every input and predicted plan.
+      - Fixed the gripper snapping shut (it opens wider than UMI's convention) and the robot's speed (actions were 0.3 s apart, not 0.1 s).
+      - Measured the arm's lag at 0.13–0.15 s, found a backward jerk at every plan hand-off and made each new plan start further ahead.
+figures:
+  - diagram: umi
+  - media: umi-demo
+    part: figure
+    alt: Fisheye video from the handheld gripper’s camera as it reaches for and grasps a cup on the lab table.
+    width: text
+    caption: "One demonstration as the gripper's GoPro saw it: fisheye view, ArUco finger tags at the bottom."
+  - media: robot-learning
+    part: tile
+    alt: "The wrist camera’s view: green gripper fingers close on a black dial and turn it."
+    width: text
+    caption: The wrist camera during a knob-turning rollout of a policy I trained on the lab's teleop dataset.
+builtWith:
+  - ORB-SLAM3 + IMU
+  - ArUco fiducials
+  - PyTorch
+  - CLIP ViT-B/16
+  - HDF5 and zarr
+  - ROS 2
+  - Python
+  - UR5e
+  - linear + SLERP interpolation
+credits:
+  - Builds on UMI (Chi et al., RSS 2024) and Diffusion Policy (Chi et al.). With Prof. Wenzhen Yuan (PI) and Jingyi Xiang (mentor), RoboTouch Lab.

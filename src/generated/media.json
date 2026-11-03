@@ -1,0 +1,853 @@
+{
+ "framelight": {
+  "tile": {
+   "poster": {
+    "widths": [
+     640,
+     960,
+     1280
+    ],
+    "avif": [
+     "/media/framelight-640.avif 640w",
+     "/media/framelight-960.avif 960w",
+     "/media/framelight-1280.avif 1280w"
+    ],
+    "webp": [
+     "/media/framelight-640.webp 640w",
+     "/media/framelight-960.webp 960w",
+     "/media/framelight-1280.webp 1280w"
+    ],
+    "src": "/media/framelight-640.webp",
+    "bytes": {
+     "640": {
+      "avif": 13631,
+      "webp": 23008
+     },
+     "960": {
+      "avif": 24785,
+      "webp": 41734
+     },
+     "1280": {
+      "avif": 38011,
+      "webp": 64972
+     }
+    }
+   },
+   "loops": []
+  },
+  "hero": {
+   "kind": "still",
+   "poster": {
+    "widths": [
+     1280,
+     1760
+    ],
+    "avif": [
+     "/media/framelight-hero-1280.avif 1280w",
+     "/media/framelight-hero-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/framelight-hero-1280.webp 1280w",
+     "/media/framelight-hero-1760.webp 1760w"
+    ],
+    "src": "/media/framelight-hero-1280.webp",
+    "bytes": {
+     "1280": {
+      "avif": 32758,
+      "webp": 55588
+     },
+     "1760": {
+      "avif": 53359,
+      "webp": 92012
+     }
+    }
+   },
+   "phone": {
+    "widths": [
+     736,
+     1104
+    ],
+    "avif": [
+     "/media/framelight-hero-phone-736.avif 736w",
+     "/media/framelight-hero-phone-1104.avif 1104w"
+    ],
+    "webp": [
+     "/media/framelight-hero-phone-736.webp 736w",
+     "/media/framelight-hero-phone-1104.webp 1104w"
+    ],
+    "src": "/media/framelight-hero-phone-736.webp",
+    "bytes": {
+     "736": {
+      "avif": 16827,
+      "webp": 28144
+     },
+     "1104": {
+      "avif": 30188,
+      "webp": 50886
+     }
+    },
+    "w": 1104,
+    "h": 621
+   }
+  }
+ },
+ "robot-learning": {
+  "tile": {
+   "poster": {
+    "widths": [
+     640
+    ],
+    "avif": [
+     "/media/robot-learning-640.avif 640w"
+    ],
+    "webp": [
+     "/media/robot-learning-640.webp 640w"
+    ],
+    "src": "/media/robot-learning-640.webp",
+    "bytes": {
+     "640": {
+      "avif": 5089,
+      "webp": 6304
+     }
+    }
+   },
+   "loops": [
+    {
+     "w": 640,
+     "h": 360,
+     "mp4": "/media/robot-learning-640.mp4",
+     "webm": "/media/robot-learning-640.webm",
+     "mp4Bytes": 147476,
+     "webmBytes": 96900,
+     "crf": 25,
+     "crfAv1": 35,
+     "duration": 2.6,
+     "fps": "30/1"
+    }
+   ]
+  },
+  "hero": {
+   "kind": "still",
+   "poster": {
+    "widths": [
+     1280,
+     1760
+    ],
+    "avif": [
+     "/media/robot-learning-hero-1280.avif 1280w",
+     "/media/robot-learning-hero-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/robot-learning-hero-1280.webp 1280w",
+     "/media/robot-learning-hero-1760.webp 1760w"
+    ],
+    "src": "/media/robot-learning-hero-1280.webp",
+    "bytes": {
+     "1280": {
+      "avif": 31202,
+      "webp": 53288
+     },
+     "1760": {
+      "avif": 48025,
+      "webp": 80188
+     }
+    }
+   }
+  },
+  "gains": [
+   0.9763666924990231,
+   0.9982765935757001,
+   1.027204461340154
+  ]
+ },
+ "apriltag-overlay": {
+  "tile": {
+   "poster": {
+    "widths": [
+     640,
+     944
+    ],
+    "avif": [
+     "/media/apriltag-overlay-640.avif 640w",
+     "/media/apriltag-overlay-944.avif 944w"
+    ],
+    "webp": [
+     "/media/apriltag-overlay-640.webp 640w",
+     "/media/apriltag-overlay-944.webp 944w"
+    ],
+    "src": "/media/apriltag-overlay-640.webp",
+    "bytes": {
+     "640": {
+      "avif": 7440,
+      "webp": 9046
+     },
+     "944": {
+      "avif": 13166,
+      "webp": 15536
+     }
+    }
+   },
+   "loops": []
+  },
+  "hero": {
+   "kind": "still",
+   "poster": {
+    "widths": [
+     1280,
+     1760
+    ],
+    "avif": [
+     "/media/apriltag-overlay-hero-1280.avif 1280w",
+     "/media/apriltag-overlay-hero-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/apriltag-overlay-hero-1280.webp 1280w",
+     "/media/apriltag-overlay-hero-1760.webp 1760w"
+    ],
+    "src": "/media/apriltag-overlay-hero-1280.webp",
+    "bytes": {
+     "1280": {
+      "avif": 11380,
+      "webp": 14734
+     },
+     "1760": {
+      "avif": 17744,
+      "webp": 22754
+     }
+    }
+   },
+   "phone": {
+    "widths": [
+     704,
+     1056
+    ],
+    "avif": [
+     "/media/apriltag-overlay-hero-phone-704.avif 704w",
+     "/media/apriltag-overlay-hero-phone-1056.avif 1056w"
+    ],
+    "webp": [
+     "/media/apriltag-overlay-hero-phone-704.webp 704w",
+     "/media/apriltag-overlay-hero-phone-1056.webp 1056w"
+    ],
+    "w": 1056,
+    "h": 787,
+    "src": "/media/apriltag-overlay-hero-phone-704.webp"
+   }
+  },
+  "gains": [
+   1.0287,
+   0.9833,
+   0.9895
+  ]
+ },
+ "umi-demo": {
+  "figure": {
+   "poster": {
+    "widths": [
+     640
+    ],
+    "avif": [
+     "/media/umi-demo-640.avif 640w"
+    ],
+    "webp": [
+     "/media/umi-demo-640.webp 640w"
+    ],
+    "src": "/media/umi-demo-640.webp",
+    "bytes": {
+     "640": {
+      "avif": 9642,
+      "webp": 13576
+     }
+    }
+   },
+   "loops": [
+    {
+     "w": 640,
+     "h": 360,
+     "mp4": "/media/umi-demo-640.mp4",
+     "webm": "/media/umi-demo-640.webm",
+     "mp4Bytes": 338112,
+     "webmBytes": 269007,
+     "crf": 25,
+     "crfAv1": 35,
+     "duration": 7.37,
+     "fps": "30/1"
+    }
+   ]
+  }
+ },
+ "world-cup-forecasting": {
+  "tile": {
+   "poster": {
+    "widths": [
+     640,
+     960,
+     1280
+    ],
+    "avif": [
+     "/media/world-cup-forecasting-640.avif 640w",
+     "/media/world-cup-forecasting-960.avif 960w",
+     "/media/world-cup-forecasting-1280.avif 1280w"
+    ],
+    "webp": [
+     "/media/world-cup-forecasting-640.webp 640w",
+     "/media/world-cup-forecasting-960.webp 960w",
+     "/media/world-cup-forecasting-1280.webp 1280w"
+    ],
+    "src": "/media/world-cup-forecasting-640.webp",
+    "bytes": {
+     "640": {
+      "avif": 3088,
+      "webp": 5746
+     },
+     "960": {
+      "avif": 4313,
+      "webp": 9164
+     },
+     "1280": {
+      "avif": 5309,
+      "webp": 12812
+     }
+    }
+   },
+   "loops": [
+    {
+     "w": 640,
+     "h": 360,
+     "mp4": "/media/world-cup-forecasting-640.mp4",
+     "webm": "/media/world-cup-forecasting-640.webm",
+     "mp4Bytes": 45854,
+     "webmBytes": 44431,
+     "crf": 25,
+     "crfAv1": 38,
+     "duration": 7.2,
+     "fps": "30/1"
+    },
+    {
+     "w": 960,
+     "h": 540,
+     "mp4": "/media/world-cup-forecasting-960.mp4",
+     "webm": "/media/world-cup-forecasting-960.webm",
+     "mp4Bytes": 67711,
+     "webmBytes": 66962,
+     "crf": 25,
+     "crfAv1": 37,
+     "duration": 7.2,
+     "fps": "30/1"
+    }
+   ]
+  }
+ },
+ "world-cup-forecasting-hero": {
+  "hero": {
+   "kind": "still",
+   "poster": {
+    "widths": [
+     1280,
+     1760
+    ],
+    "avif": [
+     "/media/world-cup-forecasting-hero-1280.avif 1280w",
+     "/media/world-cup-forecasting-hero-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/world-cup-forecasting-hero-1280.webp 1280w",
+     "/media/world-cup-forecasting-hero-1760.webp 1760w"
+    ],
+    "src": "/media/world-cup-forecasting-hero-1280.webp",
+    "bytes": {
+     "1280": {
+      "avif": 15650,
+      "webp": 23836
+     },
+     "1760": {
+      "avif": 21006,
+      "webp": 35700
+     }
+    }
+   },
+   "phone": {
+    "widths": [
+     736,
+     1104
+    ],
+    "avif": [
+     "/media/world-cup-forecasting-hero-phone-736.avif 736w",
+     "/media/world-cup-forecasting-hero-phone-1104.avif 1104w"
+    ],
+    "webp": [
+     "/media/world-cup-forecasting-hero-phone-736.webp 736w",
+     "/media/world-cup-forecasting-hero-phone-1104.webp 1104w"
+    ],
+    "w": 1104,
+    "h": 621,
+    "src": "/media/world-cup-forecasting-hero-phone-736.webp"
+   }
+  }
+ },
+ "world-cup-forecasting-calibration": {
+  "figure": {
+   "poster": {
+    "widths": [
+     880,
+     1320,
+     1760
+    ],
+    "avif": [
+     "/media/world-cup-forecasting-calibration-880.avif 880w",
+     "/media/world-cup-forecasting-calibration-1320.avif 1320w",
+     "/media/world-cup-forecasting-calibration-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/world-cup-forecasting-calibration-880.webp 880w",
+     "/media/world-cup-forecasting-calibration-1320.webp 1320w",
+     "/media/world-cup-forecasting-calibration-1760.webp 1760w"
+    ],
+    "src": "/media/world-cup-forecasting-calibration-880.webp",
+    "bytes": {
+     "880": {
+      "avif": 15218,
+      "webp": 18460
+     },
+     "1320": {
+      "avif": 24449,
+      "webp": 30888
+     },
+     "1760": {
+      "avif": 28348,
+      "webp": 43808
+     }
+    }
+   },
+   "loops": [],
+   "phone": {
+    "widths": [
+     736,
+     1104
+    ],
+    "avif": [
+     "/media/world-cup-forecasting-calibration-phone-736.avif 736w",
+     "/media/world-cup-forecasting-calibration-phone-1104.avif 1104w"
+    ],
+    "webp": [
+     "/media/world-cup-forecasting-calibration-phone-736.webp 736w",
+     "/media/world-cup-forecasting-calibration-phone-1104.webp 1104w"
+    ],
+    "w": 1104,
+    "h": 2184,
+    "src": "/media/world-cup-forecasting-calibration-phone-736.webp"
+   }
+  }
+ },
+ "world-cup-forecasting-categories": {
+  "figure": {
+   "poster": {
+    "widths": [
+     880,
+     1320,
+     1760
+    ],
+    "avif": [
+     "/media/world-cup-forecasting-categories-880.avif 880w",
+     "/media/world-cup-forecasting-categories-1320.avif 1320w",
+     "/media/world-cup-forecasting-categories-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/world-cup-forecasting-categories-880.webp 880w",
+     "/media/world-cup-forecasting-categories-1320.webp 1320w",
+     "/media/world-cup-forecasting-categories-1760.webp 1760w"
+    ],
+    "src": "/media/world-cup-forecasting-categories-880.webp",
+    "bytes": {
+     "880": {
+      "avif": 13277,
+      "webp": 18784
+     },
+     "1320": {
+      "avif": 21700,
+      "webp": 31832
+     },
+     "1760": {
+      "avif": 28956,
+      "webp": 44328
+     }
+    }
+   },
+   "loops": [],
+   "phone": {
+    "widths": [
+     736,
+     1104
+    ],
+    "avif": [
+     "/media/world-cup-forecasting-categories-phone-736.avif 736w",
+     "/media/world-cup-forecasting-categories-phone-1104.avif 1104w"
+    ],
+    "webp": [
+     "/media/world-cup-forecasting-categories-phone-736.webp 736w",
+     "/media/world-cup-forecasting-categories-phone-1104.webp 1104w"
+    ],
+    "w": 1104,
+    "h": 1656,
+    "src": "/media/world-cup-forecasting-categories-phone-736.webp"
+   }
+  }
+ },
+ "memos": {
+  "tile": {
+   "poster": {
+    "widths": [
+     640,
+     960,
+     1280
+    ],
+    "avif": [
+     "/media/memos-640.avif 640w",
+     "/media/memos-960.avif 960w",
+     "/media/memos-1280.avif 1280w"
+    ],
+    "webp": [
+     "/media/memos-640.webp 640w",
+     "/media/memos-960.webp 960w",
+     "/media/memos-1280.webp 1280w"
+    ],
+    "src": "/media/memos-640.webp",
+    "bytes": {
+     "640": {
+      "avif": 14250,
+      "webp": 21194
+     },
+     "960": {
+      "avif": 22880,
+      "webp": 34520
+     },
+     "1280": {
+      "avif": 31914,
+      "webp": 47500
+     }
+    }
+   },
+   "loops": [
+    {
+     "w": 640,
+     "h": 360,
+     "mp4": "/media/memos-640.mp4",
+     "webm": "/media/memos-640.webm",
+     "mp4Bytes": 301969,
+     "webmBytes": 270337,
+     "crf": 25,
+     "crfAv1": 35,
+     "duration": 6,
+     "fps": "30/1"
+    },
+    {
+     "w": 960,
+     "h": 540,
+     "mp4": "/media/memos-960.mp4",
+     "webm": "/media/memos-960.webm",
+     "mp4Bytes": 556916,
+     "webmBytes": 515540,
+     "crf": 25,
+     "crfAv1": 35,
+     "duration": 6,
+     "fps": "30/1"
+    }
+   ]
+  }
+ },
+ "memos-hero": {
+  "hero": {
+   "kind": "loop",
+   "poster": {
+    "widths": [
+     640,
+     960,
+     1280
+    ],
+    "avif": [
+     "/media/memos-hero-640.avif 640w",
+     "/media/memos-hero-960.avif 960w",
+     "/media/memos-hero-1280.avif 1280w"
+    ],
+    "webp": [
+     "/media/memos-hero-640.webp 640w",
+     "/media/memos-hero-960.webp 960w",
+     "/media/memos-hero-1280.webp 1280w"
+    ],
+    "src": "/media/memos-hero-640.webp",
+    "bytes": {
+     "640": {
+      "avif": 15421,
+      "webp": 23022
+     },
+     "960": {
+      "avif": 25169,
+      "webp": 37808
+     },
+     "1280": {
+      "avif": 35065,
+      "webp": 52140
+     }
+    }
+   },
+   "loops": [
+    {
+     "w": 960,
+     "h": 540,
+     "mp4": "/media/memos-hero-960.mp4",
+     "webm": "/media/memos-hero-960.webm",
+     "mp4Bytes": 639526,
+     "webmBytes": 601128,
+     "crf": 26,
+     "crfAv1": 35,
+     "duration": 8,
+     "fps": "30/1"
+    },
+    {
+     "w": 1280,
+     "h": 720,
+     "mp4": "/media/memos-hero-1280.mp4",
+     "webm": "/media/memos-hero-1280.webm",
+     "mp4Bytes": 995225,
+     "webmBytes": 937347,
+     "crf": 26,
+     "crfAv1": 35,
+     "duration": 8,
+     "fps": "30/1"
+    }
+   ]
+  }
+ },
+ "photogleam": {
+  "tile": {
+   "poster": {
+    "widths": [
+     640,
+     960
+    ],
+    "avif": [
+     "/media/photogleam-640.avif 640w",
+     "/media/photogleam-960.avif 960w"
+    ],
+    "webp": [
+     "/media/photogleam-640.webp 640w",
+     "/media/photogleam-960.webp 960w"
+    ],
+    "bytes": {
+     "640": {
+      "avif": 6251,
+      "webp": 10032
+     },
+     "960": {
+      "avif": 10921,
+      "webp": 17754
+     }
+    },
+    "src": "/media/photogleam-640.webp"
+   },
+   "loops": []
+  },
+  "hero": {
+   "kind": "still",
+   "poster": {
+    "widths": [
+     1280,
+     1760
+    ],
+    "avif": [
+     "/media/photogleam-hero-1280.avif 1280w",
+     "/media/photogleam-hero-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/photogleam-hero-1280.webp 1280w",
+     "/media/photogleam-hero-1760.webp 1760w"
+    ],
+    "bytes": {
+     "1280": {
+      "avif": 16578,
+      "webp": 26056
+     },
+     "1760": {
+      "avif": 26295,
+      "webp": 40362
+     }
+    },
+    "src": "/media/photogleam-hero-1280.webp"
+   },
+   "phone": {
+    "widths": [
+     736,
+     1104
+    ],
+    "avif": [
+     "/media/photogleam-hero-phone-736.avif 736w",
+     "/media/photogleam-hero-phone-1104.avif 1104w"
+    ],
+    "webp": [
+     "/media/photogleam-hero-phone-736.webp 736w",
+     "/media/photogleam-hero-phone-1104.webp 1104w"
+    ],
+    "w": 1104,
+    "h": 1104,
+    "src": "/media/photogleam-hero-phone-736.webp"
+   }
+  },
+  "figure": {
+   "poster": {
+    "widths": [
+     880,
+     1320,
+     1760
+    ],
+    "avif": [
+     "/media/photogleam-filters-880.avif 880w",
+     "/media/photogleam-filters-1320.avif 1320w",
+     "/media/photogleam-filters-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/photogleam-filters-880.webp 880w",
+     "/media/photogleam-filters-1320.webp 1320w",
+     "/media/photogleam-filters-1760.webp 1760w"
+    ],
+    "w": 1760,
+    "h": 990,
+    "src": "/media/photogleam-filters-880.webp"
+   },
+   "phone": {
+    "widths": [
+     736,
+     1104
+    ],
+    "avif": [
+     "/media/photogleam-filters-phone-736.avif 736w",
+     "/media/photogleam-filters-phone-1104.avif 1104w"
+    ],
+    "webp": [
+     "/media/photogleam-filters-phone-736.webp 736w",
+     "/media/photogleam-filters-phone-1104.webp 1104w"
+    ],
+    "w": 1104,
+    "h": 1380,
+    "src": "/media/photogleam-filters-phone-736.webp"
+   },
+   "loops": []
+  }
+ },
+ "framelight-shots": {
+  "figure": {
+   "poster": {
+    "widths": [
+     880,
+     1320,
+     1760
+    ],
+    "avif": [
+     "/media/framelight-shots-880.avif 880w",
+     "/media/framelight-shots-1320.avif 1320w",
+     "/media/framelight-shots-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/framelight-shots-880.webp 880w",
+     "/media/framelight-shots-1320.webp 1320w",
+     "/media/framelight-shots-1760.webp 1760w"
+    ],
+    "w": 1760,
+    "h": 627,
+    "src": "/media/framelight-shots-880.webp"
+   },
+   "loops": [],
+   "phone": {
+    "widths": [
+     736,
+     1104
+    ],
+    "avif": [
+     "/media/framelight-shots-phone-736.avif 736w",
+     "/media/framelight-shots-phone-1104.avif 1104w"
+    ],
+    "webp": [
+     "/media/framelight-shots-phone-736.webp 736w",
+     "/media/framelight-shots-phone-1104.webp 1104w"
+    ],
+    "w": 1104,
+    "h": 1428,
+    "src": "/media/framelight-shots-phone-736.webp"
+   }
+  }
+ },
+ "og": {
+  "og": {
+   "src": "/og.jpg",
+   "w": 1200,
+   "h": 630,
+   "bytes": 82059
+  }
+ },
+ "framelight-prompts": {
+  "figure": {
+   "poster": {
+    "widths": [
+     880,
+     1320,
+     1760
+    ],
+    "avif": [
+     "/media/framelight-prompts-880.avif 880w",
+     "/media/framelight-prompts-1320.avif 1320w",
+     "/media/framelight-prompts-1760.avif 1760w"
+    ],
+    "webp": [
+     "/media/framelight-prompts-880.webp 880w",
+     "/media/framelight-prompts-1320.webp 1320w",
+     "/media/framelight-prompts-1760.webp 1760w"
+    ],
+    "w": 1760,
+    "h": 1227,
+    "src": "/media/framelight-prompts-880.webp"
+   },
+   "loops": [],
+   "phone": {
+    "widths": [
+     736,
+     1104
+    ],
+    "avif": [
+     "/media/framelight-prompts-phone-736.avif 736w",
+     "/media/framelight-prompts-phone-1104.avif 1104w"
+    ],
+    "webp": [
+     "/media/framelight-prompts-phone-736.webp 736w",
+     "/media/framelight-prompts-phone-1104.webp 1104w"
+    ],
+    "w": 1104,
+    "h": 1380,
+    "src": "/media/framelight-prompts-phone-736.webp"
+   }
+  }
+ },
+ "ar-overlay-ycb-2": {
+  "figure": {
+   "poster": {
+    "widths": [
+     520,
+     780,
+     1040
+    ],
+    "avif": [
+     "/media/ar-overlay-ycb-2-520.avif 520w",
+     "/media/ar-overlay-ycb-2-780.avif 780w",
+     "/media/ar-overlay-ycb-2-1040.avif 1040w"
+    ],
+    "webp": [
+     "/media/ar-overlay-ycb-2-520.webp 520w",
+     "/media/ar-overlay-ycb-2-780.webp 780w",
+     "/media/ar-overlay-ycb-2-1040.webp 1040w"
+    ],
+    "w": 1339,
+    "h": 990,
+    "src": "/media/ar-overlay-ycb-2-520.webp"
+   },
+   "loops": []
+  }
+ }
+}
