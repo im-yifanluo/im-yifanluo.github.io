@@ -1,4 +1,15 @@
 {
   "emails": [],
-  "ignore": []
+  "ignore": [
+    {
+      "rule": "phone.nanp",
+      "file": "**/yifan-luo-resume.pdf",
+      "reason": "The résumé lists Yifan's phone number on purpose; the site's pages do not."
+    },
+    {
+      "rule": "phone.known",
+      "file": "**/yifan-luo-resume.pdf",
+      "reason": "The résumé lists Yifan's phone number on purpose; the site's pages do not."
+    }
+  ]
 }
