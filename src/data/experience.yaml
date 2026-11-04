@@ -16,7 +16,7 @@
   start: 2025-12
   end: 2026-08
   org: Forward Data Lab, UIUC
-  role: Research assistant · Prof. Kevin Chang
+  role: Research assistant
   lines:
     - Built two RAG harnesses and evaluated 10+ published methods in them.
 - id: wideaccel-communication
