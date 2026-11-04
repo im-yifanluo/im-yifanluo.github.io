@@ -6,7 +6,7 @@
  *   1. allowlist  dist/ holds only pages, media, the font license, bundled scripts and styles, and a few named root
  *                 files. The font itself is inlined into each page's CSS, so no font file ships.
  *   2. origin     no local-machine URL in any text file; every canonical link, og:url and og:image is an absolute
- *                 URL on the configured site (SITE_URL, or the same default as astro.config.mjs), and names a file
+ *                 URL on the configured site (SITE_URL, or the default in scripts/site-url.mjs), and names a file
  *                 that dist/ serves; so does every URL in the sitemaps and in robots.txt, which names the sitemap
  *                 index. The sitemap lists exactly the pages that search engines may index.
  *   3. budgets    the "dist" limits in scripts/budgets.json.
@@ -23,12 +23,10 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, lstatSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DEFAULT_SITE_URL, SITE_URL } from './site-url.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, '..');
-
-// Keep in step with astro.config.mjs (`site`). The site is served from the root of this origin.
-const DEFAULT_SITE = 'https://im-yifanluo.github.io';
 
 const HELP = `Usage:
   node scripts/check-dist.mjs [--strict] [--report] [dist-dir]
@@ -63,7 +61,7 @@ Options:
   -h, --help        show this text.
 
 Environment:
-  SITE_URL                   the site the canonical URLs must use (default ${DEFAULT_SITE}).
+  SITE_URL                   the site the canonical URLs must use (default ${DEFAULT_SITE_URL}).
   CHECK_DIST_SKIP_PRIVACY=1  skip the privacy scan. Only for testing this script on a copied dist;
                              refused (a failure) when CI or PRIVACY_STRICT=1 is set.
   CI, PRIVACY_STRICT, PRIVACY_SCAN_*  passed through to the privacy scan unchanged.
@@ -93,14 +91,13 @@ function usage(message) {
 }
 
 function siteUrl() {
-  const raw = process.env.SITE_URL || DEFAULT_SITE;
   let url;
   try {
-    url = new URL(raw);
+    url = new URL(SITE_URL);
   } catch {
-    usage(`SITE_URL is not a URL: ${raw}`);
+    usage(`SITE_URL is not a URL: ${SITE_URL}`);
   }
-  if (!/^https?:$/.test(url.protocol)) usage(`SITE_URL must be http(s): ${raw}`);
+  if (!/^https?:$/.test(url.protocol)) usage(`SITE_URL must be http(s): ${SITE_URL}`);
   // Canonical URLs are compared as prefixes, so the site always ends in "/".
   return url.origin + (url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`);
 }

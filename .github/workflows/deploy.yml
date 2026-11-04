@@ -21,7 +21,7 @@ jobs:
       PRIVACY_STRICT: 1
       PRIVACY_SCAN_PRIVATE: ${{ secrets.PRIVACY_SCAN_PRIVATE }}
       PRIVACY_SCAN_RULES: ${{ secrets.PRIVACY_SCAN_RULES }}
-      SITE_URL: ${{ vars.SITE_URL || 'https://im-yifanluo.github.io' }}
+      SITE_URL: ${{ vars.SITE_URL }}
     steps:
       - uses: actions/checkout@v7
       - name: Install ffprobe for the privacy scan of video metadata
