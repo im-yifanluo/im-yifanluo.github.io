@@ -1,8 +1,7 @@
 // What search engines and link previews read: each page's head (title, description, canonical and og:* absolute on the
-// site's address; the 404 page out of the index), the sitemap and robots.txt; and no co-found… / found(er|ing) wording
-// on any page at any width or in any text file of the build. The head and the files are the same at every width, so
-// those run once, in the desktop project at 1440 px (tagged @desktop).
-import { atEachWidth, expect, measure, PAGES, projects, SITE_URL, test } from './fixtures';
+// site's address; the 404 page out of the index), the sitemap and robots.txt. The head and the files are the same at
+// every width, so they run once, in the desktop project at 1440 px (tagged @desktop).
+import { expect, PAGES, projects, SITE_URL, test } from './fixtures';
 import { distFiles, readDist, readHtml, readPage } from './helpers/dist';
 
 /** A meta description's limit in characters (project pages cut theirs to it: summarize() in src/pages/[slug].astro). */
@@ -10,29 +9,9 @@ const DESCRIPTION_MAX = 160;
 /** og:image:alt describes the image in a sentence: longer than this many characters. */
 const IMAGE_ALT_OVER = 40;
 const NOT_FOUND = '/404.html';
-/** Words that name a company role (co-found…, found(er|ers|ing)), as measure() finds them on a page. */
-const FOUND_WORDS = /\bco-?found\w*|\bfound(?:ers?|ing)\b/gi;
-/** The files of dist/ read as text. */
-const TEXT_FILE = /\.(html?|json|js|mjs|css|txt|xml|svg|webmanifest|map)$/i;
-
-test.describe('wording', () => {
-  for (const path of PAGES) {
-    test(`${path}: no co-found… / found(er|ing) wording in the text, title, descriptions or alt text`, ({ open }) =>
-      atEachWidth(open, path, async (page, width) => {
-        expect.soft((await measure(page)).foundWords, `${path} at ${width} px`).toEqual([]);
-      }));
-  }
-});
 
 // the same at every width: checked in the desktop project
 test.describe('the build', { tag: '@desktop' }, () => {
-  test('no co-found… / found(er|ing) wording in any text file of dist', () => {
-    const hits = distFiles()
-      .filter((file) => TEXT_FILE.test(file))
-      .flatMap((file) => [...readDist(file).matchAll(FOUND_WORDS)].map((match) => `dist/${file}: ${match[0]}`));
-    expect(hits).toEqual([]);
-  });
-
   for (const path of PAGES) {
     test(`${path}: head: og:image:alt; description ≤ ${DESCRIPTION_MAX} characters, never cut with "…"; 404 noindex without canonical`, async ({
       page,

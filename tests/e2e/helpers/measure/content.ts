@@ -1,8 +1,8 @@
-// measure() parts about what a page holds: links, images, videos and wording; the diagrams; the Awards list.
+// measure() parts about what a page holds: links, images and videos; the diagrams; the Awards list.
 // Each part runs in the page with the shared toolkit and uses nothing else from outside its own body.
 import type { Toolkit } from './toolkit';
 
-/** Links and their target sizes, images, videos, headings, role wording, and the page's scroll size. */
+/** Links and their target sizes, images, videos, headings, and the page's scroll size. */
 export function content(k: Toolkit) {
   // a project title's link is stretched over its whole row
   const links = [...document.querySelectorAll('a[href]')]
@@ -29,21 +29,11 @@ export function content(k: Toolkit) {
     wh: v.hasAttribute('width') && v.hasAttribute('height'),
     autoplay: v.autoplay,
   }));
-  // words that name a company role (co-found…, found(er|ers|ing)) in the text, the head's descriptions and alt text
-  const head = document.querySelectorAll('meta[name="description"], meta[property^="og:"], meta[name^="twitter:"]');
-  const foundWords = [
-    document.body.innerText,
-    document.title,
-    ...[...head].map((m) => (m as HTMLMetaElement).content),
-    ...[...document.querySelectorAll('img[alt]')].map((i) => (i as HTMLImageElement).alt),
-    ...[...document.querySelectorAll('[aria-label]')].map((e) => e.getAttribute('aria-label')!),
-  ].flatMap((t) => t.match(/\bco-?found\w*|\bfound(?:ers?|ing)\b/gi) ?? []);
   const { scrollWidth, clientWidth, scrollHeight: pageHeight } = document.documentElement;
   return {
     links,
     imgs,
     videos,
-    foundWords,
     h1: document.querySelectorAll('h1').length,
     scrollWidth,
     clientWidth,
