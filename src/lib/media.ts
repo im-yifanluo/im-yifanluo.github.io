@@ -1,5 +1,6 @@
 // The media manifest (src/generated/media.json, written by `npm run media`): per entry, the renditions of a project's
 // tile, hero and figures, and the link-preview image. Every file it names is in public/media (og.jpg at the site root).
+import { z } from 'astro/zod';
 import manifest from '@/generated/media.json';
 
 /** One loop rendition: H.264 MP4 and AV1 WebM at one width. */
@@ -61,15 +62,27 @@ export type MediaRef = { media: string; part: PartName; alt?: string } | { drawn
 
 /** The portrait manifest (src/generated/portrait.json, written by `npm run media:portrait`): AVIF and WebP `srcset`
  *  items, the fallback `src`, the largest width's size, the object-position and the photo's backdrop colours. */
-export interface Portrait {
-  avif: string[];
-  webp: string[];
-  src: string;
-  w: number;
-  h: number;
-  position: string;
-  bg?: [string, string];
-}
+const portraitSchema = z.object({
+  avif: z.array(z.string()),
+  webp: z.array(z.string()),
+  src: z.string(),
+  w: z.number().int(),
+  h: z.number().int(),
+  position: z.string(),
+  bg: z.tuple([z.string(), z.string()]).optional(),
+});
+export type Portrait = z.infer<typeof portraitSchema>;
+
+/** The portrait, checked against its schema (a manifest that does not match fails the build); undefined until
+ *  `npm run media:portrait` writes one, and the homepage then shows a placeholder. */
+export const PORTRAIT: Portrait | undefined = (() => {
+  const files = import.meta.glob('../generated/portrait.json', { eager: true, import: 'default' });
+  const json = Object.values(files)[0];
+  if (json === undefined) return undefined;
+  const parsed = portraitSchema.safeParse(json);
+  if (!parsed.success) throw new Error(`src/generated/portrait.json: ${z.prettifyError(parsed.error)}`);
+  return parsed.data;
+})();
 
 /** The manifest part a reference names (undefined for a drawing or an unknown entry). */
 export function mediaPart(ref: MediaRef): MediaPart | undefined {

@@ -11,7 +11,7 @@ import { AWARD_LINE_KEEP, EMAIL, GITHUB, INTRO, LINKEDIN, RESUME, SITE, TYPOGRAP
 import { monthHtml, rangeHtml, dateHtml } from '@/lib/dates';
 import { escapeHtml, rich, segs } from '@/lib/rich-text';
 import { glue } from '@/lib/typography';
-import type { Portrait } from '@/lib/media';
+import { PORTRAIT } from '@/lib/media';
 
 const TILE_SIZES = '(min-width: 944px) 320px, (min-width: 720px) 240px, calc(100vw - 40px)';
 const projects = (await getCollection('projects'))
@@ -33,9 +33,6 @@ const AWARD_COUNT = AWARDS.reduce((n, g) => n + g.items.length, 0);
 // The portrait photo (`npm run media:portrait -- <photo> --crop …` writes src/generated/portrait.json and the
 // AVIF/WebP files). The box paints the photo's own backdrop (`bg`) until the image decodes, so it never flashes
 // grey. Without a manifest the quiet placeholder holds the same 1:1 box, so nothing else moves.
-const portrait = Object.values(
-  import.meta.glob<Portrait>('../generated/portrait.json', { eager: true, import: 'default' }),
-)[0];
 const PORTRAIT_SIZES = '(min-width: 944px) 320px, (min-width: 720px) 240px, 160px';
 const awardsShown = AWARDS.filter((g) => !g.collapsed),
   awardsMore = AWARDS.filter((g) => g.collapsed);
@@ -44,18 +41,18 @@ const awardsShown = AWARDS.filter((g) => !g.collapsed),
 <BaseLayout title={SITE.title} description={SITE.description} home>
   <main class="wrap" id="main" tabindex="-1">
     <section class="row intro" aria-labelledby="name">
-      {portrait ? (
+      {PORTRAIT ? (
         <div
           class="portrait photo"
-          style={`--portrait-pos: ${portrait.position}${portrait.bg ? `; --portrait-bg: linear-gradient(180deg, ${portrait.bg[0]}, ${portrait.bg[1]})` : ''}`}
+          style={`--portrait-pos: ${PORTRAIT.position}${PORTRAIT.bg ? `; --portrait-bg: linear-gradient(180deg, ${PORTRAIT.bg[0]}, ${PORTRAIT.bg[1]})` : ''}`}
         ><picture>
-            <source type="image/avif" srcset={portrait.avif.join(', ')} sizes={PORTRAIT_SIZES} />
+            <source type="image/avif" srcset={PORTRAIT.avif.join(', ')} sizes={PORTRAIT_SIZES} />
             <img
-              src={portrait.src}
-              srcset={portrait.webp.join(', ')}
+              src={PORTRAIT.src}
+              srcset={PORTRAIT.webp.join(', ')}
               sizes={PORTRAIT_SIZES}
-              width={portrait.w}
-              height={portrait.h}
+              width={PORTRAIT.w}
+              height={PORTRAIT.h}
               alt="Yifan Luo"
               loading="eager"
               fetchpriority="high"
