@@ -72,10 +72,10 @@ const fontLoaded = (page: Page, frames: boolean) =>
   );
 
 /**
- * Waits until the page is set in the site's font. With `font-display: optional` a browser may skip the font for one
- * load; it is cached by then, so one reload settles it. Pass `{ scripts: false }` for a page with JavaScript off.
+ * Waits until the page is set in the site's font (inlined in the page CSS, src/styles/fonts.css); if it is not, reloads
+ * once before failing. Pass `{ scripts: false }` for a page with JavaScript off.
  */
-export async function waitForFonts(page: Page, { scripts = true } = {}): Promise<void> {
+async function waitForFonts(page: Page, { scripts = true } = {}): Promise<void> {
   if (await fontLoaded(page, scripts)) return;
   await page.reload({ waitUntil: 'networkidle' });
   if (!(await fontLoaded(page, scripts))) throw new Error(`${page.url()}: the font "${font.family}" did not load`);

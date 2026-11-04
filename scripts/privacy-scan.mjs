@@ -62,7 +62,8 @@ import sharp from 'sharp';
 
 const execFile = promisify(execFileCb);
 
-export const SITE_EMAIL = 'yifan65@illinois.edu';
+// the address src/site.config.ts EMAIL publishes; change both together
+const SITE_EMAIL = 'yifan65@illinois.edu';
 const ALLOW_FILE = fileURLToPath(new URL('./privacy-allow.json', import.meta.url));
 const CONFIG_DIR = path.join(os.homedir(), '.config', 'portfolio-website');
 
@@ -470,7 +471,7 @@ function readPrivate(envVar, fileVar, defaultName) {
  * (the environment variable) every comma separates entries too, otherwise only a comma that starts another typed
  * entry does, so a literal may contain commas.
  */
-export function splitPrivateEntries(text, { commas = false, from = 'values' } = {}) {
+function splitPrivateEntries(text, { commas = false, from = 'values' } = {}) {
   const out = [];
   String(text)
     .split(/\r?\n/)
@@ -495,7 +496,7 @@ const PHONE_CHARS = /^[+\d\s().\-/]+$/;
  * "phone:…", "email:…", "literal:…" (or untyped) entries, as strings or { value, where }. Phones are reduced to their
  * national digits. Entries that cannot be what their type says land in `rejected` ({ where, reason }, never the value).
  */
-export function parsePrivateValues(entries) {
+function parsePrivateValues(entries) {
   const out = { phones: new Set(), emails: new Set(), literals: new Set() };
   const rejected = [];
   let n = 0;
@@ -532,7 +533,7 @@ const regexFlags = (flags, { global }) => {
  * Private rules JSON → compiled rules plus ignore entries. With `anonymize`, ids become "private.<n>". Error messages
  * never quote the input (JSON and RegExp errors would), so a malformed secret does not end up in a build log.
  */
-export function compilePrivateRules(json, { anonymize = false } = {}) {
+function compilePrivateRules(json, { anonymize = false } = {}) {
   let spec = json;
   if (typeof json === 'string') {
     try {
@@ -812,7 +813,7 @@ function normalizePass(input) {
 
 /** Normalized view of `input` plus start(i)/end(i), the source span of normalized character i. Two passes, so
  * double encoding (an entity inside an entity, "%2540") is caught too. */
-export function normalizeForScan(input) {
+function normalizeForScan(input) {
   const identity = { text: input, start: (i) => i, end: (i) => i + 1 };
   if (!NEEDS_NORMALIZING.test(input)) return identity;
   const p1 = normalizePass(input);
@@ -931,7 +932,7 @@ export function scanText(raw, { file = '<text>', mode = 'prose', source = 'text'
 }
 
 // ───────────────────────────── file readers ─────────────────────────────
-export async function pdfText(file) {
+async function pdfText(file) {
   const data = new Uint8Array(await readFile(file));
   const task = pdfjs.getDocument({
     data,
@@ -965,7 +966,7 @@ export async function pdfText(file) {
  * scanFile() asks only for files without a text extension or with control bytes in their first 4 KiB, so a text
  * file that happens to start like a signature stays text.
  */
-export function sniff(head, ext = '') {
+function sniff(head, ext = '') {
   const s = (a, b) => head.toString('latin1', a, b);
   if (head.length >= 3 && head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff) return 'jpeg';
   if (s(0, 8) === '\x89PNG\r\n\x1a\n') return 'png';
@@ -1209,7 +1210,7 @@ const CONTROL_BYTES = /[\x00-\x08\x0e-\x1a\x1c-\x1f]/;
  * Scan one file: { file, kind, findings, notes, error? }. The content picks the reader; a file whose content
  * contradicts its extension is still read by its content, and is also reported as unscannable.
  */
-export async function scanFile(abs, cfg, relTo = process.cwd()) {
+async function scanFile(abs, cfg, relTo = process.cwd()) {
   const file = path.relative(relTo, abs).split(path.sep).join('/') || path.basename(abs);
   const ext = path.extname(abs).toLowerCase();
   const res = { file, kind: 'binary', findings: [], notes: [] };
@@ -1297,7 +1298,7 @@ async function* walk(p) {
 
 /** Scan files and directories: { files, findings, errors, counts }. Paths are reported relative to a single
  * directory target, else to the working directory. */
-export async function scanPaths(targets, cfg = loadConfig()) {
+async function scanPaths(targets, cfg = loadConfig()) {
   const files = [];
   for (const t of targets) for await (const f of walk(path.resolve(t))) files.push(f);
   const base =
@@ -1349,7 +1350,7 @@ export async function scanPaths(targets, cfg = loadConfig()) {
   };
 }
 
-export function formatReport(report) {
+function formatReport(report) {
   const lines = [];
   const byFile = new Map();
   for (const f of report.findings) byFile.set(f.file, [...(byFile.get(f.file) ?? []), f]);
