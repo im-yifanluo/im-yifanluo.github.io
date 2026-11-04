@@ -10,6 +10,7 @@ import LinkList from '@/components/LinkList.astro';
 import Media from '@/components/Media.astro';
 import Diagram from '@/components/diagrams/Diagram.astro';
 import Caption from '@/components/Caption.astro';
+import PauseVideos from '@/components/PauseVideos.astro';
 import { AWARD_LINE_KEEP, SITE, TYPOGRAPHY } from '@/site.config';
 import { rangeHtml } from '@/lib/dates';
 import { rich, segs } from '@/lib/rich-text';
@@ -61,7 +62,6 @@ const isLoop = (r: MediaRef) => (mediaPart(r)?.loops?.length ?? 0) > 0;
 // (on /robot-learning/ the hero is a still photo and the loops are far below it).
 const heroLoops = isLoop(p.hero);
 const firstLoopFig = heroLoops ? -1 : figures.findIndex((f) => !isDiagram(f) && isLoop(f));
-const Motion = () => '<button class="motion" type="button" hidden>Pause videos</button>';
 
 const HERO_SIZES = '(min-width: 944px) 880px, (min-width: 720px) calc(100vw - 64px), calc(100vw - 40px)';
 const TEXT_SIZES = '(min-width: 720px) 520px, calc(100vw - 40px)';
@@ -84,7 +84,7 @@ const description = summarize(plain(p.outcome), 160);
 
     <figure>
       <Media ref={p.hero} box="hero" sizes={HERO_SIZES} eager />
-      {heroLoops && <Fragment set:html={Motion()} />}
+      {heroLoops && <PauseVideos />}
       <Caption text={p.hero.caption} phone={p.hero.captionPhone} />
     </figure>
 
@@ -117,7 +117,7 @@ const description = summarize(plain(p.outcome), 160);
           ) : (
             <figure class={f.width === 'text' ? 'fig-text' : 'fig-wide'}>
               <Media ref={f} box="figure" sizes={f.width === 'text' ? TEXT_SIZES : HERO_SIZES} />
-              {k === firstLoopFig && <Fragment set:html={Motion()} />}
+              {k === firstLoopFig && <PauseVideos />}
               <Caption text={f.caption} phone={f.captionPhone} />
             </figure>
           ),

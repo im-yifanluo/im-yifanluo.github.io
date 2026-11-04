@@ -6,6 +6,7 @@ import RichText from '@/components/RichText.astro';
 import LinkList from '@/components/LinkList.astro';
 import Media from '@/components/Media.astro';
 import AwardGroup from '@/components/AwardGroup.astro';
+import PauseVideos from '@/components/PauseVideos.astro';
 import { AWARD_LINE_KEEP, EMAIL, GITHUB, INTRO, LINKEDIN, RESUME, SITE, TYPOGRAPHY } from '@/site.config';
 import { monthHtml, rangeHtml, dateHtml } from '@/lib/dates';
 import { escapeHtml, rich, segs } from '@/lib/rich-text';
@@ -102,8 +103,7 @@ const awardsShown = AWARDS.filter((g) => !g.collapsed),
     </section>
 
     <section class="sec" id="projects" aria-labelledby="projects-h">
-      <div class="sec-head in-text"><h2 class="h2" id="projects-h">Projects</h2
-        ><button class="motion" type="button" hidden>Pause videos</button></div>
+      <div class="sec-head in-text"><h2 class="h2" id="projects-h">Projects</h2><PauseVideos /></div>
       <ol class="projects">
         {projects.map(({ slug, p, meta }) => <li class="entry row" id={`p-${slug}`}>
           <Media ref={p.tile ?? { media: slug, part: 'tile' }} box="tile" sizes={TILE_SIZES} href={`/${slug}/`} />
