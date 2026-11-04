@@ -1,5 +1,5 @@
 /* The one face: YL Sans (Source Sans 3 VF, wght 300–600, Latin subset), with its OFL text in public/fonts/. The
-   15.9 KB file is inlined here as a data: URI (astro.config.mjs inlines .woff2 files only; ≈ 16 KB more per page once
+   15.9 KB file is inlined here as a data: URI (astro.config.mjs assetsInlineLimit; ≈ 16 KB more per page once
    gzipped). A separate file with a preload and font-display: optional misses the optional window on a slow first
    visit (slow 4G, or 4G at 100 ms RTT) and keeps the fallback for the whole view. Inlined, the font arrives with the
    document, so `block` costs no wait (there is no request to wait for) and no visit paints in the fallback; and since
