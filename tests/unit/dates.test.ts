@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { dateHtml, month, monthHtml, rangeHtml } from '@/lib/dates';
 import { NB } from '@/lib/typography';
+import { REVISED } from '@/site.config';
 import { schemaOf } from './load';
 
 describe('month', () => {
@@ -12,6 +13,15 @@ describe('month', () => {
 
   it('writes "Sep", never "Sept"', () => {
     expect(month('2025-09')).toBe(`Sep${NB}2025`);
+  });
+
+  it.each(['2026-00', '2026-13', '2026', 'present', ''])('throws on "%s"', (ym) => {
+    expect(() => month(ym)).toThrow(`month "${ym}": expected YYYY-MM`);
+    expect(() => rangeHtml(ym, '2026-01')).toThrow(`month "${ym}": expected YYYY-MM`);
+  });
+
+  it('reads site.config.ts REVISED', () => {
+    expect(month(REVISED)).toMatch(new RegExp(`^[A-Z][a-z]{2}${NB}\\d{4}$`));
   });
 });
 

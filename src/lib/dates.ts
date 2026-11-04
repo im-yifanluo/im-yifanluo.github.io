@@ -4,7 +4,11 @@ import { NB } from './typography';
 
 const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const parts = (ym: string) => ({ y: ym.slice(0, 4), m: M[Number(ym.slice(5, 7)) - 1] });
+function parts(ym: string) {
+  const m = M[Number(ym.slice(5, 7)) - 1];
+  if (m === undefined) throw new Error(`month "${ym}": expected YYYY-MM`);
+  return { y: ym.slice(0, 4), m };
+}
 
 /** "2026-10" → "Oct 2026" (plain text, NBSP inside). */
 export function month(ym: string): string {

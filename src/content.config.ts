@@ -64,7 +64,8 @@ const projects = defineCollection({
 });
 
 const dated = z.object({ date: dateCol, text: z.string() });
-// News is dated by month only: the footer's "Last updated" is the newest News month (layouts/BaseLayout.astro)
+// News is dated by month only: it feeds the footer's "Last updated" (the newer of the newest News month and
+// site.config.ts REVISED; layouts/BaseLayout.astro)
 const news = defineCollection({
   loader: list('src/data/news.yaml'),
   schema: z.object({ position, date: ym, text: z.string() }),
