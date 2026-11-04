@@ -40,10 +40,16 @@ export const INTRO = {
     { text: 'Expected May 2028 · 4.00 GPA · James Scholar Honors Student' },
   ] satisfies Line[],
   bio: [
+    { text: 'I study computer science at the University of Illinois, Urbana Champaign.' },
     {
-      text: "I build perception systems that run on real hardware. As technical lead of [Framelight](/framelight/), I led a 15-person team to ship it on the App Store and Google Play: a camera app that coaches your framing on the phone. At UIUC's RoboTouch Lab I train the models that move a robot arm from demonstrations I record, work that won URSA's Best Research Poster Award.",
+      text: "I love building ML projects that can benefit different people. Currently, I'm working on [Framelight](/framelight/), an app that guides people to take better photos in real time. I'm also doing research on visuomotor learning policies, data collection, and benchmarking in the RoboTouch Lab under Professor Wenzhen Yuan. Previously, I conducted research on RAG for long-document QA in the Forward Data Lab under Professor Kevin Chang.",
     },
-    { text: "I'm seeking a Summer 2027 internship in perception, on-device ML or robot learning." },
+    {
+      text: "Right now I'm interested in computer vision, and I also love to work on robotics, specifically robot learning policies.",
+    },
+    {
+      text: "I'm always excited to learn new skills, especially on the systems side, including distributed systems, ML infrastructure, and data pipelines. You never know how much you'll enjoy something unless you've tried it!",
+    },
   ] satisfies Line[],
 };
 
