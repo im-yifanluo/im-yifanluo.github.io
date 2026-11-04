@@ -37,7 +37,7 @@ The command-line scripts in `scripts/` print their options with `--help`, e.g. `
 ## Project structure
 
 ```text
-.github/                CI, the manual GitHub Pages deploy, Dependabot
+.github/                CI, the GitHub Pages deploy, Dependabot
 public/                 copied into dist/ as is: media/ and og.jpg (generated), icons, the résumé, fonts/OFL.txt
 scripts/                check-dist.mjs (post-build checks), privacy-scan.mjs and privacy-allow.json, budgets.json,
                         site-url.mjs, media/ (the media pipeline; settings in paths.mjs), fonts/ (fallbacks.mjs)
@@ -136,8 +136,9 @@ loading) depend on the machine's fonts and speed, and are skipped when `CI` is s
 ## CI and deployment
 
 [`ci.yml`](.github/workflows/ci.yml) runs `format:check`, `lint`, `build`, `test` and `test:e2e` on every pull request
-and push to `main`. [`deploy.yml`](.github/workflows/deploy.yml) publishes to GitHub Pages and runs only when started by
-hand (Actions → Deploy → Run workflow; Settings → Pages → Source: GitHub Actions, Custom domain: `yifanluo.dev`).
+and push to `main`. [`deploy.yml`](.github/workflows/deploy.yml) publishes to GitHub Pages on every push to `main`, or
+when started by hand (Actions → Deploy → Run workflow); Settings → Pages: Source "GitHub Actions", custom domain
+`yifanluo.dev`.
 
 - Secrets: `PRIVACY_SCAN_PRIVATE` and `PRIVACY_SCAN_RULES`, the privacy scan's private data, as both Actions and
   Dependabot secrets (a CI build fails without them, and Dependabot's pull requests see only Dependabot secrets).

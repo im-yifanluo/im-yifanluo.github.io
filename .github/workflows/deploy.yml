@@ -1,7 +1,10 @@
 name: Deploy
 
-# Runs only when started by hand. Settings → Pages → Source must be "GitHub Actions".
+# Publishes the site to GitHub Pages on every push to main, or when started by hand.
+# Settings → Pages → Source must be "GitHub Actions" (custom domain: yifanluo.dev).
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
