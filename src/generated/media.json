@@ -618,12 +618,12 @@
     ],
     "bytes": {
      "640": {
-      "avif": 6251,
-      "webp": 10032
+      "avif": 6905,
+      "webp": 10838
      },
      "960": {
-      "avif": 10921,
-      "webp": 17754
+      "avif": 12806,
+      "webp": 20976
      }
     },
     "src": "/media/photogleam-640.webp"
@@ -647,12 +647,12 @@
     ],
     "bytes": {
      "1280": {
-      "avif": 16578,
-      "webp": 26056
+      "avif": 30049,
+      "webp": 46708
      },
      "1760": {
-      "avif": 26295,
-      "webp": 40362
+      "avif": 49010,
+      "webp": 79184
      }
     },
     "src": "/media/photogleam-hero-1280.webp"

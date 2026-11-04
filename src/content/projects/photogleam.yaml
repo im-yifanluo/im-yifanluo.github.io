@@ -15,8 +15,8 @@ links:
 hero:
   media: photogleam
   part: hero
-  alt: "Two iPhone screens: the PhotoGleam camera page aimed at a monitor box on a wooden floor, then the filter page with the same shot in black and white under the title B&W Classic, its description and a Save Image button."
-  caption: "PhotoGleam on an iPhone: a shot from the camera page, and the first filter Gemini returned for it, B&W Classic."
+  alt: "Three PhotoGleam screens on an Android phone: the camera page aimed down a sunny street; the AI-Generated Filters page with a street-corner photo under the filter Cool Tones, its one-line description and a Save Image button; and the Image Viewer with a photo of an intersection and an Apply New Filter button."
+  caption: "PhotoGleam on my phone: the camera page; a street photo under Cool Tones, the first filter Gemini wrote for it; and the Image Viewer, where a saved photo can get new filters."
 lead:
   - "PhotoGleam edits a photo the way a photographer would, without asking anything. Gemini looks at the photo and writes a set of filters for it alone: each has a name, four adjustments (brightness, contrast, color and sharpness) and a sentence on what it does. Swipe through them and save the one you like."
   - "I built all three parts: the Flutter app, the Flask server and the engine between Gemini and Pillow. It shipped on the App Store and Google Play in 2024, won First Place, Mobile and Web, at the IgniteCS Programming Expo 2024 and has a patent filed."

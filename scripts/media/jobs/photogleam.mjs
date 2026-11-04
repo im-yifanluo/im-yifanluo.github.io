@@ -2,13 +2,14 @@
  * PhotoGleam media: tile, hero and a page figure, registered in scripts/media/build.mjs as the `photogleam` job.
  * Returns the same shape as the other jobs: { tile: { poster, loops }, hero: { kind, poster, phone }, figure }.
  *
- * Every pixel of a screen is the app's own: the Android screens are emulator captures of Oct 7, 2024 (the set the
- * Google Play listing shows); the iPhone screens are the App Store listing's screenshots (Sep 24, 2024). They are
- * stored losslessly in $MEDIA_SRC/photogleam (Android's gesture bar trimmed). Here they are only scaled (lanczos, never
- * enlarged), given a phone's rounded corners and a hairline in the site's --tile-line colour, and set whole, side by
- * side, on the media plate (SURFACE): the Framelight hero's layout.
+ * Every pixel of a screen is the app's own: the phone screens are screenshots from a real Android phone (Sep 2024,
+ * cut from the device frame they were saved in); the three-filter screens are emulator captures of Oct 7, 2024 (the
+ * set the Google Play listing shows). They are stored losslessly in $MEDIA_SRC/photogleam (the emulator's gesture bar
+ * trimmed). Here they are only scaled (lanczos, never enlarged), given a phone's rounded corners and a hairline in the
+ * site's --tile-line colour, and set whole, side by side, on the media plate (SURFACE): the Framelight hero's layout.
  *
- *   tile and hero  "on iPhone": the camera page, then the first filter Gemini returned for that shot (B&W Classic).
+ *   tile           the camera page, then a street photo under Cool Tones, the first filter Gemini wrote for it.
+ *   hero           the same two, then the Image Viewer, where a saved photo can be sent for new filters.
  *   page figure    "three filters for one photo": Cool Hues · Dark & Moody · Dramatic Stripes, the first three of the
  *                  filters Gemini wrote for one photo, each with its own name and its own one-line reason.
  */
@@ -20,13 +21,16 @@ import { source } from '../paths.mjs';
 const here = source('photogleam');
 const src = (name) => join(here, `${name}.webp`);
 
-const IPHONE = ['ios-camera', 'ios-bw-classic']; // tile and hero
+const PAIR = ['android-camera', 'android-cool-tones']; // tile and the hero's phone cut
+const THREE_SCREENS = [...PAIR, 'android-viewer']; // hero
 const THREE_FILTERS = ['filter-cool-hues', 'filter-dark-moody', 'filter-dramatic-stripes']; // page figure
 
 const TILE_LINE = { r: 2, g: 33, b: 105, alpha: 0.09 }; // tokens.css --tile-line
 const FILL = { tile: 0.88, hero: 0.9 }; // screen height ÷ frame height (the Framelight hero uses 0.9)
 const GAP = 0.04; // gap between screens ÷ frame width (as in the Framelight hero)
 const RADIUS = 0.05; // corner radius ÷ screen width (a phone display's corners)
+// the phone screenshots were cut from a device frame, so they keep that display's own, rounder corners
+const DEVICE_RADIUS = { 'android-camera': 0.11, 'android-cool-tones': 0.11, 'android-viewer': 0.11 };
 
 /** One frame W px wide (16:9 unless `aspect` = height ÷ width): the screens, whole, side by side and centred on the plate.
  *  Written as a PNG. */
@@ -40,7 +44,7 @@ async function compose(screens, W, out, { fill = FILL.tile, aspect = 9 / 16, gap
     const img = sharp(src(s)).resize({ height: sh, kernel: 'lanczos3' });
     const { data, info } = await img.png().toBuffer({ resolveWithObject: true });
     const w = info.width,
-      r = Math.round(w * RADIUS);
+      r = Math.round(w * (DEVICE_RADIUS[s] ?? RADIUS));
     const ring = Buffer.from(
       `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${sh}"><rect x="${line / 2}" y="${line / 2}" width="${w - line}" height="${sh - line}" rx="${r - line / 2}" fill="none" stroke="rgb(${TILE_LINE.r},${TILE_LINE.g},${TILE_LINE.b})" stroke-opacity="${TILE_LINE.alpha}" stroke-width="${line}"/></svg>`,
     );
@@ -82,19 +86,19 @@ async function composedAt(name, screens, widths, opts, { stills: asStills = fals
 }
 
 /** The `photogleam` job.
- *  The tile is the iPhone pair, the camera page and the first filter Gemini wrote for that shot, so the homepage shows
- *  a before → after. The page hero is the same pair on the 16:9 plate (screens 90 % of its height), with a square phone
- *  cut (the pair at 88 %, ≈ 140 CSS px a screen at 390, where the 16:9 pair would be ≈ 80). The three filters are a
- *  wide figure after the diagram (880 × 495, the same layout), and its phone cut is one whole screen, Dark & Moody, on
- *  a 4:5 plate (the Framelight prompts figure's form). */
+ *  The tile is the pair, the camera page and a photo under the first filter Gemini wrote for it. The page hero adds the
+ *  Image Viewer: three screens on the 16:9 plate (90 % of its height), with a square phone cut of the pair (88 %, ≈ 140
+ *  CSS px a screen at 390, where the 16:9 three would be ≈ 55). The three filters are a wide figure after the diagram
+ *  (880 × 495, the same layout), and its phone cut is one whole screen, Dark & Moody, on a 4:5 plate (the Framelight
+ *  prompts figure's form). */
 export async function photogleam() {
-  const tile = { poster: await composedAt('photogleam', IPHONE, [640, 960], { fill: FILL.tile }), loops: [] };
+  const tile = { poster: await composedAt('photogleam', PAIR, [640, 960], { fill: FILL.tile }), loops: [] };
   const hero = {
     kind: 'still',
-    poster: await composedAt('photogleam-hero', IPHONE, [1280, 1760], { fill: FILL.hero }),
+    poster: await composedAt('photogleam-hero', THREE_SCREENS, [1280, 1760], { fill: FILL.hero }),
     phone: await composedAt(
       'photogleam-hero-phone',
-      IPHONE,
+      PAIR,
       [736, 1104],
       { fill: 0.88, aspect: 1, gapFrac: 0.046 },
       { stills: true },
