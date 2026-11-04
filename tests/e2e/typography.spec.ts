@@ -4,11 +4,13 @@
 // screen. Measured type depends on the machine's fonts, so every test here is tagged @local.
 import { readFileSync } from 'node:fs';
 import {
+  atEachWidth,
+  DESKTOP,
   expect,
   font,
   measure,
+  missingGlyphs,
   PAGES,
-  projectWidths,
   scrollThrough,
   test,
   token,
@@ -24,7 +26,6 @@ const MAX_FAMILIES = 1;
 const MAX_MEASURE = 75;
 /** Words in the homepage's first screen at the widest width. */
 const MAX_FIRST_SCREEN_WORDS = 230;
-const WIDEST = Math.max(...WIDTHS);
 /** A heading's one-word last line is checked at one width of each kind: wide, mid and phone. */
 const ORPHAN_WIDTHS = [1440, 1024, 390];
 if (!ORPHAN_WIDTHS.every((w) => WIDTHS.includes(w))) throw new Error('ORPHAN_WIDTHS must be widths of WIDTHS');
@@ -139,14 +140,7 @@ const CHECKS: Check[] = [
   },
   {
     title: 'every character in the font that renders it',
-    run: ({ m }, soft) => {
-      const missing = Object.entries(m.chars).flatMap(([family, text]) =>
-        [...new Set(text)]
-          .filter((c) => !/\s/.test(c) && !(family === font.family && font.codepoints.has(c.codePointAt(0)!)))
-          .map((c) => `${family}: ${c}`),
-      );
-      soft(missing).toEqual([]);
-    },
+    run: ({ m }, soft) => soft(missingGlyphs(m.chars)).toEqual([]),
   },
   { title: 'one h1', run: ({ m }, soft) => soft(m.h1).toBe(1) },
   { title: 'no line starts with “·”', run: ({ m }, soft) => soft(m.seps).toEqual([]) },
@@ -167,13 +161,13 @@ const CHECKS: Check[] = [
   },
   {
     title: `measure ≤ ${MAX_MEASURE} characters`,
-    where: (_, width) => width === WIDEST,
+    where: (_, width) => width === DESKTOP,
     run: ({ m }, soft) => soft(Math.max(0, ...m.cpl.map((p) => p.cpl)), m.cpl).toBeLessThanOrEqual(MAX_MEASURE),
   },
   { title: 'no meta line repeats an item', run: ({ m }, soft) => soft(m.dupMeta).toEqual([]) },
   {
     title: 'copy: curly quotes, en-dash ranges, “Sep”, brand spellings, no term the private scan rules ban',
-    where: (_, width) => width === WIDEST,
+    where: (_, width) => width === DESKTOP,
     run: async ({ page }, soft) => {
       const text = await page.evaluate(() => document.body.innerText);
       const found: Record<string, string[]> = {};
@@ -185,29 +179,24 @@ const CHECKS: Check[] = [
   },
   {
     title: `first screen ≤ ${MAX_FIRST_SCREEN_WORDS} words`,
-    where: (path, width) => path === '/' && width === WIDEST,
+    where: (path, width) => path === '/' && width === DESKTOP,
     run: async ({ page }, soft) => soft(await page.evaluate(wordsInView)).toBeLessThanOrEqual(MAX_FIRST_SCREEN_WORDS),
   },
 ];
 
 test.describe('typography', { tag: '@local' }, () => {
   for (const path of PAGES) {
-    test(`${path}: type, line breaks and copy`, async ({ open }) => {
-      for (const width of projectWidths()) {
-        await test.step(`${width} px`, async () => {
-          const { page, context } = await open(path, { width, reducedMotion: 'reduce' });
-          const state: State = { page, m: await measure(page) };
-          await scrollThrough(page);
-          for (const check of CHECKS) {
-            if (check.where && !check.where(path, width)) continue;
-            const message = `${path} at ${width} px: ${check.title}`;
-            const soft: Soft = (value, detail) =>
-              expect.soft(value, detail === undefined ? message : `${message} (${JSON.stringify(detail)})`);
-            await test.step(check.title, () => check.run(state, soft));
-          }
-          await context.close();
-        });
-      }
-    });
+    test(`${path}: type, line breaks and copy`, ({ open }) =>
+      atEachWidth(open, path, async (page, width) => {
+        const state: State = { page, m: await measure(page) };
+        await scrollThrough(page);
+        for (const check of CHECKS) {
+          if (check.where && !check.where(path, width)) continue;
+          const message = `${path} at ${width} px: ${check.title}`;
+          const soft: Soft = (value, detail) =>
+            expect.soft(value, detail === undefined ? message : `${message} (${JSON.stringify(detail)})`);
+          await test.step(check.title, () => check.run(state, soft));
+        }
+      }));
   }
 });

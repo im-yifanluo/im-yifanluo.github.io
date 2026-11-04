@@ -4,18 +4,18 @@
 // projects (helpers/media.ts). A check tied to one layout runs at its widths in the project that has that layout.
 import { plain } from '../../src/lib/typography';
 import {
+  atEachWidth,
+  DESKTOP,
   expect,
-  isPhone,
   measure,
   PAGES,
+  PHONE,
   PHONE_BELOW,
   PROJECT_PAGES,
   projects,
-  projectWidths,
   scrollThrough,
   test,
   token,
-  WIDTHS,
   type Locator,
   type Page,
 } from './fixtures';
@@ -27,9 +27,6 @@ import {
   PHONE_HEROES,
   TEXT_FIGURE_PAUSE_PAGES,
 } from './helpers/media';
-
-const DESKTOP = WIDTHS[0]!;
-const PHONE = WIDTHS.find(isPhone)!;
 
 /** How many of the page's loops are playing. */
 const playing = (page: Page) =>
@@ -65,30 +62,28 @@ const MATRIX = [
 // every page at each of the project's widths, motion reduced: as loaded, then scrolled through
 test.describe(MATRIX.join('; '), () => {
   for (const path of PAGES) {
-    test(path, async ({ open }) => {
-      for (const width of projectWidths()) {
-        const at = (label: string) => `${label} at ${width}px`;
-        const { page } = await open(path, { width, reducedMotion: 'reduce' });
+    test(path, ({ open }) =>
+      atEachWidth(open, path, async (page) => {
         const { videos, imgs } = await measure(page);
         const unfit = videos.filter((v) => !(v.muted && v.loop && v.pi && v.preload === 'none' && v.wh && !v.autoplay));
-        expect.soft(unfit, at(MATRIX[0])).toEqual([]);
+        expect.soft(unfit, MATRIX[0]).toEqual([]);
         // below the fold: more than one and a half screens down
         const fold = page.viewportSize()!.height * 1.5;
         const eager = imgs.filter((img) => img.top > fold && img.loading !== 'lazy');
-        expect.soft(eager, at(MATRIX[1])).toEqual([]);
+        expect.soft(eager, MATRIX[1]).toEqual([]);
         // the eager images are exactly the ones with fetchpriority=high, and there is at most one
         const high = imgs.filter((img) => img.fetchpriority === 'high');
         const notLazy = imgs.filter((img) => img.loading !== 'lazy');
-        expect.soft(high.length, at(MATRIX[2])).toBeLessThanOrEqual(1);
-        expect.soft(notLazy, at(MATRIX[2])).toEqual(high);
+        expect.soft(high.length, MATRIX[2]).toBeLessThanOrEqual(1);
+        expect.soft(notLazy, MATRIX[2]).toEqual(high);
         await scrollThrough(page);
-        expect.soft(await playing(page), at(MATRIX[3])).toBe(0);
+        expect.soft(await playing(page), MATRIX[3]).toBe(0);
         const animations = await page.evaluate(
           () => document.getAnimations().filter((animation) => animation instanceof CSSAnimation).length,
         );
-        expect.soft(animations, at(MATRIX[4])).toBe(0);
-      }
-    });
+        expect.soft(animations, MATRIX[4]).toBe(0);
+      }),
+    );
   }
 });
 
@@ -245,7 +240,7 @@ test.describe('the Pause control ends at its text-width figure’s right edge', 
 
 // below 720 px a hero or figure with a phone cut shows it, with its phone caption: checked at 390 px in the phone project
 test.describe('phone cuts', { tag: '@phone' }, () => {
-  test.describe('phone cuts carry their phone captions (hero, prompts)', () => {
+  test.describe('phone cuts carry their phone captions', () => {
     for (const { page: path, count } of PHONE_CAPTIONS) {
       test(path, async ({ open }) => {
         const { page } = await open(path, { width: PHONE });
@@ -284,8 +279,7 @@ test.describe('phone cuts', { tag: '@phone' }, () => {
   });
 
   const words = (text: string) => text.replace(/\s+/g, ' ').trim();
-  // every figure with a phone cut and a phone caption, PhotoGleam's filter figure among them
-  test.describe('PhotoGleam’s filter figure: one screen and its phone caption', () => {
+  test.describe('figures with a phone cut: the phone screen and its phone caption', () => {
     for (const figure of PHONE_FIGURES) {
       test(`${figure.page} ${figure.media}`, async ({ open }) => {
         const { page } = await open(figure.page, { width: PHONE });

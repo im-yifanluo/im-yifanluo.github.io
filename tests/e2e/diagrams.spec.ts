@@ -4,7 +4,7 @@
 // script and styles only on pages with a diagram; and the drawing's alignment (labels, edge ends, frames, rows).
 import { plain } from '../../src/lib/typography';
 import { atEachWidth, axeViolations, expect, measure, PAGES, test, type Page } from './fixtures';
-import { axNodes } from './helpers/a11y';
+import { axNodes, focusStop } from './helpers/a11y';
 import {
   boxRows,
   centreDrops,
@@ -31,7 +31,8 @@ async function tabThroughNodes(page: Page) {
   const stops = [];
   for (let k = 0; k < nodes.length; k++) {
     await page.keyboard.press('Tab');
-    stops.push(await page.evaluate(dom.focusState));
+    const stop = await focusStop(page);
+    stops.push({ ...(await page.evaluate(dom.focusState)), ring: stop?.expects === 'ring' && stop.shown });
   }
   const order = stops.map(({ id }) => id);
   const unringed = stops.filter(({ ring }) => !ring).map(({ id }) => id);

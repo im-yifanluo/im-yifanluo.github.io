@@ -6,8 +6,8 @@ import {
   awards,
   distinct,
   expect,
-  font,
   measure,
+  missingGlyphs,
   near,
   settle,
   spacingScale,
@@ -105,11 +105,6 @@ test.describe('Awards at every width, reduced motion', () => {
       const scale = await spacingScale(page);
       const o = await opened();
       const edges = distinct(o.textLeft);
-      const missing = Object.entries(o.chars).flatMap(([family, text]) =>
-        [...new Set(text)]
-          .filter((c) => !/\s/.test(c) && !(family === font.family && font.codepoints.has(c.codePointAt(0)!)))
-          .map((c) => `${family}: ${c}`),
-      );
       expect({
         textEdges: edges.length,
         onTheEdge: near(edges[0]!, edge),
@@ -118,7 +113,7 @@ test.describe('Awards at every width, reduced motion', () => {
         sepEnds: o.sepEnds,
         datesOnOneEdge: distinct(o.rightEdges.dates).length <= 1,
         sideways: o.scrollWidth > o.clientWidth,
-        missing,
+        missing: missingGlyphs(o.chars),
       }).toEqual({
         textEdges: 1,
         onTheEdge: true,

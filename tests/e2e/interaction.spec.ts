@@ -1,11 +1,9 @@
 // Pointer hover at 1440 px with motion allowed: every link answers it, and a homepage project row answers as one link.
 // Hover needs a mouse, so every test here is tagged @desktop.
-import { expect, PROJECT_PAGES, settle, test, token, type Locator, type OpenOptions, type Page } from './fixtures';
-
-const MOTION: OpenOptions = { width: 1440, reducedMotion: 'no-preference' };
+import { CONTENT_PAGES, expect, MOTION, settle, test, token, type Locator, type Page } from './fixtures';
 
 test.describe('hover changes every link', { tag: '@desktop' }, () => {
-  for (const path of ['/', ...PROJECT_PAGES]) {
+  for (const path of CONTENT_PAGES) {
     test(path, async ({ open }) => {
       const { page } = await open(path, MOTION);
       await settle(page);

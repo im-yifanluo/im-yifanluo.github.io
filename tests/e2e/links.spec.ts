@@ -31,7 +31,7 @@ function landing() {
 test.describe('every project URL still serves its page', { tag: '@desktop' }, () => {
   for (const { slug } of projects) {
     const path = `/${slug}/`;
-    test(`${path}: every project URL still serves its page`, async ({ page }) => {
+    test(path, async ({ page }) => {
       const response = await page.goto(path, { waitUntil: 'networkidle' });
       expect(response?.status()).toBeLessThan(400);
       expect(await page.evaluate(landing)).toEqual({ url: path, h1: 1, notFound: false, top: null });
@@ -43,7 +43,7 @@ test.describe('each redirect lands on its target', { tag: '@desktop' }, () => {
   for (const { from, to } of redirects) {
     const anchored = new URL(to, SITE_URL).hash !== '';
     for (const path of [`${bare(from)}/`, bare(from)]) {
-      test(`${path}: each redirect lands on its target (${to})`, async ({ page }) => {
+      test(`${path} → ${to}`, async ({ page }) => {
         const response = await page.goto(path, { waitUntil: 'networkidle' });
         expect(response?.status()).toBeLessThan(400);
         await page.waitForURL((url) => url.pathname + url.hash === to);
@@ -59,7 +59,7 @@ test.describe('each redirect lands on its target', { tag: '@desktop' }, () => {
 
 test.describe('each redirect page points at its target', { tag: '@desktop' }, () => {
   for (const { from, to } of redirects) {
-    test(`${bare(from)}/: each redirect page points at its target`, async ({ page, request }) => {
+    test(`${bare(from)}/ → ${to}`, async ({ page, request }) => {
       const response = await request.get(`${bare(from)}/`);
       expect(response.status()).toBe(200);
       const redirect = await readHtml(page, await response.text());

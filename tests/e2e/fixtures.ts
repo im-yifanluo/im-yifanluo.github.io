@@ -11,13 +11,13 @@ import {
   type TestInfo,
 } from '@playwright/test';
 import { font } from './helpers/data';
-import { deviceAt, isPhone, WIDTHS } from './helpers/devices';
+import { DESKTOP, deviceAt, isPhone, WIDTHS } from './helpers/devices';
 
 export { expect };
 export type { Locator, Page } from '@playwright/test';
 export * from './helpers/data';
 export * from './helpers/devices';
-export { measure, type Box, type Measurement } from './helpers/measure';
+export { measure, missingGlyphs, type Box, type Measurement } from './helpers/measure';
 export { clickAndScroll, scrollToY, settle } from './helpers/settle';
 
 /** The widths of the matrix that the running project covers: the phone widths in `phone`, the others in `desktop`. */
@@ -137,6 +137,9 @@ export interface OpenOptions extends BrowserContextOptions {
   before?: (page: Page) => Promise<void> | void;
 }
 
+/** Motion allowed, at the desktop width: for hover and the header's states. */
+export const MOTION: OpenOptions = { width: DESKTOP, reducedMotion: 'no-preference' };
+
 export interface OpenPage {
   page: Page;
   context: BrowserContext;
@@ -153,7 +156,7 @@ export const test = base.extend<{ open: Open }>({
   open: async ({ browser, baseURL }, use, testInfo) => {
     const contexts: BrowserContext[] = [];
     await use(async (path, { width, waitUntil = 'networkidle', before, ...options } = {}) => {
-      const device = deviceAt(width ?? testInfo.project.use.viewport?.width ?? WIDTHS[0]!);
+      const device = deviceAt(width ?? testInfo.project.use.viewport?.width ?? DESKTOP);
       const context = await browser.newContext({ ...device, baseURL, ...options });
       contexts.push(context);
       const page = await context.newPage();
@@ -171,13 +174,17 @@ export const test = base.extend<{ open: Open }>({
 });
 
 /** Opens `path` at each width of the running project with reduced motion and runs `check` on it: one step per width,
- *  each in its own browser context. */
-export async function atEachWidth(open: Open, path: string, check: (page: Page, width: number) => Promise<void>) {
+ *  each in its own browser context. `check` also gets the whole OpenPage (its errors and vitals). */
+export async function atEachWidth(
+  open: Open,
+  path: string,
+  check: (page: Page, width: number, opened: OpenPage) => Promise<void>,
+) {
   for (const width of projectWidths()) {
     await test.step(`${width} px`, async () => {
-      const { page, context } = await open(path, { width, reducedMotion: 'reduce' });
-      await check(page, width);
-      await context.close();
+      const opened = await open(path, { width, reducedMotion: 'reduce' });
+      await check(opened.page, width, opened);
+      await opened.context.close();
     });
   }
 }

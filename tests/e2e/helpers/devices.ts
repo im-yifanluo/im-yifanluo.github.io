@@ -8,6 +8,11 @@ export const WIDTHS = [1440, 1280, 1024, 768, 390, 360, 320];
 export const PHONE_BELOW = 720;
 export const isPhone = (width: number) => width < PHONE_BELOW;
 
+/** The widest width of the matrix: the desktop project's own, where checks that need a desktop run. */
+export const DESKTOP = WIDTHS[0]!;
+/** The widest phone width: the phone project's own, where checks that need a phone run. */
+export const PHONE = WIDTHS.find(isPhone)!;
+
 /** The browser context for a viewport width: phones are 844 px tall with touch and 3x pixels, other screens 900 px. */
 export function deviceAt(width: number): BrowserContextOptions {
   const phone = isPhone(width);

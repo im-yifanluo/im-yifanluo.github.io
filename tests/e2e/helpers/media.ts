@@ -1,26 +1,17 @@
 // The media manifest (src/generated/media.json) read against the projects: which boxes loop and which have a phone
 // cut. The media spec takes its pages and expectations from here, so a content or media change needs no test change.
 import manifest from '../../../src/generated/media.json' with { type: 'json' };
+import type { MediaEntry, PartName, PhonePoster } from '../../../src/lib/media';
 import { projects, type Caption, type Project } from './data';
 
-interface PhoneCut {
-  avif: string[];
-  webp: string[];
-  w: number;
-  h: number;
-}
-interface Part {
-  phone?: PhoneCut;
-  loops?: { mp4: string; webm: string }[];
-}
 /** A tile, hero or figure entry of a project file. */
-type Box = Caption & { media?: string; part?: string; diagram?: string; width?: 'wide' | 'text' };
+type Box = Caption & { media?: string; part?: PartName; diagram?: string; width?: 'wide' | 'text' };
 
-const parts = manifest as unknown as Record<string, Record<string, Part | undefined>>;
+const parts: Record<string, MediaEntry> = manifest;
 const partOf = (box: Box) => (box.media && box.part ? parts[box.media]?.[box.part] : undefined);
 const loops = (box: Box) => (partOf(box)?.loops?.length ?? 0) > 0;
 /** The URLs of a phone cut's renditions: its srcset items without their widths. */
-const cutFiles = (cut: PhoneCut) => [...cut.avif, ...cut.webp].map((item) => item.split(' ')[0]!);
+const cutFiles = (cut: PhonePoster) => [...cut.avif, ...cut.webp].map((item) => item.split(' ')[0]!);
 
 const all = (projects as (Project & { tile?: Box; hero: Box; figures: Box[] })[]).map((p) => ({
   ...p,
@@ -31,9 +22,9 @@ const all = (projects as (Project & { tile?: Box; hero: Box; figures: Box[] })[]
 
 /** Every loop file the manifest names, MP4 and WebM. */
 export const LOOP_FILES = new Set(
-  Object.values(parts).flatMap((entry) =>
-    Object.values(entry).flatMap((part) => part?.loops?.flatMap((loop) => [loop.mp4, loop.webm]) ?? []),
-  ),
+  Object.values(parts)
+    .flatMap(({ tile, hero, figure }) => [tile, hero, figure])
+    .flatMap((part) => part?.loops?.flatMap((loop) => [loop.mp4, loop.webm]) ?? []),
 );
 
 /** The pages with a loop: the homepage when a tile loops, and each project whose hero or a figure loops. */

@@ -10,20 +10,13 @@ export function focusSectionHeading() {
   heading.removeAttribute('tabindex');
 }
 
-/** The focused element: its id, whether it shows the 2 px accent ring, and whether its node's detail is in the caption. */
+/** The focused element's id, and whether its node's detail is in the caption (focusStop() checks its ring). */
 export function focusState() {
   const focused = document.activeElement as HTMLElement;
-  const style = getComputedStyle(focused);
-  const probe = document.createElement('i');
-  probe.style.color = 'var(--accent)';
-  document.body.append(probe);
-  const accent = getComputedStyle(probe).color;
-  probe.remove();
   const item = focused.closest<HTMLElement>('.dg-item');
   const detail = item && focused.closest('.dg')!.querySelector(`.dg-x[data-for="${item.dataset.id}"]`);
   return {
     id: focused.id,
-    ring: style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) >= 2 && style.outlineColor === accent,
     detail: !!detail && getComputedStyle(detail).visibility === 'visible',
   };
 }

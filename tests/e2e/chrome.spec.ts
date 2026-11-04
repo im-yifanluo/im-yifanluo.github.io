@@ -3,20 +3,21 @@
 import {
   atEachWidth,
   clickAndScroll,
+  CONTENT_PAGES,
+  DESKTOP,
   distinct,
   expect,
   isPhone,
   measure,
+  MOTION,
   news,
   PAGES,
-  PROJECT_PAGES,
   scrollToY,
   settle,
   site,
   test,
   token,
   type Box,
-  type OpenOptions,
   type Page,
 } from './fixtures';
 import { glassContrast, headerState } from './helpers/header';
@@ -123,8 +124,6 @@ test.describe('footer and header at every width', () => {
   }
 });
 
-const MOTION: OpenOptions = { width: 1440, reducedMotion: 'no-preference' };
-
 /** The header's state at the top, then with the page scrolled 400 px. */
 async function headerStates(page: Page) {
   await settle(page);
@@ -134,8 +133,8 @@ async function headerStates(page: Page) {
 }
 
 // measured with a mouse at 1440 px: the desktop project
-test.describe('header at 1440 px with motion allowed', { tag: '@desktop' }, () => {
-  for (const path of ['/', ...PROJECT_PAGES]) {
+test.describe(`header at ${DESKTOP} px with motion allowed`, { tag: '@desktop' }, () => {
+  for (const path of CONTENT_PAGES) {
     test.describe(path, () => {
       test('header: clear at the top; frosted (glass tokens, saturate ≤ 1.2, blur 8) with the hairline once scrolled', async ({
         open,

@@ -75,5 +75,8 @@ const titleLinks = list.slice(0, list.indexOf('</ol>')).matchAll(/<h3\b[^>]*>\s*
 export const PROJECT_PAGES = [...new Set([...titleLinks].map((match) => match[1]!))];
 if (PROJECT_PAGES.length === 0) throw new Error('dist/index.html: no project links in <ol class="projects">');
 
+/** The pages with content: the homepage and each project page. */
+export const CONTENT_PAGES = ['/', ...PROJECT_PAGES];
+
 /** Every page under test: the homepage, each project page and the 404 page. */
-export const PAGES = ['/', ...PROJECT_PAGES, '/404.html'];
+export const PAGES = [...CONTENT_PAGES, '/404.html'];
