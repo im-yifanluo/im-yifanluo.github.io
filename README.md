@@ -5,9 +5,8 @@ Personal website: projects, experience, news and awards, live at <https://im-yif
 
 ## Getting started
 
-Requires Node 24 (`.nvmrc`). Node 22.19 or later builds the site; `npm run lint` needs 22.22.3 or 24.16 or later. A
-clone builds from the committed files alone: only regenerating the media or the font needs the private source files
-(see [Media and fonts](#media-and-fonts)).
+Requires Node 24 (`.nvmrc`). A clone builds from the committed files alone; only regenerating the media or the font
+needs the private source files (see [Media and fonts](#media-and-fonts)).
 
 ```sh
 npm ci
@@ -108,11 +107,11 @@ job's inputs and whose `fonts/README.md` says how the font subset is made.
 `npm run build` stops at the first failure. Its last step, `scripts/check-dist.mjs`, checks the files and URLs in
 `dist/`, the size budgets and privacy; `node scripts/check-dist.mjs --help` lists every rule.
 
-The privacy scan (`scripts/privacy-scan.mjs`) looks for personal data and secrets in every built file, image, PDF and
-video metadata included. Its private values and rules are never committed: they come from `PRIVACY_SCAN_PRIVATE` and
-`PRIVACY_SCAN_RULES`, else from files in `~/.config/portfolio-website/` (formats in the script's header). Without them,
-or without ffprobe for video tags (`FFPROBE`, else on `PATH`), the scan warns; with `CI` or `PRIVACY_STRICT=1` set, or
-`--strict`, it fails. Exceptions go in `scripts/privacy-allow.json`, each with a reason. To scan the tracked sources:
+The privacy scan (`scripts/privacy-scan.mjs`) checks every built file, including image, PDF and video metadata, for
+personal data and secrets. Its private rules are never committed: set `PRIVACY_SCAN_PRIVATE` and `PRIVACY_SCAN_RULES`,
+or put the files in `~/.config/portfolio-website/` (formats in the script's header). Without them, or without ffprobe,
+it warns locally and fails under `CI`, `PRIVACY_STRICT=1` or `--strict`. Exceptions go in `scripts/privacy-allow.json`
+with a reason. To scan the tracked sources:
 
 ```sh
 git ls-files -z | xargs -0 node scripts/privacy-scan.mjs --strict
