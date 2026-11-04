@@ -1,6 +1,7 @@
 // Content collections: one YAML file per project (src/content/projects/<slug>.yaml, the file name is the slug) and one
 // YAML list per homepage section (src/data/*.yaml, every item with an explicit unique `id`; the file order is the display
-// order). Strings use the site's inline markup ([label](href), `code`); typography is applied at render time.
+// order). Strings use the site's inline markup ([label](href), `code`, no HTML) and get the typography pass at render
+// time, except the fields marked "shown as written".
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
@@ -17,7 +18,7 @@ const position = z.number().int().nonnegative();
 const mediaRef = z.object({
   media: z.string().refine((k) => Object.hasOwn(MEDIA, k), 'not in src/generated/media.json (run npm run media)'),
   part: z.enum(['tile', 'hero', 'figure']),
-  alt: z.string().min(1),
+  alt: z.string().min(1), // shown as written
 });
 /** Drawn in HTML/SVG instead of a poster (components/OrderStrip.astro). */
 const drawn = z.object({ drawn: z.literal('order-strip') });
@@ -30,7 +31,7 @@ const projects = defineCollection({
     .object({
       order: z.number().int().positive(), // homepage order; previous / next follow it
       title: z.string(),
-      short: z.string(), // <title>, previous / next
+      short: z.string(), // <title> (as plain text), previous / next (inside a link, so no [label](href))
       role: z.string(), // homepage meta: role · org · dates
       org: z.string().optional(),
       start: ym,
@@ -43,6 +44,7 @@ const projects = defineCollection({
       hero: z.union([mediaRef.extend(cap), drawn.extend(cap)]),
       lead: z.array(z.string()).min(1),
       did: z.array(z.string()).min(1).optional(),
+      // titled groups of `did` items; a group's `label` is shown as written
       didGroups: z.array(z.object({ id: z.string(), label: z.string(), did: z.array(z.string()).min(1) })).optional(),
       figures: z.array(
         z.union([
@@ -77,7 +79,7 @@ const experience = defineCollection({
     position,
     start: ym,
     end: z.union([ym, z.literal('present')]),
-    org: z.string(),
+    org: z.string(), // shown as written
     role: z.string(),
     lines: z.array(z.string()),
   }),
@@ -87,15 +89,15 @@ const education = defineCollection({
   schema: z.object({
     position,
     graduation: ym, // shown as its month, then `dateText`
-    dateText: z.string(),
-    org: z.string(),
+    dateText: z.string(), // shown as written, e.g. "(expected)"
+    org: z.string(), // shown as written
     role: z.string(),
     lines: z.array(z.string()),
   }),
 });
 const awards = defineCollection({
   loader: list('src/data/awards.yaml'),
-  // `collapsed` groups sit behind the "Show all N awards" control
+  // a group's `label` is shown as written; `collapsed` groups sit behind the "Show all N awards" control
   schema: z.object({ position, label: z.string(), collapsed: z.boolean().default(false), items: z.array(dated) }),
 });
 
