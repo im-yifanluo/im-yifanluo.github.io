@@ -15,14 +15,15 @@
  * current file and refines, rebuilds dist/ between rounds, and prints its measurements as a table. The pages measured
  * are the homepage and every project it lists.
  *
- * Needs a running server for the site at --base (the dev server, or `npm run preview`), Chrome on the machine, and the
- * `playwright` package, which is not a dependency of the site (`npm i --no-save playwright`).
- * Exit codes: 0 done, 1 a failed run, 2 a usage error or a missing `playwright`.
+ * Needs a running server for the site at --base (the dev server, or `npm run preview`) and Chrome on the machine
+ * (launched through Playwright's `chrome` channel).
+ * Exit codes: 0 done, 1 a failed run, 2 a usage error.
  */
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
+import { chromium } from '@playwright/test';
 
 const USAGE = `usage: npm run fonts:fallbacks [-- --base <url> --rounds <n>]
   --base <url>   the running site to measure (default http://localhost:4321: npm run dev, or npm run preview)
@@ -51,9 +52,6 @@ if (!Number.isInteger(ROUNDS) || ROUNDS < 1) usageError('--rounds needs a whole 
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = resolve(ROOT, 'src/styles/fallbacks.css');
-const { chromium } = await import('playwright').catch(() =>
-  usageError('the playwright package is not installed (npm i --no-save playwright)'),
-);
 
 // the real fonts' hhea metrics (em) and the system fonts that stand in for them (Liberation = Arial/Times/Courier metrics)
 const SANS =
