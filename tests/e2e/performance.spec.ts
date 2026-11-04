@@ -21,7 +21,7 @@ test('every e2e budget in scripts/budgets.json is checked', () => {
 test.describe('no console errors or failed requests; no layout shift (CLS 0)', () => {
   for (const path of PAGES) {
     test(path, ({ open }) =>
-      atEachWidth(open, path, async (page, width, { errors, vitals }) => {
+      atEachWidth(open, path, async (page, _width, { errors, vitals }) => {
         await scrollThrough(page);
         expect.soft(errors, 'no console errors or failed requests').toEqual([]);
         expect.soft((await vitals()).cls, 'no layout shift (CLS 0)').toBeLessThan(LIMIT.cls);
