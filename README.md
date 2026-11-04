@@ -48,19 +48,21 @@ public/                    copied into dist/ as is
 scripts/
 ├── check-dist.mjs         post-build checks, run by npm run build
 ├── budgets.json           size and performance budgets
+├── site-url.mjs           the site URL: SITE_URL, else the default
 ├── privacy-scan.mjs       privacy scan of dist/ (or any files)
 ├── privacy-allow.json     exceptions to the privacy scan, each with a reason
-├── media/                 build.mjs, jobs/<job>.mjs, portrait.mjs, paths.mjs (settings)
+├── media/                 build.mjs, jobs/<job>.mjs, lib.mjs (shared helpers), portrait.mjs, paths.mjs (settings)
 └── fonts/                 fallbacks.mjs
 src/
 ├── assets/fonts/          yl-sans.woff2, inlined into the CSS at build time
-├── components/            RichText, LinkList, Media, Caption, AwardGroup, OrderStrip, diagrams/
+├── components/            RichText, LinkList, Media, PosterBox, PauseVideos, Caption, AwardGroup, OrderStrip, diagrams/
 ├── content/projects/      one YAML file per project
 ├── data/                  news, awards, experience, education, more-projects (YAML); diagrams.ts
 ├── generated/             media.json, portrait.json, font.json: written by scripts or exported once; never edited by hand
 ├── layouts/               BaseLayout.astro
-├── lib/                   dates, rich text, typography, the YAML list loader, the typed media manifest, diagram helpers
+├── lib/                   dates, rich text, typography, the YAML list loader, reserved paths, media manifests, diagrams
 ├── pages/                 index.astro, [slug].astro, 404.astro, robots.txt.ts
+├── scripts/               the page script (header, separators, print, poster fades, loops), inlined into each page
 ├── styles/                tokens, global, fonts, fallbacks, diagrams
 ├── content.config.ts      the content schema
 ├── env.d.ts               HTML attributes that Astro's types do not declare
@@ -98,9 +100,8 @@ match.
   in HTML and SVG by `src/components/OrderStrip.astro` (the hero still takes a `caption`).
 - A figure can also be a diagram, `diagram: <id>`, with an id defined in `src/data/diagrams.ts`.
 - `links` use a fixed set of labels: `App Store`, `Google Play`, `Website` and `Code`.
-- A slug must not shadow a top-level path of the site (`media`, `fonts`, `_astro`, `404`, `og`, `robots`,
-  `sitemap-index`, `sitemap-0`) or the source of a redirect in `astro.config.mjs` (`deployment-debugging`); the build
-  stops if it does.
+- A slug must not shadow a top-level path of the site or the source of a redirect (both listed in
+  `src/lib/routes.ts`); the build stops if it does.
 
 **Lists.** News, awards, experience, education and smaller projects live in `src/data/*.yaml`, one list per file.
 
@@ -168,10 +169,10 @@ that the `framelight` job writes to `MEDIA_CACHE`, so it runs after `framelight`
 A clone builds and serves the site from the committed files alone (`public/media`, `public/og.jpg`, `src/generated`
 and `src/assets/fonts`); only regenerating media or the font subset needs `$MEDIA_SRC`.
 
-Size budgets are defined once, in `scripts/budgets.json`, and checked on every build: each tile loop at most 400 KiB
-(640 KiB for its high-density rendition), each hero loop at most 1 MiB, no single file over 1 MiB, and each page at
-most 128 KiB of HTML, 64 KiB of it inline CSS (the inlined font included). `npm test` checks the repository's own
-budget: at most 30 MiB of tracked files.
+Size budgets are defined once, in `scripts/budgets.json`, and checked on every build (`npm run media` encodes the loops
+to fit them): each tile loop at most 400 KiB (640 KiB for its high-density rendition), each hero loop at most 1 MiB, no
+single file over 1 MiB, and each page at most 128 KiB of HTML, 64 KiB of it inline CSS (the inlined font included).
+`npm test` checks the repository's own budget: at most 30 MiB of tracked files.
 
 `public/favicon.svg` and `public/apple-touch-icon.png` (180 × 180) are made by hand; no script writes them.
 `public/yifan-luo-resume.pdf` is served as is.
@@ -181,11 +182,11 @@ budget: at most 30 MiB of tracked files.
 The site uses one font, `src/assets/fonts/yl-sans.woff2`: a subset of
 [Source Sans 3](https://github.com/adobe-fonts/source-sans), renamed YL Sans as the SIL Open Font License requires for
 modified versions. It is committed as built. `src/styles/fonts.css` points at it, and the build inlines it into each
-page's CSS as a `data:` URI (`astro.config.mjs` inlines `.woff2` files only), so a page makes no font request. The
-license is served at `/fonts/OFL.txt`. `src/generated/font.json` records the file's hash and the code points it covers.
-Text that needs a character outside the subset requires rebuilding the subset; the build does not check for one. The
-subset generator is not in this repository: `$MEDIA_SRC/fonts/README.md` says where it is, with its sources and
-settings.
+page's CSS as a `data:` URI (`astro.config.mjs` inlines only the font and the page script), so a page makes no font
+request. The license is served at `/fonts/OFL.txt`. `src/generated/font.json` records the file's hash and the code
+points it covers. Text that needs a character outside the subset requires rebuilding the subset; the build does not
+check for one. The subset generator is not in this repository: `$MEDIA_SRC/fonts/README.md` says where it is, with its
+sources and settings.
 
 `npm run fonts:fallbacks` measures the real font against local system fonts for each text role and writes
 `src/styles/fallbacks.css`, so that text laid out in a fallback face takes the same space and the page does not shift
@@ -193,7 +194,6 @@ if it is ever painted before the font. It runs headless and needs:
 
 - a server for the site (`-- --base <url>`, default `http://localhost:4321`): `npm run dev`, or `npm run preview`
   after a build (the script rebuilds `dist/` between its rounds);
-- the `playwright` package, which is not a dependency of the site: `npm i --no-save playwright`;
 - Chrome installed on the machine, since the script launches it through Playwright's `chrome` channel (Playwright's
   bundled Chromium is not used).
 
@@ -214,8 +214,9 @@ if it is ever painted before the font. It runs headless and needs:
    - the `dist` budgets in `scripts/budgets.json`;
    - the privacy scan (below).
 
-Set `SITE_URL` when building for a different domain; `astro.config.mjs` and the checks both read it. Exit codes: 0
-pass, 1 a failed check, 2 a setup error (bad arguments, or a privacy scan that could not run to the end).
+Set `SITE_URL` when building for a different domain; `astro.config.mjs` and the checks both read it through
+`scripts/site-url.mjs`. Exit codes: 0 pass, 1 a failed check, 2 a setup error (bad arguments, or a privacy scan that
+could not run to the end).
 
 ### Privacy scan
 
@@ -258,9 +259,9 @@ Both suites take their expectations from the content, `src/site.config.ts` and `
 copied values, so a content edit needs no test change unless it breaks a rule.
 
 **Unit tests** (`npm test`, [Vitest](https://vitest.dev), `tests/unit/`) run on Astro's Vite config and need no build.
-They cover the text helpers in `src/lib/`, the content schemas and the list loader, the homepage and `robots.txt`
-rendered with Astro's container API, and rules for the repository as a whole (tracked files, size budgets, unique list
-ids, reserved slugs).
+They cover the text helpers in `src/lib/`, the diagram edge geometry, the content schemas and the list loader, the
+homepage and `robots.txt` rendered with Astro's container API, and rules for the repository as a whole (tracked files,
+size budgets, unique list ids, reserved slugs).
 
 **End-to-end tests** (`npm run test:e2e`, [Playwright](https://playwright.dev), `tests/e2e/`) drive a headless browser
 against the built site, which `astro preview` serves at `http://127.0.0.1:4329`. They never build:
@@ -274,7 +275,7 @@ npm run test:e2e
 - They open the homepage, each project page it links to and the 404 page at seven widths, split between two
   Playwright projects: `desktop` (1440, 1280, 1024 and 768 px) and `phone` (390, 360 and 320 px, with touch).
 - Tags: `@desktop` and `@phone` tests run in that project only. `@local` tests (measured layout and type, throttled
-  loading, video playback) depend on the machine's fonts, codecs and speed, and are skipped when `CI` is set.
+  loading) depend on the machine's fonts and speed, and are skipped when `CI` is set.
 - `E2E_PORT` changes the port. Arguments after `--` go to Playwright, e.g. `npm run test:e2e -- tests/e2e/seo.spec.ts`.
 - Reports go to `playwright-report/` (`npx playwright show-report`) and traces of failed tests to `test-results/`.
 
