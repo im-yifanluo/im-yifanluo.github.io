@@ -1,6 +1,6 @@
 /**
- * memos media jobs, called from scripts/media/build.mjs (`jobs.memos`, `jobs['memos-hero']`), which passes in its
- * helpers. Sources ($MEDIA_SRC/memos): the team's real Cal Hacks 13 scenes rendered headless in the memos viewer.
+ * memos media jobs, registered in scripts/media/build.mjs as `memos` and `memos-hero`. Sources ($MEDIA_SRC/memos): the
+ * team's real Cal Hacks 13 scenes rendered headless in the memos viewer.
  *
  * memos (tile)
  *   Tile: the plaza in front of the Palace of Fine Arts rotunda (scene o3328, one Ray-Ban Meta clip), the camera
@@ -16,6 +16,7 @@
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { HERO_MAX, TILE_MAX, WORK, fmtGrade, frame, loop, master, posters, rotate } from '../lib.mjs';
 import { source } from '../paths.mjs';
 
 const here = source('memos');
@@ -28,7 +29,7 @@ const need = (f) => {
 const seam = (L, d, grade) =>
   `[0]trim=${d}:${L},setpts=PTS-STARTPTS,fps=30,${grade}[x];[1]trim=0:${d},setpts=PTS-STARTPTS,fps=30,${grade}[y];[x][y]xfade=transition=fade:duration=${d}:offset=${(L - 2 * d).toFixed(3)}[out]`;
 
-export async function memos({ master, loop, frame, posters, WORK, TILE_MAX, fmtGrade }) {
+export async function memos() {
   const tileSrc = need('rotunda-tile.mp4');
   const m = master('memos', ['-i', tileSrc, '-i', tileSrc], seam(6.5, 0.5, fmtGrade), 1280);
   const png = frame(m, 0, join(WORK, 'memos-poster.png'));
@@ -39,7 +40,7 @@ export async function memos({ master, loop, frame, posters, WORK, TILE_MAX, fmtG
   return { tile };
 }
 
-export async function memosHero({ master, rotate, loop, frame, posters, WORK, TILE_MAX, HERO_MAX, fmtGrade }) {
+export async function memosHero() {
   const src = need('rotunda-hero.mp4');
   const m0 = master('memos-hero', ['-i', src, '-i', src], seam(8.5, 0.5, fmtGrade), 1280);
   // Start (and pose) at 3.0 s: people small in the middle of the plaza, not the two close ghosts of 0–2 s.

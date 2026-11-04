@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 
 const env = (name) => process.env[name] || undefined;
 
-export const REPO = fileURLToPath(new URL('../../', import.meta.url));
+const REPO = fileURLToPath(new URL('../../', import.meta.url));
 export const MEDIA_SRC = resolve(env('MEDIA_SRC') ?? join(REPO, '../portfolio-media'));
 export const MEDIA_CACHE = resolve(env('MEDIA_CACHE') ?? join(MEDIA_SRC, '.cache'));
 export const MEDIA_OUT = resolve(env('MEDIA_OUT') ?? join(REPO, 'public/media'));

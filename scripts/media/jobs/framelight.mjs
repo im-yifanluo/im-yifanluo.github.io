@@ -1,6 +1,6 @@
 /**
- * Framelight media jobs, called from scripts/media/build.mjs (`jobs.framelight`, `jobs['framelight-prompts']`,
- * `jobs['framelight-shots']`), which passes in its helpers. `framelight` returns the same shape as the other tile jobs:
+ * Framelight media jobs, registered in scripts/media/build.mjs as `framelight`, `framelight-prompts` and
+ * `framelight-shots`. `framelight` returns the same shape as the other tile jobs:
  * { tile: { poster, loops }, hero: { kind, poster, phone } }.
  *
  * Sources ($MEDIA_SRC/framelight): three raw iPhone screenshots of the shipped app, all taken at 19:45 on 2026-07-03 of
@@ -22,6 +22,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import sharp from 'sharp';
+import { WORK, h9, plate, posters, roundCorners, stills } from '../lib.mjs';
 import { source } from '../paths.mjs';
 
 const here = source('framelight');
@@ -35,40 +36,26 @@ const CORNER = 165 / 1290; // the display's corner radius as a fraction of its s
 /** A screen resized to w×h with the display's rounded corners (transparent outside). */
 async function screen(file, w, h) {
   const r = Math.round(Math.min(w, h) * CORNER);
-  const mask = Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`,
-  );
-  return sharp(file)
-    .resize(w, h, { fit: 'fill', kernel: 'lanczos3' })
-    .ensureAlpha()
-    .composite([{ input: mask, blend: 'dest-in' }])
-    .png()
-    .toBuffer();
+  return roundCorners(sharp(file).resize(w, h, { fit: 'fill', kernel: 'lanczos3' }), w, h, r);
 }
 
-/** The plate with the given layers composited (each { input, left, top }). */
-const plate = (w, h, SURFACE, layers) =>
-  sharp({ create: { width: w, height: h, channels: 3, background: SURFACE } })
-    .composite(layers)
-    .png();
-
 /** The landscape screen whole, centred on a w×(w·9/16) plate at `frac` of its width. */
-async function wholeLandscape(w, h9, SURFACE, frac = 0.92) {
+async function wholeLandscape(w, frac = 0.92) {
   const { width: sw0, height: sh0 } = await sharp(SRC.perfect).metadata();
   const H = h9(w);
   const sw = Math.round(w * frac),
     sh = Math.round((sw * sh0) / sw0);
-  return plate(w, H, SURFACE, [
+  return plate(w, H, [
     { input: await screen(SRC.perfect, sw, sh), left: Math.round((w - sw) / 2), top: Math.round((H - sh) / 2) },
   ]);
 }
 
-export async function framelight({ posters, h9, WORK, SURFACE }) {
+export async function framelight() {
   for (const f of Object.values(SRC)) if (!existsSync(f)) throw new Error(`${f}: missing from MEDIA_SRC`);
 
   // ── tile: the landscape screen, whole ──
   const tilePng = join(WORK, 'framelight-tile.png');
-  await (await wholeLandscape(1280, h9, SURFACE)).toFile(tilePng);
+  await (await wholeLandscape(1280)).toFile(tilePng);
   const tile = { poster: await posters('framelight', tilePng, [640, 960, 1280]), loops: [] };
 
   // ── hero: prompt → "Perfect!" → the shot, one minute at golden hour ──
@@ -82,13 +69,13 @@ export async function framelight({ posters, h9, WORK, SURFACE }) {
   const yP = Math.round((H - ph) / 2),
     yL = Math.round((H - pw) / 2);
   const heroPng = join(WORK, 'framelight-hero.png');
-  await plate(W, H, SURFACE, [
+  await plate(W, H, [
     { input: await screen(SRC.move, pw, ph), left: side, top: yP },
     { input: await screen(SRC.perfect, ph, pw), left: side + pw + gap, top: yL },
     { input: await screen(SRC.ember, pw, ph), left: side + pw + gap + ph + gap, top: yP },
   ]).toFile(heroPng);
   const phonePng = join(WORK, 'framelight-hero-phone.png');
-  await (await wholeLandscape(1104, h9, SURFACE)).toFile(phonePng);
+  await (await wholeLandscape(1104)).toFile(phonePng);
   const phone = { ...(await posters('framelight-hero-phone', phonePng, [736, 1104])), w: 1104, h: h9(1104) };
   return { tile, hero: { kind: 'still', poster: await posters('framelight-hero', heroPng, [1280, 1760]), phone } };
 }
@@ -107,7 +94,7 @@ const FIG = {
 /** Three live-view prompts, whole, at one scale, side by side on the plate (wide, 880 CSS px; drawn at 2×: 24 px padding
  *  and gaps, the display's own corners). Phones get the first screen alone on a 4:5 plate (`phone`, 368 CSS px at 3×),
  *  so its prompt stays readable (≈ 180 CSS px wide instead of ≈ 100). */
-export async function framelightPrompts({ stills, WORK, SURFACE }) {
+export async function framelightPrompts() {
   for (const f of FIG.prompts) if (!existsSync(f)) throw new Error(`${f}: missing from MEDIA_SRC`);
   const W = 1760,
     pad = 48,
@@ -120,13 +107,13 @@ export async function framelightPrompts({ stills, WORK, SURFACE }) {
     FIG.prompts.map(async (f, i) => ({ input: await screen(f, sw, sh), left: x0 + i * (sw + gap), top: pad })),
   );
   const wide = join(WORK, 'framelight-prompts.png');
-  await plate(W, H, SURFACE, layers).toFile(wide);
+  await plate(W, H, layers).toFile(wide);
   const PW = 1104,
     PH = 1380,
     psh = Math.round(PH * 0.9),
     psw = Math.round((psh * 1290) / 2796);
   const phonePng = join(WORK, 'framelight-prompts-phone.png');
-  await plate(PW, PH, SURFACE, [
+  await plate(PW, PH, [
     {
       input: await screen(FIG.prompts[0], psw, psh),
       left: Math.round((PW - psw) / 2),
@@ -144,20 +131,12 @@ export async function framelightPrompts({ stills, WORK, SURFACE }) {
 
 /** A photo resized to w×h with `r` px corners (transparent outside). */
 async function rounded(file, w, h, r) {
-  const mask = Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`,
-  );
-  return sharp(file)
-    .resize(w, h, { fit: 'cover', kernel: 'lanczos3' })
-    .ensureAlpha()
-    .composite([{ input: mask, blend: 'dest-in' }])
-    .png()
-    .toBuffer();
+  return roundCorners(sharp(file).resize(w, h, { fit: 'cover', kernel: 'lanczos3' }), w, h, r);
 }
 
 /** Four photos shot with the app, whole at 3:4, in a row on the plate (wide, 880 CSS px; drawn at 2×); phones get a
  *  2 × 2 grid (`phone`, 368 CSS px at 3×), so each photo stays ≈ 160 px wide instead of ≈ 75. */
-export async function framelightShots({ stills, WORK, SURFACE }) {
+export async function framelightShots() {
   for (const f of FIG.shots) if (!existsSync(f)) throw new Error(`${f}: missing from MEDIA_SRC`);
   const grid = async (W, cols, pad, gap, r) => {
     const rows = Math.ceil(FIG.shots.length / cols);
@@ -172,7 +151,7 @@ export async function framelightShots({ stills, WORK, SURFACE }) {
         top: pad + Math.floor(i / cols) * (ph + gap),
       })),
     );
-    return plate(W, H, SURFACE, layers);
+    return plate(W, H, layers);
   };
   const wide = join(WORK, 'framelight-shots.png'),
     phonePng = join(WORK, 'framelight-shots-phone.png');

@@ -17,239 +17,42 @@
  * Sources are read from $MEDIA_SRC (one folder per job); intermediates go to $MEDIA_CACHE. Every setting is described
  * in scripts/media/paths.mjs. A job is a function in the `jobs` object below (inline, or imported from jobs/<job>.mjs)
  * that writes its files and returns its manifest entry, typed as MediaEntry in src/lib/media.ts (`tile`, `hero` and
- * `figure`, each a poster with optional loops and phone cut; `og` for the link preview).
+ * `figure`, each a poster with optional loops and phone cut; `og` for the link preview). The helpers the jobs share
+ * (ffmpeg, masters and loops, posters and stills, the plate) are in scripts/media/lib.mjs.
  * Exit codes: 0 done, 1 a job failed, 2 a usage error or a missing MEDIA_SRC.
  */
-import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import sharp from 'sharp';
-import { FFMPEG, FFPROBE, MANIFEST, MEDIA_CACHE, MEDIA_OUT, MEDIA_SRC, OG_OUT, source } from './paths.mjs';
+import { apriltagOverlay } from './jobs/apriltag-overlay.mjs';
+import { framelight, framelightPrompts, framelightShots } from './jobs/framelight.mjs';
+import { memos, memosHero } from './jobs/memos.mjs';
+import { photogleam } from './jobs/photogleam.mjs';
+import {
+  OUT,
+  WORK,
+  TILE_MAX,
+  ff,
+  probe,
+  bytes,
+  master,
+  loop,
+  rotate,
+  frame,
+  posters,
+  stills,
+  neutralise,
+  fmtGrade,
+} from './lib.mjs';
+import { MANIFEST, MEDIA_SRC, OG_OUT, source } from './paths.mjs';
 
-const OUT = MEDIA_OUT;
-const WORK = MEDIA_CACHE;
-
-const SURFACE = '#F6F6F4'; // the media plate: the grey every composed still is set on
-const TILE_MAX = 400 * 1024; // the loop limits (scripts/budgets.json tileLoopBytes.max and heroLoopBytes.max)
-const HERO_MAX = 1024 * 1024;
-
-const ff = (args) =>
-  execFileSync(FFMPEG, ['-hide_banner', '-v', 'error', '-y', ...args], {
-    stdio: ['ignore', 'inherit', 'inherit'],
-    maxBuffer: 1 << 28,
-    env: { ...process.env, SVT_LOG: '1' },
-  });
-const probe = (file) =>
-  JSON.parse(
-    execFileSync(FFPROBE, [
-      '-v',
-      'error',
-      '-show_entries',
-      'stream=codec_type,codec_name,width,height,r_frame_rate:format=duration',
-      '-of',
-      'json',
-      file,
-    ]).toString(),
-  );
-const bytes = (f) => statSync(f).size;
-const h9 = (w) => Math.round((w * 9) / 16);
-
-/** Lossless master (H.264 qp 0, yuv444p) from an ffmpeg input + filter graph ending in [out]. */
-function master(name, inputs, graph, w) {
-  const file = join(WORK, `${name}.master.mkv`);
-  ff([
-    ...inputs,
-    '-filter_complex',
-    `${graph};[out]scale=${w}:${h9(w)}:flags=lanczos,fps=30,format=yuv444p[m]`,
-    '-map',
-    '[m]',
-    '-c:v',
-    'libx264',
-    '-qp',
-    '0',
-    '-preset',
-    'veryfast',
-    '-an',
-    file,
-  ]);
-  return file;
-}
-
-/** H.264 + AV1 loop at width w from a master; raises CRF until the H.264 file fits `max`. */
-function loop(name, masterFile, w, max) {
-  const vf = `scale=${w}:${h9(w)}:flags=lanczos,format=yuv420p`;
-  const mp4 = join(OUT, `${name}-${w}.mp4`);
-  const webm = join(OUT, `${name}-${w}.webm`);
-  let crf = w >= 1280 ? 24 : 25;
-  for (;;) {
-    ff([
-      '-i',
-      masterFile,
-      '-vf',
-      vf,
-      '-c:v',
-      'libx264',
-      '-profile:v',
-      'high',
-      '-preset',
-      'slow',
-      '-crf',
-      String(crf),
-      '-g',
-      '60',
-      '-movflags',
-      '+faststart',
-      '-an',
-      '-map_metadata',
-      '-1',
-      '-metadata:s:v',
-      'handler_name=',
-      mp4,
-    ]);
-    if (bytes(mp4) <= max || crf >= 30) break;
-    crf += 1;
-  }
-  let crfAv1 = 35;
-  for (;;) {
-    // bitexact: the WebM muxer otherwise writes a random track UID, so a rerun would rewrite an unchanged loop
-    ff([
-      '-i',
-      masterFile,
-      '-vf',
-      vf,
-      '-c:v',
-      'libsvtav1',
-      '-preset',
-      '6',
-      '-crf',
-      String(crfAv1),
-      '-g',
-      '60',
-      '-an',
-      '-map_metadata',
-      '-1',
-      '-fflags',
-      '+bitexact',
-      webm,
-    ]);
-    if (bytes(webm) <= Math.min(max, bytes(mp4)) || crfAv1 >= 42) break;
-    crfAv1 += 1;
-  }
-  const p = probe(mp4);
-  const v = p.streams.find((s) => s.codec_type === 'video');
-  if (p.streams.some((s) => s.codec_type === 'audio')) throw new Error(`${mp4}: has an audio stream`);
-  return {
-    w,
-    h: h9(w),
-    mp4: `/media/${name}-${w}.mp4`,
-    webm: `/media/${name}-${w}.webm`,
-    mp4Bytes: bytes(mp4),
-    webmBytes: bytes(webm),
-    crf,
-    crfAv1,
-    duration: Number(Number(p.format.duration).toFixed(2)),
-    fps: v.r_frame_rate,
-  };
-}
-
-/** Rotate a seamless master so it starts at t (lossless). The poster is then the loop's own first frame, so the poster →
- *  loop dissolve shows one image, never two poses; the poster keeps the moment chosen for it. */
-function rotate(name, masterFile, t) {
-  const file = join(WORK, `${name}.rot.mkv`);
-  ff([
-    '-i',
-    masterFile,
-    '-filter_complex',
-    `[0]split[a][b];[a]trim=start=${t},setpts=PTS-STARTPTS[x];[b]trim=end=${t},setpts=PTS-STARTPTS[y];[x][y]concat=n=2:v=1[m]`,
-    '-map',
-    '[m]',
-    '-c:v',
-    'libx264',
-    '-qp',
-    '0',
-    '-preset',
-    'veryfast',
-    '-an',
-    file,
-  ]);
-  return file;
-}
-
-/** Frame at time t of a master as a PNG. */
-function frame(masterFile, t, png) {
-  ff(['-ss', String(t), '-i', masterFile, '-frames:v', '1', '-pix_fmt', 'rgb24', png]);
-  return png;
-}
-
-/** AVIF + WebP posters at each width ≤ the master's width, all exactly 16:9 (cover-cropped, centred). */
-async function posters(name, png, widths) {
-  const meta = await sharp(png).metadata();
-  const ws = widths.filter((w) => w <= meta.width);
-  const out = { widths: ws, avif: [], webp: [] };
-  for (const w of ws) {
-    const img = sharp(png).resize(w, h9(w), { fit: 'cover', kernel: 'lanczos3' });
-    await img
-      .clone()
-      .avif({ quality: 50, effort: 7 })
-      .toFile(join(OUT, `${name}-${w}.avif`));
-    await img
-      .clone()
-      .webp({ quality: 78, effort: 6 })
-      .toFile(join(OUT, `${name}-${w}.webp`));
-    out.avif.push(`/media/${name}-${w}.avif ${w}w`);
-    out.webp.push(`/media/${name}-${w}.webp ${w}w`);
-  }
-  out.src = `/media/${name}-${ws[0]}.webp`;
-  out.bytes = Object.fromEntries(
-    ws.map((w) => [w, { avif: bytes(join(OUT, `${name}-${w}.avif`)), webp: bytes(join(OUT, `${name}-${w}.webp`)) }]),
-  );
-  return out;
-}
-
-/** Still image (not 16:9): AVIF + WebP at widths ≤ source, native aspect ratio. */
-async function stills(name, png, widths) {
-  const meta = await sharp(png).metadata();
-  const ws = widths.filter((w) => w <= meta.width);
-  const out = { widths: ws, avif: [], webp: [], w: meta.width, h: meta.height };
-  for (const w of ws) {
-    const img = sharp(png).resize(w, null, { kernel: 'lanczos3' });
-    await img
-      .clone()
-      .avif({ quality: 55, effort: 7 })
-      .toFile(join(OUT, `${name}-${w}.avif`));
-    await img
-      .clone()
-      .webp({ quality: 80, effort: 6 })
-      .toFile(join(OUT, `${name}-${w}.webp`));
-    out.avif.push(`/media/${name}-${w}.avif ${w}w`);
-    out.webp.push(`/media/${name}-${w}.webp ${w}w`);
-  }
-  out.src = `/media/${name}-${ws[0]}.webp`;
-  return out;
-}
-
-/** Pull a lab photo's neutral surface toward grey: scale channels by `amount` of the cast. */
-async function neutralise(input, patch, amount = 0.7) {
-  const { data, info } = await sharp(input).extract(patch).raw().toBuffer({ resolveWithObject: true });
-  const sum = [0, 0, 0];
-  for (let i = 0; i < data.length; i += info.channels) for (let c = 0; c < 3; c++) sum[c] += data[i + c];
-  const n = data.length / info.channels;
-  const mean = sum.map((s) => s / n);
-  const grey = (mean[0] + mean[1] + mean[2]) / 3;
-  const gains = mean.map((m) => 1 + amount * (grey / m - 1));
-  return { gains, mean };
-}
-
-const fmtGrade = 'eq=saturation=0.9';
 const jobs = {};
 
 // ── Framelight: the shipped app's landscape screen, whole, a still; the hero is the same minute as three screens (jobs/framelight.mjs) ──
-jobs.framelight = async () => (await import('./jobs/framelight.mjs')).framelight({ posters, h9, WORK, SURFACE });
+jobs.framelight = framelight;
 // Page figures (not 16:9, so `stills`): three live-view prompts and four photos shot with the app
-jobs['framelight-prompts'] = async () =>
-  (await import('./jobs/framelight.mjs')).framelightPrompts({ stills, WORK, SURFACE });
-jobs['framelight-shots'] = async () =>
-  (await import('./jobs/framelight.mjs')).framelightShots({ stills, WORK, SURFACE });
+jobs['framelight-prompts'] = framelightPrompts;
+jobs['framelight-shots'] = framelightShots;
 
 // ── Robot learning: the tile is the real wrist camera turning the knob (a policy I trained, after the fixes),
 // boomeranged; the hero is the UR5e itself.
@@ -280,8 +83,7 @@ jobs['robot-learning'] = async () => {
 
 // ── AR overlay: the tool's own output, the door fixture's guide stood upright and see-through in front of the UR5e; the
 // tile is a crop of that real frame, the hero the whole frame on the plate (jobs/apriltag-overlay.mjs). ─────────────────
-jobs['apriltag-overlay'] = async () =>
-  (await import('./jobs/apriltag-overlay.mjs')).default({ WORK, SURFACE, h9, posters, stills });
+jobs['apriltag-overlay'] = apriltagOverlay;
 
 // The second YCB layout, a page figure: the source's first 5 columns are white (a capture margin), which would draw a
 // 1.5 px sliver inside the figure's left hairline, so 6 px come off its left edge; text width, at 520, 780 and 1040 px
@@ -381,13 +183,12 @@ for (const f of ['calibration', 'categories']) {
 // point ghosts.
 // Hero: the same plaza, wider, 8.0 s, as its own entry (memos-hero) with its own 960 and 1280 loops.
 // These scenes have their own light, so they get only the shared grade.
-const memosHelpers = () => ({ master, rotate, loop, frame, posters, WORK, TILE_MAX, HERO_MAX, fmtGrade });
-jobs.memos = async () => (await import('./jobs/memos.mjs')).memos(memosHelpers());
-jobs['memos-hero'] = async () => (await import('./jobs/memos.mjs')).memosHero(memosHelpers());
+jobs.memos = memos;
+jobs['memos-hero'] = memosHero;
 
 // ── PhotoGleam: the app's own screens set whole on the plate, each rendition composed at its own width
 // (jobs/photogleam.mjs) ──────────────────────────────────────────────────────────────────────────────────────────────
-jobs.photogleam = async () => (await import('./jobs/photogleam.mjs')).default({ WORK, SURFACE, h9, posters, stills });
+jobs.photogleam = photogleam;
 
 // ── Link preview (og:image, 1200×630): the Framelight hero's three real screens, cut from its 16:9 master to 1.905:1
 // (only plate is cut; the screens fill 82 % of the master's height). Run after `framelight`, with the same MEDIA_CACHE.

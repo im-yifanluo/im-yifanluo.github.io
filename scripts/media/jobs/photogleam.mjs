@@ -1,6 +1,6 @@
 /**
- * PhotoGleam media: tile, hero and a page figure, called from scripts/media/build.mjs (jobs.photogleam) with its
- * helpers. Returns the same shape as the other jobs: { tile: { poster, loops }, hero: { kind, poster, phone }, figure }.
+ * PhotoGleam media: tile, hero and a page figure, registered in scripts/media/build.mjs as the `photogleam` job.
+ * Returns the same shape as the other jobs: { tile: { poster, loops }, hero: { kind, poster, phone }, figure }.
  *
  * Every pixel of a screen is the app's own: the Android screens are emulator captures of Oct 7, 2024 (the set the
  * Google Play listing shows); the iPhone screens are the App Store listing's screenshots (Sep 24, 2024). They are
@@ -14,6 +14,7 @@
  */
 import { join } from 'node:path';
 import sharp from 'sharp';
+import { WORK, plate, posters, roundCorners, stills } from '../lib.mjs';
 import { source } from '../paths.mjs';
 
 const here = source('photogleam');
@@ -29,7 +30,7 @@ const RADIUS = 0.05; // corner radius ÷ screen width (a phone display's corners
 
 /** One frame W px wide (16:9 unless `aspect` = height ÷ width): the screens, whole, side by side and centred on the plate.
  *  Written as a PNG. */
-async function compose(screens, W, out, { surface, fill = FILL.tile, aspect = 9 / 16, gapFrac = GAP } = {}) {
+async function compose(screens, W, out, { fill = FILL.tile, aspect = 9 / 16, gapFrac = GAP } = {}) {
   const H = Math.round(W * aspect);
   const sh = Math.round(H * fill);
   const gap = Math.round(W * gapFrac);
@@ -40,17 +41,10 @@ async function compose(screens, W, out, { surface, fill = FILL.tile, aspect = 9 
     const { data, info } = await img.png().toBuffer({ resolveWithObject: true });
     const w = info.width,
       r = Math.round(w * RADIUS);
-    const mask = Buffer.from(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${sh}"><rect width="${w}" height="${sh}" rx="${r}" fill="#fff"/></svg>`,
-    );
     const ring = Buffer.from(
       `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${sh}"><rect x="${line / 2}" y="${line / 2}" width="${w - line}" height="${sh - line}" rx="${r - line / 2}" fill="none" stroke="rgb(${TILE_LINE.r},${TILE_LINE.g},${TILE_LINE.b})" stroke-opacity="${TILE_LINE.alpha}" stroke-width="${line}"/></svg>`,
     );
-    const screen = await sharp(data)
-      .ensureAlpha()
-      .composite([{ input: mask, blend: 'dest-in' }, { input: ring }])
-      .png()
-      .toBuffer();
+    const screen = await roundCorners(sharp(data), w, sh, r, [{ input: ring }]);
     layers.push({ input: screen, w });
   }
   const total = layers.reduce((n, l) => n + l.w, 0) + gap * (layers.length - 1);
@@ -61,28 +55,25 @@ async function compose(screens, W, out, { surface, fill = FILL.tile, aspect = 9 
     x += l.w + gap;
     return c;
   });
-  await sharp({ create: { width: W, height: H, channels: 3, background: surface } })
-    .composite(composites)
-    .png()
-    .toFile(out);
+  await plate(W, H, composites).toFile(out);
   return out;
 }
 
 /** Posters composed at each width (no second resample of the UI), merged into one posters() / stills() record.
- *  `stills` = h.stills (any aspect, records w × h) instead of h.posters (16:9). */
-async function composedAt(h, name, screens, widths, opts, { stills = false } = {}) {
-  const merged = { widths: [], avif: [], webp: [], ...(stills ? {} : { bytes: {} }) };
+ *  `stills: true` encodes with stills() (any aspect, records w × h) instead of posters() (16:9). */
+async function composedAt(name, screens, widths, opts, { stills: asStills = false } = {}) {
+  const merged = { widths: [], avif: [], webp: [], ...(asStills ? {} : { bytes: {} }) };
   let last;
   for (const w of widths) {
-    const png = await compose(screens, w, join(h.WORK, `${name}-${w}.png`), { surface: h.SURFACE, ...opts });
-    const p = stills ? await h.stills(name, png, [w]) : await h.posters(name, png, [w]);
+    const png = await compose(screens, w, join(WORK, `${name}-${w}.png`), opts);
+    const p = asStills ? await stills(name, png, [w]) : await posters(name, png, [w]);
     merged.widths.push(...p.widths);
     merged.avif.push(...p.avif);
     merged.webp.push(...p.webp);
     if (p.bytes) Object.assign(merged.bytes, p.bytes);
     last = p;
   }
-  if (stills) {
+  if (asStills) {
     merged.w = last.w;
     merged.h = last.h;
   } // the largest master's size (its aspect is what the box needs)
@@ -90,19 +81,18 @@ async function composedAt(h, name, screens, widths, opts, { stills = false } = {
   return merged;
 }
 
-/** The build.mjs job. h = { WORK, SURFACE, h9, posters, stills } from scripts/media/build.mjs.
+/** The `photogleam` job.
  *  The tile is the iPhone pair, the camera page and the first filter Gemini wrote for that shot, so the homepage shows
  *  a before → after. The page hero is the same pair on the 16:9 plate (screens 90 % of its height), with a square phone
  *  cut (the pair at 88 %, ≈ 140 CSS px a screen at 390, where the 16:9 pair would be ≈ 80). The three filters are a
  *  wide figure after the diagram (880 × 495, the same layout), and its phone cut is one whole screen, Dark & Moody, on
  *  a 4:5 plate (the Framelight prompts figure's form). */
-export default async function photogleam(h) {
-  const tile = { poster: await composedAt(h, 'photogleam', IPHONE, [640, 960], { fill: FILL.tile }), loops: [] };
+export async function photogleam() {
+  const tile = { poster: await composedAt('photogleam', IPHONE, [640, 960], { fill: FILL.tile }), loops: [] };
   const hero = {
     kind: 'still',
-    poster: await composedAt(h, 'photogleam-hero', IPHONE, [1280, 1760], { fill: FILL.hero }),
+    poster: await composedAt('photogleam-hero', IPHONE, [1280, 1760], { fill: FILL.hero }),
     phone: await composedAt(
-      h,
       'photogleam-hero-phone',
       IPHONE,
       [736, 1104],
@@ -112,7 +102,6 @@ export default async function photogleam(h) {
   };
   const figure = {
     poster: await composedAt(
-      h,
       'photogleam-filters',
       THREE_FILTERS,
       [880, 1320, 1760],
@@ -120,7 +109,6 @@ export default async function photogleam(h) {
       { stills: true },
     ),
     phone: await composedAt(
-      h,
       'photogleam-filters-phone',
       ['filter-dark-moody'],
       [736, 1104],
