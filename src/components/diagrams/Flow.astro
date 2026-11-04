@@ -102,7 +102,6 @@ const edges = d.edges.map((e, k) => ({ e, k }));
         data-ta={e.toAt}
         data-ch={e.channel}
         data-side={e.labelSide}
-        data-both={e.both ? '' : undefined}
       >
         <path class="ln" /><path class="hd" />{e.both && <path class="hd hd0" />}
       </g>)}

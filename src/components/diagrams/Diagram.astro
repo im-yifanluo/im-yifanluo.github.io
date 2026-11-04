@@ -1,9 +1,9 @@
 ---
 // One project diagram, rendered from src/data/diagrams.ts: a whole <figure> (plate + caption) that goes where a figure
 // goes.
-//   <Diagram id="umi" />                          the diagram's default width (wide: the content column, 880 px)
-//   <Diagram id="rag-coverage" width="text" />    the text measure (520 px)
-//   <Diagram id="fl" caption={f.caption} />       the page's own caption (project YAML) instead of the data's
+//   <Diagram id="umi" />                                the diagram's default width (wide: the content column, 880 px)
+//   <Diagram id="rag-coverage" width="text" />          the text measure (520 px)
+//   <Diagram id="fl" caption={{ text: f.caption }} />   the page's own caption (project YAML) instead of the data's
 // The figure carries fig-wide / fig-text and its caption `cap meta`, like a media figure on a project page.
 // `flow` diagrams are real boxes and SVG edges with hover / focus / tap details (Flow.astro + flow.ts, the only JS, loaded
 // only on pages that render one); `bars` tables are plain HTML (Bars.astro). Styles: styles/diagrams.css.
