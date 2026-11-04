@@ -1,6 +1,6 @@
 # Yifan Luo
 
-Personal website: projects, experience, news and awards, live at <https://im-yifanluo.github.io>. A static
+Personal website: projects, experience, news and awards, live at <https://yifanluo.dev>. A static
 [Astro](https://astro.build) 7 site with no UI framework, hand-written CSS and YAML content, deployed to GitHub Pages.
 
 ## Getting started
@@ -137,11 +137,11 @@ loading) depend on the machine's fonts and speed, and are skipped when `CI` is s
 
 [`ci.yml`](.github/workflows/ci.yml) runs `format:check`, `lint`, `build`, `test` and `test:e2e` on every pull request
 and push to `main`. [`deploy.yml`](.github/workflows/deploy.yml) publishes to GitHub Pages and runs only when started by
-hand (Actions → Deploy → Run workflow; Settings → Pages → Source: GitHub Actions).
+hand (Actions → Deploy → Run workflow; Settings → Pages → Source: GitHub Actions, Custom domain: `yifanluo.dev`).
 
 - Secrets: `PRIVACY_SCAN_PRIVATE` and `PRIVACY_SCAN_RULES`, the privacy scan's private data, as both Actions and
   Dependabot secrets (a CI build fails without them, and Dependabot's pull requests see only Dependabot secrets).
-- Variable: `SITE_URL`, the origin the site is served from, at its root (default `https://im-yifanluo.github.io`).
+- Variable: `SITE_URL`, the origin the site is served from, at its root (default `https://yifanluo.dev`).
 
 ## License
 
