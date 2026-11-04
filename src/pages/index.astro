@@ -76,7 +76,7 @@ const awardsShown = AWARDS.filter((g) => !g.collapsed),
             ),
           )}</div>
         {INTRO.bio.map((b) => (
-          <RichText as="p" class="bio prose" text={b.text} glue={b.keep} />
+          <RichText as="p" class="bio prose" text={b.text} />
         ))}
         <LinkList
           items={[
