@@ -31,6 +31,7 @@ everything from the repository root.
 | `npm run format`                    | Format the code with Prettier                                                                                       |
 | `npm run format:check`              | Check the formatting without changing files                                                                         |
 | `npm test`                          | Run the unit tests (see [Tests](#tests))                                                                            |
+| `npm run test:e2e`                  | Run the end-to-end tests on the built site (see [Tests](#tests))                                                    |
 | `npm run media`                     | Rebuild the web media from `$MEDIA_SRC`; `npm run media -- --only <job>` for one job, `-- --help` for the job names |
 | `npm run media:portrait -- <photo>` | Rebuild the homepage portrait from a photo                                                                          |
 | `npm run fonts:fallbacks`           | Re-tune the fallback font faces in `src/styles/fallbacks.css`                                                       |
@@ -64,11 +65,13 @@ src/
 ├── env.d.ts               HTML attributes that Astro's types do not declare
 └── site.config.ts         name, contact links, intro, last-updated date, typography settings
 tests/
-└── unit/                  unit tests (Vitest); fixtures/ holds the YAML files they load
+├── unit/                  unit tests (Vitest); fixtures/ holds the YAML files they load
+└── e2e/                   end-to-end tests (Playwright): *.spec.ts, fixtures.ts (shared setup), helpers/
 astro.config.mjs           site URL, static build, the sitemap, redirects for renamed pages
 .prettierrc.json           Prettier settings; .prettierignore skips the generated and served-as-is files
 eslint.config.js           ESLint rules: JavaScript, TypeScript, Astro and accessibility
 vitest.config.ts           Vitest settings, on top of Astro's Vite config
+playwright.config.ts       Playwright settings: the desktop and phone projects, the preview server for the tests
 ```
 
 ## Editing content
@@ -250,20 +253,32 @@ git ls-files -z | xargs -0 node scripts/privacy-scan.mjs --strict
 
 ## Tests
 
-`npm test` runs the unit tests in `tests/unit/` with [Vitest](https://vitest.dev). They run on Astro's Vite config
-(`vitest.config.ts`), so they import the site's modules the way the pages do, and they need no build:
+Both suites take their expectations from the content, `src/site.config.ts` and `scripts/budgets.json` rather than from
+copied values, so a content edit needs no test change unless it breaks a rule.
 
-- `typography.test.ts`, `dates.test.ts` and `rich-text.test.ts`: the text helpers in `src/lib/`.
-- `content.test.ts`: the content schemas (month fields, media and diagram ids) and the list loader, which must stop on
-  a broken list file (the cases are in `tests/unit/fixtures/`).
-- `pages.test.ts`: the homepage, rendered with Astro's container API from entries the test supplies, the project
-  pages' guard against slugs that take a redirect's address, and `robots.txt`.
-- `repo.test.ts`: the repository as a whole: the top-level entries it may track, `README.md` as its only Markdown file,
-  the budgets for tracked files and for each file in `public/`, every list in `src/data` loading all of its items under
-  unique ids, News newest first, and no project slug that shadows a reserved path or a redirect.
+**Unit tests** (`npm test`, [Vitest](https://vitest.dev), `tests/unit/`) run on Astro's Vite config and need no build.
+They cover the text helpers in `src/lib/`, the content schemas and the list loader, the homepage and `robots.txt`
+rendered with Astro's container API, and rules for the repository as a whole (tracked files, size budgets, unique list
+ids, reserved slugs).
 
-The tests read the content, the configuration and the budgets from their files rather than copying values, so a
-content edit needs no test change unless it breaks one of these rules.
+**End-to-end tests** (`npm run test:e2e`, [Playwright](https://playwright.dev), `tests/e2e/`) drive a headless browser
+against the built site, which `astro preview` serves at `http://127.0.0.1:4329`. They never build:
+
+```sh
+npm run build
+npx playwright install chromium   # once; or run with PW_CHANNEL=chrome to use the installed Chrome
+npm run test:e2e
+```
+
+- They open the homepage, each project page it links to and the 404 page at seven widths, split between two
+  Playwright projects: `desktop` (1440, 1280, 1024 and 768 px) and `phone` (390, 360 and 320 px, with touch).
+- Tags: `@desktop` and `@phone` tests run in that project only. `@local` tests (measured layout and type, throttled
+  loading, video playback) depend on the machine's fonts, codecs and speed, and are skipped when `CI` is set.
+- `E2E_PORT` changes the port. Arguments after `--` go to Playwright, e.g. `npm run test:e2e -- tests/e2e/seo.spec.ts`.
+- Reports go to `playwright-report/` (`npx playwright show-report`) and traces of failed tests to `test-results/`.
+
+One spec per concern: `layout`, `typography`, `chrome` (header and footer), `interaction`, `awards`, `a11y`, `media`,
+`performance`, `links`, `seo`, `diagrams` and `no-js`. Each file opens with a comment that says what it checks.
 
 ## License
 

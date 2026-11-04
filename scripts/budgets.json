@@ -1,5 +1,5 @@
 {
-  "$comment": "Size and performance budgets, defined once. Byte limits are binary (1 KiB = 1024 B). scope says who enforces each one: dist = scripts/check-dist.mjs after every build; repo = the unit tests (tests/unit/repo.test.ts, npm test); e2e = the browser tests, which are not in this repository yet (until then those budgets are targets, checked by hand).",
+  "$comment": "Size and performance budgets, defined once. Byte limits are binary (1 KiB = 1024 B). scope says who enforces each one: dist = scripts/check-dist.mjs after every build; repo = the unit tests (tests/unit/repo.test.ts, npm test); e2e = the end-to-end tests in a browser (tests/e2e, npm run test:e2e).",
   "trackedBytes": {
     "scope": "repo",
     "max": 31457280,

@@ -17,6 +17,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "media": "node scripts/media/build.mjs",
     "media:portrait": "node scripts/media/portrait.mjs",
     "fonts:fallbacks": "node scripts/fonts/fallbacks.mjs"
@@ -27,7 +28,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "4.13.0",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
     "@types/node": "24.19.2",
     "eslint": "10.13.0",
     "eslint-plugin-astro": "3.2.1",
