@@ -83,8 +83,8 @@ jobs['robot-learning'] = async () => {
   return { tile, hero: { kind: 'still', poster: await posters('robot-learning-hero', heroPng, [1280, 1760]) }, gains };
 };
 
-// ── AR overlay: the tool's own output, the door fixture's guide stood upright and see-through in front of the UR5e; the
-// tile is a crop of that real frame, the hero the whole frame on the plate (jobs/apriltag-overlay.mjs). ─────────────────
+// ── AR overlay: the tool's own output, four YCB objects rendered on the lab table in front of the UR5e; the tile and
+// the hero are crops of that real frame (jobs/apriltag-overlay.mjs). ────────────────────────────────────────────────────
 jobs['apriltag-overlay'] = apriltagOverlay;
 
 // The second YCB layout, a page figure: the source's first 5 columns are white (a capture margin), which would draw a

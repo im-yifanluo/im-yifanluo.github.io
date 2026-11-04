@@ -13,7 +13,7 @@ links:
 hero:
   media: apriltag-overlay
   part: hero
-  alt: "A live camera view of the lab table in front of the UR5e arm: a rendered benchmark fixture, a board with a key and a handle, stands upright as a see-through guide, and a second rendered object sits to its right; a printed AprilTag lies on the table in the foreground."
+  alt: "A live camera view of the lab table in front of the UR5e arm: four rendered YCB objects, a drill, a bleach bottle, a can and a mustard bottle, sit on the table where the benchmark puts them; a printed AprilTag lies on the table in the foreground."
   caption: The benchmark layout, rendered from the printed tag's pose and blended over the live RealSense view.
 lead:
   - A printed AprilTag tells the camera where it is, and my ROS 2 tool draws the benchmark layout over live video.

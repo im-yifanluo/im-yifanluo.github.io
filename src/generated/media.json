@@ -178,12 +178,12 @@
     "src": "/media/apriltag-overlay-640.webp",
     "bytes": {
      "640": {
-      "avif": 7440,
-      "webp": 9046
+      "avif": 8927,
+      "webp": 12946
      },
      "944": {
-      "avif": 13166,
-      "webp": 15536
+      "avif": 16010,
+      "webp": 22356
      }
     }
    },
@@ -193,51 +193,34 @@
    "kind": "still",
    "poster": {
     "widths": [
-     1280,
-     1760
+     880,
+     1188
     ],
     "avif": [
-     "/media/apriltag-overlay-hero-1280.avif 1280w",
-     "/media/apriltag-overlay-hero-1760.avif 1760w"
+     "/media/apriltag-overlay-hero-880.avif 880w",
+     "/media/apriltag-overlay-hero-1188.avif 1188w"
     ],
     "webp": [
-     "/media/apriltag-overlay-hero-1280.webp 1280w",
-     "/media/apriltag-overlay-hero-1760.webp 1760w"
+     "/media/apriltag-overlay-hero-880.webp 880w",
+     "/media/apriltag-overlay-hero-1188.webp 1188w"
     ],
-    "src": "/media/apriltag-overlay-hero-1280.webp",
+    "src": "/media/apriltag-overlay-hero-880.webp",
     "bytes": {
-     "1280": {
-      "avif": 11380,
-      "webp": 14734
+     "880": {
+      "avif": 12599,
+      "webp": 17426
      },
-     "1760": {
-      "avif": 17744,
-      "webp": 22754
+     "1188": {
+      "avif": 19827,
+      "webp": 27096
      }
     }
-   },
-   "phone": {
-    "widths": [
-     704,
-     1056
-    ],
-    "avif": [
-     "/media/apriltag-overlay-hero-phone-704.avif 704w",
-     "/media/apriltag-overlay-hero-phone-1056.avif 1056w"
-    ],
-    "webp": [
-     "/media/apriltag-overlay-hero-phone-704.webp 704w",
-     "/media/apriltag-overlay-hero-phone-1056.webp 1056w"
-    ],
-    "w": 1056,
-    "h": 787,
-    "src": "/media/apriltag-overlay-hero-phone-704.webp"
    }
   },
   "gains": [
-   1.0287,
-   0.9833,
-   0.9895
+   1.0012,
+   0.9977,
+   1.0011
   ]
  },
  "umi-demo": {
