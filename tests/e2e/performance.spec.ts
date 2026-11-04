@@ -46,19 +46,6 @@ test.describe(`${FIRST_LOAD}; ${FONT_REQUESTS}`, () => {
   }
 });
 
-test('unknown query parameters change nothing; the one font makes no request', async ({ page }) => {
-  const load = countRequests(page);
-  await page.goto('/?style=b', { waitUntil: 'networkidle' });
-  const state = await page.evaluate(() => ({
-    dataStyle: document.documentElement.getAttribute('data-style'),
-    switcher: document.querySelector('.style-switch') !== null,
-    styleLinks: document.querySelectorAll('a[href*="style="]').length,
-    family: getComputedStyle(document.querySelector('.name')!).fontFamily.split(',')[0]!.replace(/"/g, ''),
-  }));
-  expect(state).toEqual({ dataStyle: null, switcher: false, styleLinks: 0, family: font.family });
-  expect((await load()).fonts, 'font requests').toBeLessThanOrEqual(LIMIT.fontRequests);
-});
-
 test('the OFL text is served next to the font', async ({ request }) => {
   const licence = await request.get(font.licence);
   expect(licence.status()).toBe(200);

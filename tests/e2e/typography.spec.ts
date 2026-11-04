@@ -27,6 +27,7 @@ const MAX_FIRST_SCREEN_WORDS = 230;
 const WIDEST = Math.max(...WIDTHS);
 /** A heading's one-word last line is checked at one width of each kind: wide, mid and phone. */
 const ORPHAN_WIDTHS = [1440, 1024, 390];
+if (!ORPHAN_WIDTHS.every((w) => WIDTHS.includes(w))) throw new Error('ORPHAN_WIDTHS must be widths of WIDTHS');
 /** A heading's last line is an orphan when it holds one word of up to nine characters ("prompt.") and the heading has
  *  three words or more. A long compound alone on a balanced last line, or a compound's tail plus a word, is not. */
 const ORPHAN = { minWords: 3, maxChars: 9 };

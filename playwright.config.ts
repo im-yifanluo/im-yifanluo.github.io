@@ -2,8 +2,8 @@
 // serves from dist/. The tests never build: run `npm run build` first.
 //   E2E_PORT    the preview server's port (default 4329)
 //   PW_CHANNEL  an installed browser to use, e.g. `chrome`; unset, Playwright's own Chromium (`npx playwright install`)
-//   CI          skips the tests tagged @local: measured layout and type, throttled loading and video playback, which
-//               depend on the machine's fonts, codecs and speed
+//   CI          skips the tests tagged @local: measured layout and type, and throttled loading, which depend on the
+//               machine's fonts and speed
 // A test tagged @desktop runs only in the desktop project (hover, the drawn diagrams, checks that are the same at every
 // width) and one tagged @phone only in the phone project (touch, phone layouts).
 import { defineConfig } from '@playwright/test';

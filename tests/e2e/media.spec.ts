@@ -57,6 +57,7 @@ const loaded = (video: Locator) =>
 const MATRIX = [
   'loops: muted loop playsinline preload=none, sized',
   'below-fold images lazy',
+  'the LCP hint: at most one image fetchpriority=high, and it is eager; every other image lazy',
   'reduced motion: no loop autoplays',
   'reduced motion: no CSS animations',
 ] as const;
@@ -75,12 +76,17 @@ test.describe(MATRIX.join('; '), () => {
         const fold = page.viewportSize()!.height * 1.5;
         const eager = imgs.filter((img) => img.top > fold && img.loading !== 'lazy');
         expect.soft(eager, at(MATRIX[1])).toEqual([]);
+        // the eager images are exactly the ones with fetchpriority=high, and there is at most one
+        const high = imgs.filter((img) => img.fetchpriority === 'high');
+        const notLazy = imgs.filter((img) => img.loading !== 'lazy');
+        expect.soft(high.length, at(MATRIX[2])).toBeLessThanOrEqual(1);
+        expect.soft(notLazy, at(MATRIX[2])).toEqual(high);
         await scrollThrough(page);
-        expect.soft(await playing(page), at(MATRIX[2])).toBe(0);
+        expect.soft(await playing(page), at(MATRIX[3])).toBe(0);
         const animations = await page.evaluate(
           () => document.getAnimations().filter((animation) => animation instanceof CSSAnimation).length,
         );
-        expect.soft(animations, at(MATRIX[3])).toBe(0);
+        expect.soft(animations, at(MATRIX[4])).toBe(0);
       }
     });
   }
@@ -108,7 +114,7 @@ test.describe('reduced motion: the external arrow fades but does not move', { ta
   }
 });
 
-test.describe('a loop in view plays; only loops within 200 px of view play', { tag: '@local' }, () => {
+test.describe('a loop in view plays; only loops within 200 px of view play', () => {
   for (const path of LOOP_PAGES) {
     test(path, async ({ open }) => {
       const { page } = await open(path);
@@ -133,13 +139,15 @@ test.describe('Pause stops every loop and persists', () => {
     test(path, async ({ open }) => {
       const { page } = await open(path);
       const control = page.locator('.motion').first();
-      await bringIntoView(page.locator('video').first());
+      const first = page.locator('video').first();
+      await bringIntoView(first);
+      await expect.poll(() => loaded(first), { message: 'a loop plays before Pause' }).toBe(true);
       await control.click();
       await expect.poll(() => playing(page)).toBe(0);
       await expect(control).toHaveText('Play videos');
       await page.reload({ waitUntil: 'networkidle' });
       await expect(control).toHaveText('Play videos');
-      await bringIntoView(page.locator('video').first());
+      await bringIntoView(first);
       expect(await playing(page)).toBe(0);
     });
   }

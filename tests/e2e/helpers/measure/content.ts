@@ -16,6 +16,7 @@ export function content(k: Toolkit) {
     wh: i.hasAttribute('width') && i.hasAttribute('height'),
     alt: i.hasAttribute('alt'),
     loading: i.loading,
+    fetchpriority: i.fetchPriority,
     top: k.r2(k.rect(i).top + k.sy),
     hidden: !!i.closest('[aria-hidden="true"]'),
     alt0: i.alt === '',

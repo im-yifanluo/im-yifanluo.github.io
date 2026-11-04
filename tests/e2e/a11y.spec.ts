@@ -97,22 +97,24 @@ test.describe('keyboard, motion allowed', () => {
       expect(stops.length).toBeGreaterThan(0);
       expect(stops.filter((stop) => !stop.shown)).toEqual([]);
     });
-
-    test(`one tab stop per destination per entry: ${path}`, async ({ open }) => {
-      const { page } = await open(path, { width: widest(), reducedMotion: 'no-preference' });
-      const repeated = await page.evaluate(() =>
-        [...document.querySelectorAll('.entry')]
-          .filter((entry) => {
-            const hrefs = [...entry.querySelectorAll('a[href]:not([tabindex="-1"])')].map((a) =>
-              a.getAttribute('href'),
-            );
-            return new Set(hrefs).size !== hrefs.length;
-          })
-          .map((entry) => entry.id),
-      );
-      expect(repeated).toEqual([]);
-    });
   }
+
+  // the entries are the homepage's project rows; the same at every width: checked in the desktop project
+  test('one tab stop per destination per entry', { tag: '@desktop' }, async ({ open }) => {
+    const { page } = await open('/', { reducedMotion: 'no-preference' });
+    const { entries, repeated } = await page.evaluate(() => {
+      const entries = [...document.querySelectorAll('.entry')];
+      const repeated = entries
+        .filter((entry) => {
+          const hrefs = [...entry.querySelectorAll('a[href]:not([tabindex="-1"])')].map((a) => a.getAttribute('href'));
+          return new Set(hrefs).size !== hrefs.length;
+        })
+        .map((entry) => entry.id);
+      return { entries: entries.length, repeated };
+    });
+    expect(entries, 'project rows on the homepage').toBeGreaterThan(0);
+    expect(repeated).toEqual([]);
+  });
 });
 
 /** Every diagram step whose label or sub line lists items with " · ": its page, its button and those lists. */

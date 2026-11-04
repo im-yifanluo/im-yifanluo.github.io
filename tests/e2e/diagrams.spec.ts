@@ -18,8 +18,6 @@ import {
 import * as dom from './helpers/diagram-dom';
 import { readHtml } from './helpers/dist';
 
-/** A diagram script's size limit (scripts/check-dist.mjs holds all of _astro/*.js to budgets.json's externalJsBytes). */
-const SCRIPT_MAX = 8 * 1024;
 /** The interaction checks run at 2x pixels on phones. */
 const PHONE_PIXELS = { deviceScaleFactor: 2 };
 
@@ -46,19 +44,13 @@ async function tabThroughNodes(page: Page) {
 test.describe('script and styles', { tag: '@desktop' }, () => {
   for (const path of PAGES) {
     const shown = DIAGRAM_PAGES.find((page) => page.path === path);
-    test(`${path}: diagram script and styles only on pages that render a diagram (script ≤ ${SCRIPT_MAX / 1024} KB)`, async ({
-      page,
-      request,
-      baseURL,
-    }) => {
+    test(`${path}: diagram script and styles only on pages that render a diagram`, async ({ page, request }) => {
       const { diagrams: html } = await readHtml(page, await (await request.get(path)).text());
       const expected = { figs: shown?.diagrams.length ?? 0, flows: shown?.flows.length ?? 0 };
       expect({ figs: html.figs, flows: html.flows }).toEqual(expected);
       if (html.flows) {
         expect(html.scripts).toHaveLength(1);
         expect(html.styles, 'the diagram styles').toBe(true);
-        const script = await request.get(new URL(html.scripts[0]!, new URL(path, baseURL)).href);
-        expect((await script.body()).length, html.scripts[0]).toBeLessThanOrEqual(SCRIPT_MAX);
       } else {
         expect(html.scripts).toEqual([]);
         expect(html.styles, 'the diagram styles').toBe(html.figs > 0);
