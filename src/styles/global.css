@@ -56,13 +56,13 @@ figcaption {
 }
 .nw {
   white-space: nowrap;
-}
+} /* never wraps inside: phrases kept whole by lib/typography.ts (glue, typoHtml) and lib/rich-text.ts (segs) */
 @media (min-width: 720px) {
   .nw-w {
     white-space: nowrap;
   }
 } /* glued from 720 px up only (a long name on a phone line) */
-abbr.sm {
+abbr.short-form {
   display: none;
   text-decoration: none;
 } /* a phrase's phone form (lib/typography.ts shortForms) */
@@ -298,7 +298,7 @@ html:not(.js) .site-header .bar::after {
   color: var(--head);
   white-space: nowrap;
 }
-/* homepage: the name arrives in the bar once the big name has slid under it (fade + 4 px, never a bounce) */
+/* .hn, the homepage's header name: it arrives in the bar once the h1 has slid under it (fade + 4 px, never a bounce) */
 .site-header .hn {
   opacity: 0;
   transform: translateY(4px);
@@ -654,11 +654,11 @@ html.js img.fade.in {
 .awards-more > summary::marker {
   content: '';
 }
-.awards-more > summary .hd,
-.awards-more[open] > summary .sh {
+.awards-more > summary .label-open,
+.awards-more[open] > summary .label-closed {
   display: none;
 }
-.awards-more[open] > summary .hd {
+.awards-more[open] > summary .label-open {
   display: inline;
 }
 @media (hover: hover) {
@@ -976,10 +976,10 @@ main:focus {
   .intro-text {
     margin-top: 0;
   }
-  .intro-text > .sub .lg {
+  .intro-text > .sub .long-form {
     display: none;
   } /* "B.S. Computer Science, UIUC": three lines under the name, not four */
-  .intro-text > .sub abbr.sm {
+  .intro-text > .sub abbr.short-form {
     display: inline;
   }
   .entry .tile {

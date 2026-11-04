@@ -168,8 +168,9 @@ const awardsShown = AWARDS.filter((g) => !g.collapsed),
       {/* the rest behind one quiet control (native <details>: opens without JS, find-in-page reaches its rows, the
           summary carries the expanded state). The label swaps in CSS; the summary is drawn after the rows (global.css). */}
       {awardsMore.length > 0 && <details class="awards-more">
-        <summary class="meta in-text"><span class="sh">Show all <span class="awards-n">{AWARD_COUNT}</span> awards</span
-          ><span class="hd">Show fewer</span></summary>
+        <summary class="meta in-text"><span class="label-closed"
+            >Show all <span class="awards-n">{AWARD_COUNT}</span> awards</span
+          ><span class="label-open">Show fewer</span></summary>
         {awardsMore.map((g) => (
           <AwardGroup group={g} />
         ))}

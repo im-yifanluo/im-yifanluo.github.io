@@ -105,13 +105,13 @@ describe('glue', () => {
 describe('shortForms', () => {
   it('pairs a phrase with its phone form', () => {
     expect(shortForms('at Big University now', { 'Big University': 'BU' })).toBe(
-      'at <span class="lg">Big University</span><abbr class="sm" title="Big University">BU</abbr> now',
+      'at <span class="long-form">Big University</span><abbr class="short-form" title="Big University">BU</abbr> now',
     );
   });
 
   it('wraps a glued phrase whole', () => {
     expect(shortForms(glue('at Big University', ['Big University']), { 'Big University': 'BU' })).toBe(
-      'at <span class="lg"><span class="nw">Big University</span></span><abbr class="sm" title="Big University">BU</abbr>',
+      'at <span class="long-form"><span class="nw">Big University</span></span><abbr class="short-form" title="Big University">BU</abbr>',
     );
   });
 
@@ -119,7 +119,7 @@ describe('shortForms', () => {
   it.each(lines.filter((l) => l.short))('renders the phone forms of "$text"', (line) => {
     const html = shortForms(glue(rich(line.text), line.keep), line.short);
     for (const [full, short] of Object.entries(line.short ?? {})) {
-      expect(html).toContain(`<abbr class="sm" title="${full}">${short}</abbr>`);
+      expect(html).toContain(`<abbr class="short-form" title="${full}">${short}</abbr>`);
       expect(text(html)).toContain(`${full}${short}`);
     }
   });

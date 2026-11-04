@@ -48,7 +48,9 @@ export function shortForms(html: string, forms: Record<string, string> = {}): st
   return Object.entries(forms).reduce((h, [full, short]) => {
     const glued = `<span class="nw">${full}</span>`;
     const src = h.includes(glued) ? glued : full;
-    return h.split(src).join(`<span class="lg">${src}</span><abbr class="sm" title="${full}">${short}</abbr>`);
+    return h
+      .split(src)
+      .join(`<span class="long-form">${src}</span><abbr class="short-form" title="${full}">${short}</abbr>`);
   }, html);
 }
 
