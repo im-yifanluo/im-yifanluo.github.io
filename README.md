@@ -39,6 +39,7 @@ everything from the repository root.
 ## Project structure
 
 ```
+.github/                   workflows/ci.yml (checks), workflows/deploy.yml (GitHub Pages), dependabot.yml
 public/                    copied into dist/ as is
 ├── media/                 web-ready images and video loops (written by npm run media)
 ├── fonts/OFL.txt          the font's license, served at /fonts/OFL.txt
@@ -279,6 +280,18 @@ npm run test:e2e
 
 One spec per concern: `layout`, `typography`, `chrome` (header and footer), `interaction`, `awards`, `a11y`, `media`,
 `performance`, `links`, `seo`, `diagrams` and `no-js`. Each file opens with a comment that says what it checks.
+
+## CI and deployment
+
+`.github/workflows/ci.yml` runs `format:check`, `lint`, `build`, `test` and `test:e2e` (without `@local`) on every pull
+request and push to `main`. `.github/workflows/deploy.yml` publishes to GitHub Pages and runs only when started by hand
+(Actions → Deploy → Run workflow; Settings → Pages → Source: GitHub Actions).
+
+- Secrets: `PRIVACY_SCAN_PRIVATE` and `PRIVACY_SCAN_RULES`, the contents of the two files in
+  [Privacy scan](#privacy-scan). Add both as Actions secrets and as Dependabot secrets: a CI build fails without them,
+  and Dependabot's pull requests see only Dependabot secrets.
+- Variable: `SITE_URL`, the deployed address (default `https://im-yifanluo.github.io`).
+- Dependabot: npm weekly (minor and patch dev updates grouped), Actions monthly.
 
 ## License
 

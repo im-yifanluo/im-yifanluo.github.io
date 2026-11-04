@@ -1,0 +1,44 @@
+name: Deploy
+
+# Runs only when started by hand. Settings → Pages → Source must be "GitHub Actions".
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # withastro/action is a composite action, so the build reads these from the job's environment
+    env:
+      ASTRO_TELEMETRY_DISABLED: 1
+      PRIVACY_STRICT: 1
+      PRIVACY_SCAN_PRIVATE: ${{ secrets.PRIVACY_SCAN_PRIVATE }}
+      PRIVACY_SCAN_RULES: ${{ secrets.PRIVACY_SCAN_RULES }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://im-yifanluo.github.io' }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install ffprobe for the privacy scan of video metadata
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Install, build and upload the site
+        uses: withastro/action@v6
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
