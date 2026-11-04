@@ -5,7 +5,7 @@
  * ($MEDIA_CACHE); see paths.mjs.
  */
 import { execFileSync } from 'node:child_process';
-import { statSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import sharp from 'sharp';
 import { FFMPEG, FFPROBE, MEDIA_CACHE, MEDIA_OUT } from './paths.mjs';
@@ -14,8 +14,13 @@ const OUT = MEDIA_OUT;
 const WORK = MEDIA_CACHE;
 
 const SURFACE = '#F6F6F4'; // the media plate: the grey every composed still is set on
-const TILE_MAX = 400 * 1024; // the loop limits (scripts/budgets.json tileLoopBytes.max and heroLoopBytes.max)
-const HERO_MAX = 1024 * 1024;
+
+// The loop limits in bytes (scripts/budgets.json): a tile or figure loop up to 640 px wide, its wider rendition for
+// high-density screens, and a hero loop.
+const budgets = JSON.parse(readFileSync(new URL('../budgets.json', import.meta.url), 'utf8'));
+const TILE_MAX = budgets.tileLoopBytes.max;
+const TILE_HIDPI_MAX = budgets.tileLoopBytes.maxHiDpi;
+const HERO_MAX = budgets.heroLoopBytes.max;
 
 const ff = (args) =>
   execFileSync(FFMPEG, ['-hide_banner', '-v', 'error', '-y', ...args], {
@@ -249,6 +254,7 @@ export {
   OUT,
   WORK,
   TILE_MAX,
+  TILE_HIDPI_MAX,
   HERO_MAX,
   ff,
   probe,

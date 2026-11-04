@@ -7,12 +7,13 @@
  *   npm run media -- --only memos,memos-hero    only these jobs
  *   npm run media -- --help                     usage, the job names and the settings
  *
- * Contract: 16:9, cropped to the subject, never letterboxed; no text or UI on tiles; one mild grade (saturation 0.9, a
- * white-balance pull toward neutral on lab photos); posters AVIF q50 + WebP q78 at 640, 960 and 1280 (only up to the
- * source's own resolution, never upscaled for detail it does not have); loops H.264 High (yuv420p, +faststart, no
- * audio) + AV1 (libsvtav1) in WebM, tiles ≤ 400 KB, heroes ≤ 1 MB, 3–8 s, seamless (matched frames, a cross-faded seam
- * or a boomerang). Every loop is first rendered to a lossless master, so the poster is the master's frame, not a
- * re-decoded lossy one.
+ * Contract: tiles and heroes 16:9, cropped to the subject (screen captures are set whole on the media plate); no labels
+ * added to tiles; at most one mild grade (saturation 0.9, a white-balance pull toward neutral on lab photos); posters
+ * (16:9) AVIF q50 + WebP q78 and stills (their own aspect ratio) AVIF q55 + WebP q80, at the widths each job lists
+ * (tiles 640–1280, heroes and figures up to 1760), never above the source's own resolution; loops H.264 High (yuv420p,
+ * +faststart, no audio) + AV1 (libsvtav1) in WebM, within the loop budgets in scripts/budgets.json, 3–8 s, seamless
+ * (matched frames, a cross-faded seam or a boomerang). Every loop is first rendered to a lossless master, so the poster
+ * is the master's frame, not a re-decoded lossy one.
  *
  * Sources are read from $MEDIA_SRC (one folder per job); intermediates go to $MEDIA_CACHE. Every setting is described
  * in scripts/media/paths.mjs. A job is a function in the `jobs` object below (inline, or imported from jobs/<job>.mjs)
@@ -32,6 +33,7 @@ import {
   OUT,
   WORK,
   TILE_MAX,
+  TILE_HIDPI_MAX,
   ff,
   probe,
   bytes,
@@ -155,7 +157,7 @@ jobs['world-cup-forecasting'] = async () => {
   return {
     tile: {
       poster,
-      loops: [loop('world-cup-forecasting', m, 640, TILE_MAX), loop('world-cup-forecasting', m, 960, TILE_MAX * 1.6)],
+      loops: [loop('world-cup-forecasting', m, 640, TILE_MAX), loop('world-cup-forecasting', m, 960, TILE_HIDPI_MAX)],
     },
   };
 };

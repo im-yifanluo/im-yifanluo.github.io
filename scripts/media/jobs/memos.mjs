@@ -16,7 +16,7 @@
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { HERO_MAX, TILE_MAX, WORK, fmtGrade, frame, loop, master, posters, rotate } from '../lib.mjs';
+import { HERO_MAX, TILE_HIDPI_MAX, TILE_MAX, WORK, fmtGrade, frame, loop, master, posters, rotate } from '../lib.mjs';
 import { source } from '../paths.mjs';
 
 const here = source('memos');
@@ -35,7 +35,7 @@ export async function memos() {
   const png = frame(m, 0, join(WORK, 'memos-poster.png'));
   const tile = {
     poster: await posters('memos', png, [640, 960, 1280]),
-    loops: [loop('memos', m, 640, TILE_MAX), loop('memos', m, 960, TILE_MAX * 1.6)],
+    loops: [loop('memos', m, 640, TILE_MAX), loop('memos', m, 960, TILE_HIDPI_MAX)],
   };
   return { tile };
 }
@@ -50,7 +50,7 @@ export async function memosHero() {
     hero: {
       kind: 'loop',
       poster: await posters('memos-hero', png, [640, 960, 1280]),
-      loops: [loop('memos-hero', m, 960, TILE_MAX * 1.6), loop('memos-hero', m, 1280, HERO_MAX)],
+      loops: [loop('memos-hero', m, 960, TILE_HIDPI_MAX), loop('memos-hero', m, 1280, HERO_MAX)],
     },
   };
 }
