@@ -1,4 +1,4 @@
-/* The one stylesheet: grid, rhythm, type roles and the media system. Every role reads its tokens from tokens.css. */
+/* Global rules: grid, rhythm, type roles and the media system. Every role reads its tokens from tokens.css. */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -111,7 +111,6 @@ code {
   font-weight: var(--w-h2);
   letter-spacing: var(--ls-h2);
   color: var(--head);
-  text-transform: none;
   text-indent: var(--h2-optical);
 } /* optical: a large stem's side bearing would sit 1 px inside the text edge */
 .title {
@@ -145,7 +144,6 @@ code {
   line-height: var(--lh-meta);
   font-weight: var(--w-date);
   letter-spacing: var(--ls-date);
-  word-spacing: normal;
   color: var(--ink-2);
   text-align: right;
   white-space: nowrap;
@@ -267,7 +265,7 @@ html:not(.js) .site-header {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   html[data-scrolled] .site-header,
   html:not(.js) .site-header {
-    background-color: rgb(var(--bg-rgb) / 0.96);
+    background-color: rgb(var(--bg-rgb) / 0.96); /* no blur to soften what runs under it: near-opaque instead */
   }
 }
 .site-header .bar {
@@ -358,7 +356,7 @@ html:not(.js) .site-header .hn {
   top: var(--s2);
   z-index: 20;
   padding: var(--s1) var(--s3);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--bg);
   color: var(--accent);
   box-shadow: 0 0 0 1px var(--hairline);
@@ -367,7 +365,7 @@ html:not(.js) .site-header .hn {
 }
 .skip:focus-visible {
   transform: none;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); /* a faint drop shadow lifts the link off whatever is under it */
   outline-offset: 2px;
 }
 
@@ -536,8 +534,6 @@ html.js img.fade.in {
 }
 .intro-text > .bio + .bio {
   margin-top: var(--s3);
-}
-.intro-text > .bio + .bio {
   text-wrap: balance;
 } /* no two-word last line */
 .intro-text > .links {
@@ -603,9 +599,6 @@ html.js img.fade.in {
 }
 .xp .r > .meta {
   margin-top: var(--s1);
-}
-.xp .r > .meta + .meta {
-  margin-top: 0;
 }
 .xp .r > p:not(.meta) {
   margin-top: var(--s2);
@@ -736,7 +729,7 @@ html.js img.fade.in {
 }
 
 /* ---- project rows: the whole row is one link (the title's link stretched over the row); hover answers as one:
-   the title takes the accent and its underline fades in, the clip eases 2.5 % larger inside its fixed frame and the
+   the title keeps its navy and its underline fades in, the clip eases 2.5 % larger inside its fixed frame and the
    frame's hairline darkens. Nothing moves, lifts or casts a shadow. ---- */
 .projects > li + li {
   margin-top: var(--s7);
@@ -808,9 +801,6 @@ html.js img.fade.in {
 /* ---- project page: one left edge. Title, meta, text, captions and every figure start at x0, the header name's edge;
    text keeps the homepage's 520 px measure (≈ 71 characters a line) at every width ≥ 720; the hero and wide figures
    run to the right edge. ---- */
-.p-body {
-  --measure: 520px;
-}
 .p-body :is(.p-head, .lead, .p-sec > .h2, .did-group, .p-sec > p, .cap) {
   max-width: var(--measure);
 }

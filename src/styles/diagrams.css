@@ -1,6 +1,7 @@
-/* Project diagrams (components/diagrams/*, lib/diagrams.ts). One look for every diagram: the media plate (#F6F6F4, the
-   site radius and inner ring), white boxes with a quiet line, navy labels, ink-2 subs, grey edges that turn navy.
-   Type: the site's roles only (meta 15 px; labels are meta at 400, the one added style). Space: the site's scale.
+/* Project diagrams (components/diagrams/*, lib/diagrams.ts). One look for every diagram: the media plate
+   (--media-plate, the site radius and inner ring), white boxes with a quiet line, navy labels, ink-2 subs, grey edges
+   that turn navy.
+   Type: the meta role (15 px) on a 20 px line; labels are meta at 400. Box and spine geometry is local to this file.
 
    Two layouts from one markup (Flow.astro):
      list  the default: one column in reading order, a drawn spine between steps, "Into: …" lines for other links.
@@ -10,14 +11,14 @@
            and the active state. The figure's own width decides, so a text-width figure is a list at every size. */
 
 .dg-fig {
-  --dg-plate: #f6f6f4; /* the baked media plates' grey (the media script, the World Cup charts) */
+  --dg-plate: var(--media-plate);
   --dg-line: #d9dee6; /* box and frame lines */
   --dg-edge: #7a8291; /* edges at rest: 3.6:1 on the plate */
-  --dg-near: rgb(2 33 105 / 0.45); /* a box at the other end of the active node's edge */
+  --dg-near: rgb(var(--head-rgb) / 0.45); /* a box at the other end of the active node's edge */
   --dg-gap: var(--s5); /* grid column gap */
 }
 .dg-fig.fig-text {
-  max-width: var(--measure, 520px);
+  max-width: var(--measure);
 } /* the text measure, like a text-width media figure */
 .dg-plate {
   position: relative;
@@ -125,7 +126,7 @@
   margin: 0;
   padding: 10px 14px;
   text-align: left;
-  background: #ffffff;
+  background: var(--bg);
   border: 1px solid var(--dg-line);
   border-radius: var(--radius);
   color: inherit;
@@ -571,7 +572,7 @@ html.js .dg {
 }
 @media (hover: hover) {
   .dg-bars tbody tr:hover > * {
-    background: rgb(255 255 255 / 0.7);
+    background: rgb(var(--bg-rgb) / 0.7);
   }
 }
 @media (max-width: 719px) {

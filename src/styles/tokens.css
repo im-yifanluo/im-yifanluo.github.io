@@ -17,12 +17,14 @@
   --gap: 40px;
   --gutter: 32px;
   --section: var(--s9);
+  --measure: 520px; /* a project page's text width: the homepage's text column at full width */
   /* header: sticky; transparent at the top, frosted once content runs under it. A light saturate + 8 px blur keeps
      passing shapes soft and recognisable (no muddy band over dark tiles); 76 % keeps the nav ≥ 5.7 : 1 worst case */
   --header-h: 56px;
   --glass-alpha: 0.76;
   --glass-filter: saturate(1.15) blur(8px);
-  /* motion: one set for the site. Quick in, slower out; nothing longer than 300 ms, nothing travels more than 4 px */
+  /* motion: one set for the site. Quick in, slower out; nothing longer than 300 ms; no hover or arrival travels
+     more than 4 px (the skip link slides in from above the header) */
   --ease: cubic-bezier(0.4, 0, 0.2, 1); /* state changes */
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1); /* arrivals (header name, media) */
   --t-in: 150ms;
@@ -53,18 +55,21 @@
   --bg: #ffffff;
   --bg-rgb: 255 255 255;
   --head: #022169; /* name, headings, titles (14.75:1) */
+  --head-rgb: 2 33 105;
   --ink: #3b4150; /* body at 300 (10.2:1), nav (5.7:1 worst case under the glass) */
   --ink-2: #5d6371; /* meta, dates (6.0:1; 5.6:1 on surface) */
   --accent: #0b62c4;
-  --accent-hover: #022169; /* links 5.9:1; prose-link hover deepens to navy */
+  --accent-rgb: 11 98 196;
+  --accent-hover: var(--head); /* links 5.9:1; prose-link hover deepens to navy */
   --title-hover: var(--head); /* a project title stays navy; only its underline fades in */
   --hairline: #e2e6ed;
   --surface: #f5f6f6;
   --plate-top: #f9fafa;
-  --plate-ink: #e5e7e8; /* neutral greys; the media plates are #F6F6F4 */
-  --tile-line: rgb(2 33 105 / 0.09);
-  --tile-line-hover: rgb(2 33 105 / 0.14);
-  --selection: rgb(11 98 196 / 0.14);
+  --plate-ink: #e5e7e8; /* neutral greys */
+  --media-plate: #f6f6f4; /* the grey baked into the media: SURFACE in scripts/media/build.mjs, the World Cup charts */
+  --tile-line: rgb(var(--head-rgb) / 0.09);
+  --tile-line-hover: rgb(var(--head-rgb) / 0.14);
+  --selection: rgb(var(--accent-rgb) / 0.14);
   --font-name: 'YL Sans', 'YL Sans Name Fallback', system-ui, sans-serif;
   --font-h2: 'YL Sans', 'YL Sans H2 Fallback', system-ui, sans-serif;
   --font-title: 'YL Sans', 'YL Sans Title Fallback', system-ui, sans-serif;
@@ -102,7 +107,7 @@
   --radius: 4px;
   --ul-w: 1px;
   --ul-off: 0.22em;
-  --ul-rest: rgb(11 98 196 / 0.32);
+  --ul-rest: rgb(var(--accent-rgb) / 0.32);
 }
 
 /* phone sizes */

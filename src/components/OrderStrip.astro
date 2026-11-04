@@ -1,6 +1,7 @@
 ---
 // The RAG study's hand-annotated QuALITY question as a still strip in the diagram style: the same
-// retrieved passages in two orders, one bar each, the gold passage in the accent blue and the misleading one in ink.
+// retrieved passages in two orders, one bar each, the gold passage in the accent blue and the misleading bar in ink-2
+// (its hero label in ink).
 // A still drawing, not a loop: it reads at tile size and needs only a one-line caption.
 //   box="hero"  HTML labels at the site's meta size over an SVG of the bars, so it reflows on a phone (the page hero)
 //   box="tile"  one 320 × 180 drawing for the homepage row; decorative and hidden from AT like every tile, no numbers
@@ -100,8 +101,8 @@ const tx = (p: number) => T.x0 + ((p - 1) * (T.x1 - T.x0)) / N + ((T.x1 - T.x0) 
 <style>
   .os,
   .os-tile {
-    --os-plate: #f6f6f4;
-    --os-bar: #cfcfcb;
+    --os-plate: var(--media-plate);
+    --os-bar: #cfcfcb; /* every other passage: the plate's warm grey, a step darker */
     --os-dist: var(--ink-2);
     --os-gold: var(--accent);
   }
@@ -176,7 +177,7 @@ const tx = (p: number) => T.x0 + ((p - 1) * (T.x1 - T.x0)) / N + ((T.x1 - T.x0) 
   }
   .os-tile text {
     font-family: var(--font-meta);
-    font-size: 13px;
+    font-size: 13px; /* user units of the 320 × 180 viewBox: the text scales with the tile */
     font-weight: var(--w-meta);
     letter-spacing: var(--ls-meta);
     fill: var(--head);
