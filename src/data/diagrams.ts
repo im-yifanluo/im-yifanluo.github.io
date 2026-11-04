@@ -661,8 +661,8 @@ const photogleam: FlowDiagram = {
   ],
 };
 
-// Long-document RAG: coverage by task and budget (FORWARD final report Fig. 5, the heatmap's cell labels). Sorted by
-// 10K, then 5K.
+// Long-document RAG: coverage by task and budget (Forward Data Lab final report Fig. 5, the heatmap's cell labels).
+// Sorted by 10K, then 5K.
 const ragCoverage: BarTable = {
   kind: 'bars',
   id: 'rag-coverage',

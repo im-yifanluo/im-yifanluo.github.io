@@ -2,10 +2,10 @@ order: 7
 title: "Same chunks, different order: context assembly for long-document RAG"
 short: Long-document RAG
 role: Sole author of both harnesses
-org: FORWARD Data Lab
+org: Forward Data Lab
 start: 2025-12
 end: 2026-08
-roleLine: Sole author of both harnesses · FORWARD Data Lab, UIUC (Prof. Kevin Chang)
+roleLine: Sole author of both harnesses · Forward Data Lab, UIUC (Prof. Kevin Chang)
 outcome: "I built two controlled RAG harnesses and showed passage order alone moves accuracy about 4–5 points: up on QuALITY, down on ContractNLI."
 links: []
 tile:

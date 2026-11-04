@@ -40,7 +40,7 @@ export const INTRO = {
     { text: 'Expected May 2028 · 4.00 GPA · James Scholar Honors Student' },
   ] satisfies Line[],
   bio: [
-    { text: 'I study computer science at the University of Illinois, Urbana Champaign.' },
+    { text: 'I study computer science at the University of Illinois, Urbana-Champaign.', keep: ['Urbana-Champaign'] },
     {
       text: "I love building ML projects that can benefit different people. Currently, I'm working on [Framelight](/framelight/), an app that guides people to take better photos in real time. I'm also doing research on visuomotor learning policies, data collection, and benchmarking in the RoboTouch Lab under Professor Wenzhen Yuan. Previously, I conducted research on RAG for long-document QA in the Forward Data Lab under Professor Kevin Chang.",
     },
@@ -60,7 +60,7 @@ export const TYPOGRAPHY = {
     'App Store',
     'Google Play',
     'RoboTouch Lab',
-    'FORWARD Data Lab',
+    'Forward Data Lab',
     'James Scholar',
     'Dean’s List',
     'Cal Hacks 13',

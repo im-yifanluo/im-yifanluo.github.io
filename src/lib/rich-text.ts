@@ -47,7 +47,7 @@ export function segs(src: string, extra: string[] = []): string {
   }
   if (parts.at(-1) === '') parts.pop();
   // every item is a .seg (a phone layout may stack them one per line); a short one is also kept whole (.nw), and one of
-  // 41–44 characters from 720 px up only (.nw-w: "FORWARD Data Lab, UIUC (Prof. Kevin Chang)" would otherwise break
+  // 41–44 characters from 720 px up only (.nw-w: "Forward Data Lab, UIUC (Prof. Kevin Chang)" would otherwise break
   // inside on desktop; kept whole on a 320 px phone it would overflow the column)
   const html = parts.map((p) => {
     const h = rich(p),
