@@ -25,13 +25,4 @@ export default defineConfig(
       'astro/jsx-a11y/no-redundant-roles': ['error', { ol: ['list'] }],
     },
   },
-  {
-    // BaseLayout's inline scripts ship exactly as written, in a compact style: ternaries as statements, and an empty
-    // catch where storage is unavailable
-    files: ['src/layouts/BaseLayout.astro/*.ts'],
-    rules: {
-      '@typescript-eslint/no-unused-expressions': ['error', { allowTernary: true }],
-      'no-empty': ['error', { allowEmptyCatch: true }],
-    },
-  },
 );

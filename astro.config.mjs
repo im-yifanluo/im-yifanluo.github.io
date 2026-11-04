@@ -19,7 +19,11 @@ export default defineConfig({
   // the deployment write-up is the second half of /robot-learning/ (#on-the-robot); its old address still lands there
   redirects: { '/deployment-debugging': '/robot-learning/#on-the-robot' },
   vite: {
-    // only the font is inlined (styles/fonts.css: a data: URI, so it is there at first paint); every other asset stays a file
-    build: { assetsInlineLimit: (file) => file.endsWith('.woff2'), sourcemap: false },
+    build: {
+      // the font (styles/fonts.css: a data: URI, there at first paint) and BaseLayout's page script are inlined; every
+      // other asset stays a file. A boolean for every file, so Vite's size threshold never applies.
+      assetsInlineLimit: (file) => file.endsWith('.woff2') || file.includes('BaseLayout.astro_astro_type_script'),
+      sourcemap: false,
+    },
   },
 });
