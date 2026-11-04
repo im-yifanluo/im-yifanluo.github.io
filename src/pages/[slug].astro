@@ -17,18 +17,17 @@ import { rich, segs } from '@/lib/rich-text';
 import { summarize } from '@/lib/summarize';
 import { glue, plain } from '@/lib/typography';
 import { mediaPart, type MediaRef } from '@/lib/media';
+import { REDIRECT_SOURCES, RESERVED } from '@/lib/routes';
 
 type Project = CollectionEntry<'projects'>;
 
 // One page per project, in homepage order (/deployment-debugging/ is a redirect to /robot-learning/#on-the-robot:
-// astro.config.mjs). A slug (the YAML file's name) must not shadow a top-level path of the built site, or the source of
-// a redirect (astro.config.mjs `redirects`; its prerenderConflictBehavior also fails such a build).
+// astro.config.mjs). A slug (the YAML file's name) must not shadow a top-level path of the built site or the source of
+// a redirect (lib/routes.ts); astro.config.mjs prerenderConflictBehavior also fails a build with a slug on a redirect.
 export async function getStaticPaths() {
-  const RESERVED = ['media', 'fonts', '_astro', '404', 'og', 'robots', 'sitemap-index', 'sitemap-0'];
-  const REDIRECTS = ['deployment-debugging']; // the sources of astro.config.mjs `redirects`
   const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
   for (const { id } of projects) {
-    if ([...RESERVED, ...REDIRECTS].includes(id)) {
+    if ([...RESERVED, ...REDIRECT_SOURCES].includes(id)) {
       throw new Error(`src/content/projects/${id}.yaml: the slug "${id}" shadows the site's /${id}/ path`);
     }
   }

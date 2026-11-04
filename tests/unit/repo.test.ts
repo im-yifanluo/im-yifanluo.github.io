@@ -7,6 +7,7 @@ import { parse } from 'yaml';
 import astroConfig from '../../astro.config.mjs';
 import budgets from '../../scripts/budgets.json';
 import { collections } from '@/content.config';
+import { REDIRECT_SOURCES, RESERVED } from '@/lib/routes';
 import { load, loaderOf, ROOT, schemaOf, type CollectionName } from './load';
 
 const at = (path: string) => new URL(path, ROOT);
@@ -65,27 +66,18 @@ describe('budgets', () => {
 });
 
 describe('project slugs', () => {
-  const page = readFileSync(at('src/pages/[slug].astro'), 'utf8');
-  /** One of the page's string-list constants. */
-  const constant = (name: string) => {
-    const body = new RegExp(`const ${name} = \\[([^\\]]*)\\]`).exec(page)?.[1];
-    if (body === undefined) throw new Error(`src/pages/[slug].astro: no ${name} list`);
-    return [...body.matchAll(/'([^']*)'/g)].map((m) => m[1]!);
-  };
-  const RESERVED = constant('RESERVED');
-  const REDIRECTS = constant('REDIRECTS');
+  const redirects = Object.keys(astroConfig.redirects ?? {}).map((source) => source.replace(/^\/|\/$/g, ''));
   const slugs = readdirSync(at('src/content/projects/'))
     .filter((file) => file.endsWith('.yaml'))
     .map((file) => file.slice(0, -'.yaml'.length));
 
   it('none is reserved or the source of a redirect', () => {
     expect(slugs.length).toBeGreaterThan(0);
-    expect(slugs.filter((slug) => RESERVED.includes(slug) || REDIRECTS.includes(slug))).toEqual([]);
+    expect(slugs.filter((slug) => RESERVED.includes(slug) || redirects.includes(slug))).toEqual([]);
   });
 
-  it('REDIRECTS are the sources of the redirects in astro.config.mjs', () => {
-    const sources = Object.keys(astroConfig.redirects ?? {}).map((source) => source.replace(/^\/|\/$/g, ''));
-    expect(REDIRECTS.toSorted()).toEqual(sources.toSorted());
+  it('REDIRECT_SOURCES are the sources of the redirects in astro.config.mjs', () => {
+    expect(REDIRECT_SOURCES.toSorted()).toEqual(redirects.toSorted());
   });
 
   it('RESERVED includes every folder in public/', () => {
