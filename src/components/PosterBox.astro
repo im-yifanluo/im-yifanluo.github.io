@@ -1,0 +1,99 @@
+---
+// A poster box: one part of the media manifest (lib/media.ts) as a poster <picture> (AVIF → WebP, sized, lazy below the
+// fold) with an optional loop on top. The <video> carries no sources in the HTML: BaseLayout's page script
+// (src/scripts/loops.ts) attaches them when the box is within 200 px of view, sets the poster to the image already
+// shown, and plays it; with JS off the poster stays.
+import { mediaPart, type MediaRef } from '@/lib/media';
+
+interface Props {
+  ref: Exclude<MediaRef, { drawn: string }>;
+  box: 'tile' | 'hero' | 'figure';
+  sizes: string;
+  href?: string;
+  eager?: boolean;
+}
+const { ref, box, sizes, href, eager = false } = Astro.props;
+
+const part = mediaPart(ref);
+if (!part) throw new Error(`media.json: no ${ref.media}.${ref.part} (run npm run media)`);
+const poster = part.poster;
+// a poster may carry a phone cut (bigger text, its own aspect ratio) for viewports ≤ 719 px
+const phone = part.phone;
+// the part's own loops, smallest first: the smallest is the default source, the largest the high-density one
+const loops = [...(part.loops ?? [])].sort((a, b) => a.w - b.w);
+const alt = box === 'tile' ? '' : (ref.alt ?? '');
+const w = poster.widths[0];
+if (w === undefined) throw new Error(`media.json: ${ref.media}.${ref.part} has no poster widths (run npm run media)`);
+// a still keeps its own ratio
+const h = poster.w && poster.h ? Math.round((w * poster.h) / poster.w) : Math.round((w * 9) / 16);
+const lo = loops[0];
+const hi = loops.length > 1 ? loops[loops.length - 1] : undefined;
+const isLoop = !!lo;
+const cls = [box === 'tile' ? 'tile' : box === 'hero' ? 'hero' : 'fig-media', box === 'figure' && isLoop ? 'loop' : '']
+  .filter(Boolean)
+  .join(' ');
+const Tag = href ? 'a' : 'div';
+// A hero box is 16:9; a phone cut with another aspect (the AR window, PhotoGleam's square pair) sets the box's ratio below
+// 720 px through --ar-phone (styles/global.css), so the cut is shown whole, never cover-cropped
+const phoneAr =
+  box === 'hero' && phone && Math.abs(phone.w / phone.h - 16 / 9) > 0.01
+    ? `--ar-phone: ${phone.w} / ${phone.h}`
+    : undefined;
+// A tile repeats its title's link: one tab stop per destination, so the tile is hidden from AT and the tab order.
+const linkAttrs = href ? { href, tabindex: '-1', 'aria-hidden': 'true' as const } : {};
+---
+
+<Tag class={cls} style={phoneAr} {...linkAttrs}>
+  <picture>
+    {phone && (
+      <source
+        media="(max-width: 719px)"
+        type="image/avif"
+        srcset={phone.avif.join(', ')}
+        sizes={sizes}
+        width={phone.w}
+        height={phone.h}
+      />
+    )}
+    {phone && (
+      <source
+        media="(max-width: 719px)"
+        type="image/webp"
+        srcset={phone.webp.join(', ')}
+        sizes={sizes}
+        width={phone.w}
+        height={phone.h}
+      />
+    )}
+    <source type="image/avif" srcset={poster.avif.join(', ')} sizes={sizes} />
+    <img
+      src={poster.src}
+      srcset={poster.webp.join(', ')}
+      sizes={sizes}
+      width={w}
+      height={h}
+      alt={alt}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={eager ? 'high' : undefined}
+    />
+  </picture>
+  {isLoop && (
+    <video
+      muted
+      loop
+      playsinline
+      disablepictureinpicture
+      disableremoteplayback
+      preload="none"
+      width={lo.w}
+      height={lo.h}
+      aria-hidden="true"
+      tabindex="-1"
+      data-mp4={lo.mp4}
+      data-webm={lo.webm}
+      data-hi-mp4={hi?.mp4}
+      data-hi-webm={hi?.webm}
+    ></video>
+  )}
+</Tag>
