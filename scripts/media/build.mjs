@@ -139,7 +139,7 @@ jobs['umi-demo'] = async () => {
 // ── World Cup forecasting: charts drawn in the site's type in headless Chrome, rendered ahead of time to PNG frames and
 // stills in $MEDIA_SRC/world-cup-forecasting/render. Tile: a 7.2 s line-draw loop that starts on its finished drawing
 // (= the poster), no text. Hero and figures: labelled stills, each with a `phone` variant for viewports up to 719 px,
-// which Media.astro serves there.
+// which PosterBox.astro serves there.
 const WC = join(source('world-cup-forecasting'), 'render');
 const wcNeed = (f) => {
   if (!existsSync(join(WC, f))) throw new Error(`${f}: missing from ${WC}`);

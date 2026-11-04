@@ -30,7 +30,7 @@ interface State {
   rowGap: number;
   /** The media column's width (--media), in px. */
   media: number;
-  /** The text measure of a project page (--measure on its body), in px; null on other pages. */
+  /** The text measure of a project page (--measure, read on its body), in px; null on other pages. */
   textMeasure: number | null;
 }
 

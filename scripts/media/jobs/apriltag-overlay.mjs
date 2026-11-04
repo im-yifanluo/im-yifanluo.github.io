@@ -64,9 +64,9 @@ export async function apriltagOverlay() {
     { input: frame, left: Math.round((heroW - fm.width) / 2), top: Math.round((heroH - fm.height) / 2) },
   ]).toFile(heroPng);
   const heroPoster = await posters('apriltag-overlay-hero', heroPng, [1280, 1760]);
-  // The phone cut is the same whole window with no plate, full width (its own 4:3-ish aspect; Media.astro gives the hero
-  // box that ratio below 720 px), so a 390 phone shows it 350 CSS px wide, not 265. 704 and 1056 px are 2× and 3× of
-  // 352 CSS px, both under the source's 1345 px (never enlarged).
+  // The phone cut is the same whole window with no plate, full width (its own 4:3-ish aspect; PosterBox.astro gives the
+  // hero box that ratio below 720 px), so a 390 phone shows it 350 CSS px wide, not 265. 704 and 1056 px are 2× and 3×
+  // of 352 CSS px, both under the source's 1345 px (never enlarged).
   const phonePng = join(WORK, 'ar-hero-phone.png');
   await graded(null, phonePng, 1056);
   const phone = await stills('apriltag-overlay-hero-phone', phonePng, [704, 1056]);

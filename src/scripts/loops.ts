@@ -1,4 +1,4 @@
-// Video loops (components/Media.astro: <video data-mp4 data-webm [data-hi-mp4 data-hi-webm]>, no sources until needed).
+// Video loops (PosterBox.astro: <video data-mp4 data-webm [data-hi-mp4 data-hi-webm]>, no sources until needed).
 // A loop gets its sources and plays only while in view; it pauses off-screen, in a hidden tab, on the page's Pause
 // control, and under reduced motion, where it plays only while pointed at or focused. Save-Data keeps the posters.
 

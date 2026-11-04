@@ -1039,7 +1039,7 @@ main:focus {
   }
   .hero {
     aspect-ratio: var(--ar-phone, 16 / 9);
-  } /* a hero's phone cut keeps its own ratio (components/Media.astro) */
+  } /* a hero's phone cut keeps its own ratio (components/PosterBox.astro) */
   figure > .motion {
     float: none;
     order: 1;
