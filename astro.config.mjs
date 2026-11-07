@@ -1,6 +1,6 @@
 // @ts-check
 // Static Astro, no UI framework. The derived media (tiles, heroes, loops) live in public/media.
-import { defineConfig } from 'astro/config';
+import { defineConfig, envField } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { SITE_URL } from './scripts/site-url.mjs';
 
@@ -19,6 +19,13 @@ export default defineConfig({
   prerenderConflictBehavior: 'error',
   // the deployment write-up is the second half of /robot-learning/ (#on-the-robot); its old address still lands there
   redirects: { '/deployment-debugging': '/robot-learning/#on-the-robot' },
+  env: {
+    schema: {
+      // Cloudflare Web Analytics (cookieless). Only the deploy workflow sets it, so only the live site counts visits;
+      // local builds and the tests ship no beacon.
+      CF_BEACON_TOKEN: envField.string({ context: 'server', access: 'public', optional: true }),
+    },
+  },
   vite: {
     build: {
       // the font (styles/fonts.css: a data: URI, there at first paint) and BaseLayout's page script are inlined; every

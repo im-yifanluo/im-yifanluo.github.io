@@ -143,6 +143,9 @@ when started by hand (Actions → Deploy → Run workflow); Settings → Pages: 
 - Secrets: `PRIVACY_SCAN_PRIVATE` and `PRIVACY_SCAN_RULES`, the privacy scan's private data, as both Actions and
   Dependabot secrets (a CI build fails without them, and Dependabot's pull requests see only Dependabot secrets).
 - Variable: `SITE_URL`, the origin the site is served from, at its root (default `https://yifanluo.dev`).
+- Analytics: the deploy build sets `CF_BEACON_TOKEN`, which adds the [Cloudflare Web
+  Analytics](https://developers.cloudflare.com/web-analytics/) beacon (no cookies) to every page. Other builds leave it
+  out.
 
 ## License
 

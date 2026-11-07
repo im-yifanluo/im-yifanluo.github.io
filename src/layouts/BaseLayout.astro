@@ -1,12 +1,14 @@
 ---
 // Page shell: head, the sticky glass header (nav ends on the right edge), the footer and the page script (src/scripts:
 // header state, active section, separators, print, poster fades, loops). The head's one-line is:inline script ships
-// exactly as written, so Prettier skips it.
+// exactly as written, so Prettier skips it. When CF_BEACON_TOKEN is set (deploy builds only), the head also loads the
+// analytics beacon, a module script, so it never holds up the page.
 import '@/styles/fonts.css';
 import '@/styles/fallbacks.css';
 import '@/styles/tokens.css';
 import '@/styles/global.css';
 import { getCollection } from 'astro:content';
+import { CF_BEACON_TOKEN } from 'astro:env/server';
 import { monthHtml } from '@/lib/dates';
 import { EMAIL, GITHUB, LINKEDIN, OG_IMAGE_ALT, RESUME, REVISED, SITE } from '@/site.config';
 import { SEP } from '@/lib/typography';
@@ -55,6 +57,14 @@ const YEAR = UPDATED.slice(0, 4);
     <meta property="og:image:alt" content={OG_IMAGE_ALT} />
     {!noindex && <meta property="og:url" content={canonical} />}
     <meta name="twitter:card" content="summary_large_image" />
+    {CF_BEACON_TOKEN && (
+      <script
+        is:inline
+        type="module"
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: CF_BEACON_TOKEN })}
+      />
+    )}
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
