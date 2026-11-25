@@ -23,7 +23,7 @@
     "fonts:fallbacks": "node scripts/fonts/fallbacks.mjs"
   },
   "dependencies": {
-    "@astrojs/sitemap": "3.7.4",
+    "@astrojs/sitemap": "3.7.5",
     "astro": "7.3.8"
   },
   "devDependencies": {
